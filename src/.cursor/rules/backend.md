@@ -1,0 +1,1506 @@
+---
+alwaysApply: true
+---
+
+# Backend Cursor Rules - Microservices, Clean Architecture, DDD, CQRS
+
+## Solution Structure
+
+```
+src/
+├── Services/                    # Microservices
+│   └── {ServiceName}/
+│       ├── Api/                 # API Layer (Carter endpoints)
+│       │   └── {Service}.Api/
+│       │       ├── Constants/   # ApiRoutes
+│       │       ├── Endpoints/   # ICarterModule implementations
+│       │       ├── Models/      # Request models
+│       │       ├── DependencyInjection.cs
+│       │       ├── GlobalUsing.cs
+│       │       └── Program.cs
+│       ├── Core/
+│       │   ├── {Service}.Domain/        # Domain Layer (innermost)
+│       │   │   ├── Abstractions/        # Entity, Aggregate, interfaces
+│       │   │   ├── Entities/            # Domain entities
+│       │   │   ├── Enums/
+│       │   │   ├── Events/              # Domain events
+│       │   │   ├── Exceptions/
+│       │   │   └── ValueObjects/
+│       │   ├── {Service}.Application/   # Application Layer
+│       │   │   ├── Features/
+│       │   │   │   └── {Feature}/
+│       │   │   │       ├── Commands/
+│       │   │   │       ├── Queries/
+│       │   │   │       └── EventHandlers/
+│       │   │   │           └── Domain/
+│       │   │   ├── Dtos/
+│       │   │   ├── Exceptions/
+│       │   │   ├── Mappings/
+│       │   │   ├── Models/
+│       │   │   │   ├── Filters/
+│       │   │   │   └── Results/
+│       │   │   ├── Repositories/
+│       │   │   ├── Services/
+│       │   │   ├── DependencyInjection.cs
+│       │   │   └── GlobalUsing.cs
+│       │   └── {Service}.Infrastructure/
+│       │       ├── Data/
+│       │       ├── Repositories/
+│       │       ├── Services/
+│       │       ├── ApiClients/
+│       │       ├── GrpcClients/
+│       │       ├── DependencyInjection.cs
+│       │       └── GlobalUsing.cs
+│       └── Worker/
+│           ├── {Service}.Worker.Consumer/
+│           └── {Service}.Worker.Outbox/
+├── Shared/
+│   ├── BuildingBlocks/
+│   │   ├── CQRS/
+│   │   ├── Behaviors/
+│   │   ├── Exceptions/
+│   │   ├── Pagination/
+│   │   └── Abstractions/
+│   ├── Common/
+│   │   ├── Configurations/
+│   │   ├── Constants/
+│   │   ├── Extensions/
+│   │   ├── Helpers/
+│   │   └── Models/
+│   ├── Contracts/
+│   │   └── {Service}.Contract/
+│   │       └── Protos/
+│   └── EventSourcing/
+│       ├── Events/
+│       │   └── {Feature}/
+│       └── MassTransit/
+├── JobOrchestrator/
+│   └── App.Job/
+│       ├── Attributes/
+│       ├── Jobs/{Feature}/
+│       └── Quartz/
+└── ApiGateway/
+    └── YarpApiGateway/
+```
+
+---
+
+## Layer Responsibilities
+
+### Domain Layer (Innermost - No dependencies)
+- **Entities**: Business objects with behavior, inherit from Entity<TId> or Aggregate<TId>
+- **Value Objects**: Immutable objects representing concepts
+- **Domain Events**: Events raised within domain, implement IDomainEvent
+- **Enums**: Domain-specific enumerations
+- **Exceptions**: DomainException for domain rule violations
+
+### Application Layer (Depends on Domain only)
+- **Features/{Feature}/Commands/Queries**: Business use cases
+- **DTOs**: Data transfer objects for API contracts
+- **Repository Interfaces**: Abstractions for data access
+- **Service Interfaces**: Abstractions for external services
+- **Mappings**: AutoMapper profiles
+- **Validators**: FluentValidation validators
+
+### Infrastructure Layer (Implements Application interfaces)
+- **Repository Implementations**: Database access (Marten, EF Core, MongoDB)
+- **Service Implementations**: External service integrations
+- **API Clients**: Refit HTTP clients
+- **gRPC Clients**: Inter-service communication
+
+### API Layer (Entry point)
+- **Endpoints**: Carter modules for minimal API routing
+- **Request Models**: API request DTOs
+- **Response**: Response use (ApiCreatedResponse, ApiDeletedResponse, ApiUpdatedResponse, ApiGetResponse)
+- **DI Configuration**: Service registration
+
+---
+
+## CQRS Pattern
+
+### Command Definition
+```csharp
+// Command with response
+public sealed record CreateProductCommand(CreateProductDto Dto, Actor Actor) : ICommand<Guid>;
+
+// Command without response (returns Unit)
+public sealed record DeleteProductCommand(Guid Id) : ICommand;
+```
+
+### Command Handler
+```csharp
+public sealed class CreateProductCommandHandler(
+    IMapper mapper,
+    IDocumentSession session) : ICommandHandler<CreateProductCommand, Guid>
+{
+    #region Implementations
+
+    public async Task<Guid> Handle(CreateProductCommand command, CancellationToken cancellationToken)
+    {
+        var dto = command.Dto;
+        
+        var entity = ProductEntity.Create(
+            id: Guid.NewGuid(),
+            name: dto.Name!,
+            performedBy: command.Actor.ToString());
+
+        session.Store(entity);
+        await session.SaveChangesAsync(cancellationToken);
+
+        return entity.Id;
+    }
+
+    #endregion
+}
+```
+
+### Command Validator
+```csharp
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    #region Ctors
+
+    public CreateProductCommandValidator()
+    {
+        RuleFor(x => x.Dto)
+            .NotNull()
+            .WithMessage(MessageCode.BadRequest)
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Dto.Name)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.ProductNameIsRequired);
+            });
+    }
+
+    #endregion
+}
+```
+
+### Query Definition
+```csharp
+public sealed record SearchProductQuery(
+    SearchTermsFilter Filter,
+    PaginationRequest Paging) : IQuery<SearchProductResult>;
+```
+
+### Query Handler
+```csharp
+public sealed class SearchProductQueryHandler(
+    IProductRepository productRepository,
+    IMapper mapper) : IQueryHandler<SearchProductQuery, SearchProductResult>
+{
+    #region Implementations
+
+    public async Task<SearchProductResult> Handle(SearchProductQuery query, CancellationToken cancellationToken)
+    {
+        var (products, totalCount) = await productRepository.SearchAsync(
+            query.Filter, query.Paging, cancellationToken);
+
+        var productDtos = mapper.Map<List<ProductDto>>(products);
+
+        return new SearchProductResult(productDtos, totalCount, query.Paging);
+    }
+
+    #endregion
+}
+```
+
+### CRITICAL: Query/Command Return Type Rules
+
+**❌ WRONG - Never return DTOs directly or use nullable:**
+```csharp
+// DON'T return DTO directly
+public sealed record GetProductQuery(Guid Id) : IQuery<ProductDto>;
+
+// DON'T use nullable return types
+public sealed record GetProductQuery(Guid Id) : IQuery<ProductDto?>;
+
+// DON'T return List<Dto> directly
+public sealed record GetProductsQuery : IQuery<List<ProductDto>>;
+```
+
+**✅ CORRECT - Always use Result classes:**
+```csharp
+// Single item query - use Result class
+public sealed record GetProductQuery(Guid Id) : IQuery<GetProductResult>;
+
+public sealed class GetProductResult
+{
+    public ProductDto Item { get; init; }
+    
+    public GetProductResult(ProductDto item)
+    {
+        Item = item;
+    }
+}
+
+// Multiple items query - use Result class
+public sealed record GetProductsQuery : IQuery<GetProductsResult>;
+
+public sealed class GetProductsResult
+{
+    public List<ProductDto> Items { get; init; }
+    
+    public GetProductsResult(List<ProductDto> items)
+    {
+        Items = items;
+    }
+}
+
+// Handler throws NotFoundException instead of returning null
+public async Task<GetProductResult> Handle(GetProductQuery query, CancellationToken cancellationToken)
+{
+    var product = await repository.GetByIdAsync(query.Id, cancellationToken);
+    
+    if (product == null)
+    {
+        throw new NotFoundException(MessageCode.ResourceNotFound);
+    }
+    
+    var dto = mapper.Map<ProductDto>(product);
+    return new GetProductResult(dto);
+}
+```
+
+### Result Class Guidelines
+
+1. **Always create Result classes** in `Application/Models/Results/`
+2. **Never return DTOs directly** from queries/commands
+3. **Never use nullable return types** (`?`) - throw `NotFoundException` instead
+4. **Result class structure:**
+   - For single item: Property named `Item`
+   - For collections: Property named `Items`
+   - Constructor that takes the data
+   - Place in `sealed class` with `init` properties
+
+5. **Example Result classes:**
+```csharp
+// Single item result
+public sealed class GetProductByIdResult
+{
+    public ProductDto Item { get; init; }
+    
+    public GetProductByIdResult(ProductDto item)
+    {
+        Item = item;
+    }
+}
+
+// Collection result (without pagination)
+public sealed class GetAllProductsResult
+{
+    public List<ProductDto> Items { get; init; }
+    
+    public GetAllProductsResult(List<ProductDto> items)
+    {
+        Items = items;
+    }
+}
+
+// Collection result (with pagination)
+public sealed class SearchProductsResult : PaginationResult<ProductDto>
+{
+    public SearchProductsResult(
+        List<ProductDto> items, 
+        int totalCount, 
+        PaginationRequest paging) 
+        : base(items, totalCount, paging)
+    {
+    }
+}
+```
+
+---
+
+## Domain Modeling
+
+### Entity Base Class
+```csharp
+public abstract class Entity<T> : IEntityId<T>, IAuditable
+{
+    #region Fields, Properties and Indexers
+
+    public T Id { get; set; } = default!;
+    public DateTimeOffset CreatedOnUtc { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset? LastModifiedOnUtc { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    #endregion
+}
+```
+
+### Aggregate Root (with Domain Events)
+```csharp
+public abstract class Aggregate<TId> : Entity<TId>, IAggregate<TId>
+{
+    #region Fields, Properties and Indexers
+
+    private readonly List<IDomainEvent> _domainEvents = new();
+
+    #endregion
+
+    #region Implementations
+
+    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
+    public void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public IDomainEvent[] ClearDomainEvents()
+    {
+        IDomainEvent[] dequeuedEvents = _domainEvents.ToArray();
+        _domainEvents.Clear();
+        return dequeuedEvents;
+    }
+
+    #endregion
+}
+```
+
+### Entity with Factory Method
+```csharp
+public sealed class ProductEntity : Aggregate<Guid>
+{
+    #region Fields, Properties and Indexers
+
+    public string? Name { get; set; }
+    public string? Sku { get; set; }
+    public decimal Price { get; set; }
+    public ProductStatus Status { get; set; }
+
+    #endregion
+
+    #region Factories
+
+    public static ProductEntity Create(
+        Guid id, string name, string sku, decimal price, string performedBy)
+    {
+        var product = new ProductEntity
+        {
+            Id = id,
+            Name = name,
+            Sku = sku,
+            Price = price,
+            Status = ProductStatus.OutOfStock,
+            CreatedBy = performedBy,
+            CreatedOnUtc = DateTimeOffset.UtcNow
+        };
+
+        return product;
+    }
+
+    #endregion
+
+    #region Methods
+
+    public void Update(string name, string sku, decimal price, string performedBy)
+    {
+        Name = name;
+        Sku = sku;
+        Price = price;
+        LastModifiedBy = performedBy;
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+
+    public void ChangeStatus(ProductStatus status, string performedBy)
+    {
+        if (Status == status)
+            throw new DomainException(MessageCode.DecisionFlowIllegal);
+
+        Status = status;
+        LastModifiedBy = performedBy;
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+
+    #endregion
+}
+```
+
+### Domain Event
+```csharp
+public sealed record UpsertedProductDomainEvent(
+    Guid Id,
+    string Name,
+    string Sku,
+    decimal Price,
+    ProductStatus Status,
+    DateTimeOffset CreatedOnUtc,
+    string CreatedBy) : IDomainEvent;
+```
+
+---
+
+## Repository Pattern & Unit of Work
+
+### CRITICAL Rules
+
+1. **NEVER** use `IApplicationDbContext` directly in Application layer (Commands/Queries/Handlers)
+2. **ALWAYS** use `IUnitOfWork` to access repositories
+3. **Repository methods with EF Include** MUST have `WithRelationship` suffix
+4. **Read-only queries** MUST use `AsNoTracking()` in repository implementation
+5. **Specific methods** for complex queries instead of exposing `IQueryable`
+
+### Repository Interface (Domain Layer)
+
+```csharp
+// Generic base repository
+public interface IRepository<T> where T : class
+{
+    Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+    Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+    Task<long> CountAsync(CancellationToken ct = default);
+    Task<long> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+    
+    Task AddAsync(T entity, CancellationToken ct = default);
+    Task AddRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
+    
+    void Update(T entity);
+    void UpdateRange(IEnumerable<T> entities);
+    
+    void Remove(T entity);
+    void RemoveRange(IEnumerable<T> entities);
+}
+
+// Specific repository with Include methods
+public interface IInventoryItemRepository : IRepository<InventoryItemEntity>
+{
+    // ✅ Method name indicates it includes relationships
+    Task<List<InventoryItemEntity>> GetAllWithRelationshipAsync(CancellationToken ct = default);
+    
+    Task<List<InventoryItemEntity>> FindByProductWithRelationshipAsync(Guid productId, CancellationToken ct = default);
+    
+    Task<List<InventoryItemEntity>> SearchWithRelationshipAsync(
+        Expression<Func<InventoryItemEntity, bool>> predicate,
+        PaginationRequest pagination,
+        CancellationToken ct = default);
+}
+```
+
+### Repository Implementation (Infrastructure Layer)
+
+```csharp
+// Generic repository - implements AsNoTracking for read operations
+public class Repository<T>(ApplicationDbContext context) : IRepository<T> where T : class
+{
+    protected readonly ApplicationDbContext _context = context;
+    protected readonly DbSet<T> _dbSet = context.Set<T>();
+
+    // ✅ AsNoTracking for read-only queries
+    public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(predicate, ct);
+    }
+
+    public virtual async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public virtual async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(predicate)
+            .ToListAsync(ct);
+    }
+    
+    public virtual async Task<long> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(predicate)
+            .CountAsync(ct);
+    }
+
+    public virtual async Task AddAsync(T entity, CancellationToken ct = default)
+    {
+        await _dbSet.AddAsync(entity, ct);
+    }
+
+    public virtual void Update(T entity)
+    {
+        _dbSet.Update(entity);
+    }
+}
+
+// Specific repository implementation
+public class InventoryItemRepository(ApplicationDbContext context) 
+    : Repository<InventoryItemEntity>(context), IInventoryItemRepository
+{
+    // ✅ Include + OrderBy + AsNoTracking in specific method
+    public async Task<List<InventoryItemEntity>> FindByProductWithRelationshipAsync(
+        Guid productId, 
+        CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(x => x.Location)  // ← Include here
+            .Where(x => x.Product.Id == productId && x.Quantity > x.Reserved)
+            .OrderByDescending(x => x.Quantity - x.Reserved)
+            .ToListAsync(ct);
+    }
+    
+    public async Task<List<InventoryItemEntity>> GetAllWithRelationshipAsync(CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(x => x.Location)
+            .OrderByDescending(x => x.CreatedOnUtc)
+            .ToListAsync(ct);
+    }
+    
+    public async Task<List<InventoryItemEntity>> SearchWithRelationshipAsync(
+        Expression<Func<InventoryItemEntity, bool>> predicate,
+        PaginationRequest pagination,
+        CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(x => x.Location)
+            .Where(predicate)
+            .OrderByDescending(x => x.CreatedOnUtc)
+            .WithPaging(pagination)  // BuildingBlocks extension
+            .ToListAsync(ct);
+    }
+}
+```
+
+### Unit of Work Interface (Domain Abstractions)
+
+```csharp
+public interface IUnitOfWork : IDisposable
+{
+    // Repository properties
+    IInventoryReservationRepository InventoryReservations { get; }
+    IInventoryItemRepository InventoryItems { get; }
+    IInventoryHistoryRepository InventoryHistories { get; }
+    ILocationRepository Locations { get; }
+    IInboxMessageRepository InboxMessages { get; }
+    IOutboxMessageRepository OutboxMessages { get; }
+    
+    // Transaction methods
+    Task<int> SaveChangesAsync(CancellationToken ct = default);
+    Task<IDbTransaction> BeginTransactionAsync(CancellationToken ct = default);
+}
+
+// Transaction abstraction (no EF Core dependency in Domain)
+public interface IDbTransaction : IDisposable, IAsyncDisposable
+{
+    Task CommitAsync(CancellationToken ct = default);
+    Task RollbackAsync(CancellationToken ct = default);
+}
+```
+
+### Unit of Work Implementation (Infrastructure)
+
+```csharp
+public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
+{
+    private IInventoryReservationRepository? _inventoryReservations;
+    private IInventoryItemRepository? _inventoryItems;
+    // ... other repositories
+
+    // Lazy initialization
+    public IInventoryReservationRepository InventoryReservations => 
+        _inventoryReservations ??= new InventoryReservationRepository(context);
+    
+    public IInventoryItemRepository InventoryItems => 
+        _inventoryItems ??= new InventoryItemRepository(context);
+    
+    public async Task<int> SaveChangesAsync(CancellationToken ct = default)
+    {
+        return await context.SaveChangesAsync(ct);
+    }
+
+    public async Task<IDbTransaction> BeginTransactionAsync(CancellationToken ct = default)
+    {
+        var efTransaction = await context.Database.BeginTransactionAsync(ct);
+        return new DbTransactionAdapter(efTransaction);
+    }
+
+    public void Dispose()
+    {
+        context.Dispose();
+    }
+}
+
+// Adapter to hide EF Core transaction from Domain
+internal class DbTransactionAdapter(IDbContextTransaction transaction) : IDbTransaction
+{
+    public async Task CommitAsync(CancellationToken ct = default)
+    {
+        await transaction.CommitAsync(ct);
+    }
+
+    public async Task RollbackAsync(CancellationToken ct = default)
+    {
+        await transaction.RollbackAsync(ct);
+    }
+
+    public void Dispose()
+    {
+        transaction.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await transaction.DisposeAsync();
+    }
+}
+```
+
+### Usage in Command Handler
+
+```csharp
+// ❌ WRONG - Don't use IApplicationDbContext
+public sealed class CreateInventoryItemCommandHandler(
+    IApplicationDbContext dbContext) : ICommandHandler<CreateInventoryItemCommand, Guid>
+{
+    public async Task<Guid> Handle(CreateInventoryItemCommand command, CancellationToken ct)
+    {
+        var item = await dbContext.InventoryItems.FirstOrDefaultAsync(...);  // ❌ Wrong
+    }
+}
+
+// ✅ CORRECT - Use IUnitOfWork
+public sealed class CreateInventoryItemCommandHandler(
+    IUnitOfWork unitOfWork,
+    ICatalogGrpcService catalogGrpc) : ICommandHandler<CreateInventoryItemCommand, Guid>
+{
+    public async Task<Guid> Handle(CreateInventoryItemCommand command, CancellationToken ct)
+    {
+        var dto = command.Dto;
+        
+        // Validate product exists
+        var product = await catalogGrpc.GetProductByIdAsync(dto.ProductId.ToString(), ct)
+            ?? throw new ClientValidationException(MessageCode.ProductIsNotExists, dto.ProductId);
+        
+        // Check if item already exists
+        var existing = await unitOfWork.InventoryItems
+            .FirstOrDefaultAsync(x => x.Product.Id == product.Id && x.LocationId == dto.LocationId, ct);
+        
+        if (existing is not null)
+            throw new ClientValidationException(MessageCode.InventoryItemAlreadyExists, dto.ProductId);
+        
+        // Create new item
+        var itemId = Guid.NewGuid();
+        var entity = InventoryItemEntity.Create(
+            id: itemId,
+            productId: product.Id,
+            productName: product.Name,
+            locationId: dto.LocationId,
+            quantity: dto.Quantity,
+            performedBy: command.Actor.ToString());
+        
+        await unitOfWork.InventoryItems.AddAsync(entity, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+        
+        return itemId;
+    }
+}
+```
+
+### Usage with Transaction
+
+```csharp
+// Consumer event handler with transaction
+public sealed class OrderCreatedIntegrationEventHandler(
+    IUnitOfWork unitOfWork,
+    ILogger<OrderCreatedIntegrationEventHandler> logger)
+    : IConsumer<OrderCreatedIntegrationEvent>
+{
+    public async Task Consume(ConsumeContext<OrderCreatedIntegrationEvent> context)
+    {
+        var message = context.Message;
+        var messageId = context.MessageId ?? Guid.NewGuid();
+        
+        // Begin transaction
+        await using var transaction = await unitOfWork.BeginTransactionAsync(context.CancellationToken);
+        
+        try
+        {
+            // Check idempotency
+            var existing = await unitOfWork.InboxMessages.GetByMessageIdAsync(messageId, context.CancellationToken);
+            if (existing != null) return;
+            
+            // Create inbox record
+            var inboxMessage = InboxMessageEntity.Create(...);
+            await unitOfWork.InboxMessages.AddAsync(inboxMessage, context.CancellationToken);
+            await unitOfWork.SaveChangesAsync(context.CancellationToken);
+            
+            // Process event
+            // ... business logic ...
+            
+            // Mark as processed
+            inboxMessage.MarkAsProcessed(DateTimeOffset.UtcNow);
+            await unitOfWork.SaveChangesAsync(context.CancellationToken);
+            
+            // Commit transaction
+            await transaction.CommitAsync(context.CancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to process event");
+            await transaction.RollbackAsync(context.CancellationToken);
+            throw;
+        }
+    }
+}
+```
+
+### Usage in Query Handler
+
+```csharp
+// Query with relationships
+public sealed class GetAllInventoryItemsQueryHandler(
+    IUnitOfWork unitOfWork,
+    IMapper mapper) : IQueryHandler<GetAllInventoryItemsQuery, GetAllInventoryItemsResult>
+{
+    public async Task<GetAllInventoryItemsResult> Handle(GetAllInventoryItemsQuery query, CancellationToken ct)
+    {
+        // ✅ Use WithRelationship method when need Include
+        var items = await unitOfWork.InventoryItems
+            .GetAllWithRelationshipAsync(ct);
+        
+        var dtos = mapper.Map<List<InventoryItemDto>>(items);
+        return new GetAllInventoryItemsResult(dtos);
+    }
+}
+
+// Query with search and pagination
+public sealed class SearchInventoryItemsQueryHandler(
+    IUnitOfWork unitOfWork,
+    IMapper mapper) : IQueryHandler<SearchInventoryItemsQuery, SearchInventoryItemsResult>
+{
+    public async Task<SearchInventoryItemsResult> Handle(SearchInventoryItemsQuery query, CancellationToken ct)
+    {
+        var filter = query.Filter;
+        var pagination = query.Pagination;
+        
+        // Build predicate
+        Expression<Func<InventoryItemEntity, bool>> predicate = x => 
+            (string.IsNullOrEmpty(filter.ProductName) || x.Product.Name.Contains(filter.ProductName)) &&
+            (!filter.LocationId.HasValue || x.LocationId == filter.LocationId);
+        
+        // Use WithRelationship method
+        var items = await unitOfWork.InventoryItems
+            .SearchWithRelationshipAsync(predicate, pagination, ct);
+        
+        var totalCount = await unitOfWork.InventoryItems.CountAsync(predicate, ct);
+        
+        var dtos = mapper.Map<List<InventoryItemDto>>(items);
+        return new SearchInventoryItemsResult(dtos, (int)totalCount, pagination);
+    }
+}
+```
+
+### Repository Naming Convention for Include Methods
+
+| Scenario | Method Name Pattern | Example |
+|----------|-------------------|---------|
+| Get all with includes | `GetAllWithRelationshipAsync` | Gets all inventory items with Location |
+| Find by ID with includes | `GetByIdWithRelationshipAsync` | Gets item by ID with Location |
+| Search with includes | `SearchWithRelationshipAsync` | Searches items with Location |
+| Find by filter with includes | `FindByXWithRelationshipAsync` | `FindByProductWithRelationshipAsync` |
+
+**Key Points:**
+- `WithRelationship` suffix indicates method includes related entities
+- Method name should describe what it returns (GetAll, FindBy, Search)
+- Include specific relationships in implementation, not in interface
+- Use `AsNoTracking()` for all read operations
+- Use `OrderBy` in repository when needed, not in Application layer
+
+---
+
+## API Endpoint Convention (Carter)
+
+### Endpoint Structure
+```csharp
+public sealed class CreateProduct : ICarterModule
+{
+    #region Implementations
+
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+        app.MapPost(ApiRoutes.Product.Create, HandleCreateProductAsync)
+            .WithTags(ApiRoutes.Product.Tags)
+            .WithName(nameof(CreateProduct))
+            .Produces<ApiCreatedResponse<Guid>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization();
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task<ApiCreatedResponse<Guid>> HandleCreateProductAsync(
+        ISender sender,
+        IMapper mapper,
+        IHttpContextAccessor httpContext,
+        [FromBody] CreateProductRequest req)
+    {
+        var dto = mapper.Map<CreateProductDto>(req);
+        var currentUser = httpContext.GetCurrentUser();
+        var command = new CreateProductCommand(dto, Actor.User(currentUser.Id));
+        var result = await sender.Send(command);
+        return new ApiCreatedResponse<Guid>(result);
+    }
+
+    #endregion
+}
+```
+
+### API Routes Constants
+```csharp
+public static class ApiRoutes
+{
+    public static class Product
+    {
+        public const string Tags = "Products";
+        public const string Create = "/api/products";
+        public const string Update = "/api/products/{id}";
+        public const string Delete = "/api/products/{id}";
+        public const string GetById = "/api/products/{id}";
+        public const string GetAll = "/api/products";
+    }
+}
+```
+
+---
+
+## Dependency Injection Pattern
+
+### Application DI
+```csharp
+public static class DependencyInjection
+{
+    #region Methods
+
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(ApplicationMarker).Assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+        });
+
+        services.AddValidatorsFromAssembly(typeof(ApplicationMarker).Assembly);
+        services.AddAutoMapper(typeof(ApplicationMarker).Assembly);
+
+        return services;
+    }
+
+    #endregion
+}
+```
+
+### Infrastructure DI (Scrutor Assembly Scanning)
+```csharp
+public static class DependencyInjection
+{
+    #region Methods
+
+    public static IServiceCollection AddInfrastructureServices(
+        this IServiceCollection services, IConfiguration cfg)
+    {
+        services.Scan(s => s
+            .FromAssemblyOf<InfrastructureMarker>()
+            .AddClasses(c => c.Where(t => t.Name.EndsWith("Service")))
+            .UsingRegistrationStrategy(Scrutor.RegistrationStrategy.Skip)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        services.Scan(s => s
+            .FromAssemblyOf<InfrastructureMarker>()
+            .AddClasses(c => c.Where(t => t.Name.EndsWith("Repository")))
+            .UsingRegistrationStrategy(Scrutor.RegistrationStrategy.Skip)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        return services;
+    }
+
+    public static WebApplication UseInfrastructure(this WebApplication app)
+    {
+        return app;
+    }
+
+    #endregion
+}
+```
+
+### Program.cs Pattern
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration)
+    .AddApiServices(builder.Configuration);
+
+var app = builder.Build();
+
+app.UseApi();
+app.UseInfrastructure();
+
+app.Run();
+```
+
+---
+
+## Event Handling Pattern
+
+### Integration Event (Shared)
+```csharp
+public record IntegrationEvent
+{
+    #region Fields, Properties and Indexers
+
+    public string Id => Guid.NewGuid().ToString();
+    public DateTimeOffset OccurredOn => DateTimeOffset.UtcNow;
+    public string? EventType => GetType()?.AssemblyQualifiedName;
+
+    #endregion
+}
+
+public sealed record class UpsertedProductIntegrationEvent : IntegrationEvent
+{
+    public Guid ProductId { get; set; }
+    public string Name { get; set; } = default!;
+}
+```
+
+### Domain Event Handler (Outbox Pattern)
+```csharp
+public sealed class UpsertedProductDomainEventHandler(
+    IDocumentSession session,
+    ILogger<UpsertedProductDomainEventHandler> logger) : INotificationHandler<UpsertedProductDomainEvent>
+{
+    #region Implementations
+
+    public async Task Handle(UpsertedProductDomainEvent @event, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Domain Event handled: {DomainEvent}", @event.GetType().Name);
+
+        var message = new UpsertedProductIntegrationEvent
+        {
+            ProductId = @event.Id,
+            Name = @event.Name
+        };
+
+        var outboxMessage = OutboxMessageEntity.Create(
+            id: Guid.NewGuid(),
+            eventType: message.EventType!,
+            content: JsonConvert.SerializeObject(message),
+            occurredOnUtc: DateTimeOffset.UtcNow);
+
+        session.Store(outboxMessage);
+    }
+
+    #endregion
+}
+```
+
+### Integration Event Consumer (MassTransit)
+```csharp
+public sealed class UpsertedProductIntegrationEventHandler(
+    ISender sender,
+    ILogger<UpsertedProductIntegrationEventHandler> logger)
+    : IConsumer<UpsertedProductIntegrationEvent>
+{
+    #region Methods
+
+    public async Task Consume(ConsumeContext<UpsertedProductIntegrationEvent> context)
+    {
+        logger.LogInformation("Integration Event handled: {IntegrationEvent}", context.Message.GetType().Name);
+
+        var integrationEvent = context.Message;
+
+        var dto = new UpsertProductDto
+        {
+            ProductId = integrationEvent.ProductId.ToString(),
+            Name = integrationEvent.Name
+        };
+
+        var command = new UpsertProductCommand(dto);
+        await sender.Send(command, context.CancellationToken);
+    }
+
+    #endregion
+}
+```
+
+---
+
+## Job Orchestrator (Quartz)
+
+### Job Attribute
+```csharp
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class JobAttribute : Attribute
+{
+    public string? JobName { get; set; }
+    public string? JobGroup { get; set; }
+    public string? CronExpression { get; set; }
+    public string? Description { get; set; }
+    public bool AutoStart { get; set; } = true;
+}
+```
+
+### Job Implementation
+```csharp
+[Job(
+    JobName = "SyncDashboardReport",
+    JobGroup = "Report",
+    Description = "Synchronizes dashboard report data",
+    CronExpression = "0 0/5 * * * ?",
+    AutoStart = true)]
+public class SyncDashboardReportJob(ILogger<SyncDashboardReportJob> logger) : IJob
+{
+    #region Implementations
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        var jobKey = context.JobDetail.Key;
+
+        logger.LogInformation("Job {JobName} started at {StartTime}", jobKey.Name, DateTimeOffset.Now);
+
+        try
+        {
+            await DoWorkAsync(context.CancellationToken);
+            logger.LogInformation("Job {JobName} completed successfully", jobKey.Name);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Job {JobName} failed", jobKey.Name);
+            throw new JobExecutionException(ex, refireImmediately: false);
+        }
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private async Task DoWorkAsync(CancellationToken cancellationToken) { }
+
+    #endregion
+}
+```
+
+---
+
+## Naming Conventions
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Entity | XxxEntity | ProductEntity, OrderEntity |
+| DTO | XxxDto | CreateProductDto, ProductDto |
+| Command | XxxCommand | CreateProductCommand |
+| Command Handler | XxxCommandHandler | CreateProductCommandHandler |
+| Query | XxxQuery | GetProductsQuery |
+| Query Handler | XxxQueryHandler | GetProductsQueryHandler |
+| Validator | XxxValidator or XxxCommandValidator | CreateProductCommandValidator |
+| Domain Event | XxxDomainEvent | UpsertedProductDomainEvent |
+| Integration Event | XxxIntegrationEvent | UpsertedProductIntegrationEvent |
+| Event Handler | XxxEventHandler | UpsertedProductIntegrationEventHandler |
+| Repository Interface | IXxxRepository | IProductRepository |
+| Repository Impl | XxxRepository | ProductRepository |
+| Service Interface | IXxxService | IMinIOCloudService |
+| Service Impl | XxxService | MinIOCloudService |
+| Filter | XxxFilter | GetProductsFilter |
+| Result | XxxResult | GetProductsResult |
+| Configuration | XxxCfg | ConnectionStringsCfg |
+
+---
+
+## Code Style
+
+### File Structure with Regions
+```csharp
+#region using
+
+using System;
+using Microsoft.Extensions.Logging;
+
+#endregion
+
+namespace Service.Application.CQRS.Feature.Commands;
+
+public sealed class MyClass
+{
+    #region Fields, Properties and Indexers
+
+    private readonly ILogger<MyClass> _logger;
+    public string Name { get; set; }
+
+    #endregion
+
+    #region Ctors
+
+    public MyClass(ILogger<MyClass> logger)
+    {
+        _logger = logger;
+    }
+
+    #endregion
+
+    #region Implementations
+
+    #endregion
+
+    #region Factories
+
+    public static MyClass Create() => new();
+
+    #endregion
+
+    #region Methods
+
+    public void DoSomething() { }
+
+    #endregion
+
+    #region Private Methods
+
+    private void InternalWork() { }
+
+    #endregion
+}
+```
+
+### Primary Constructor Pattern (Preferred for Handlers)
+```csharp
+public sealed class ProductQueryHandler(
+    IProductRepository repository,
+    IMapper mapper,
+    ILogger<ProductQueryHandler> logger) : IQueryHandler<GetProductQuery, ProductDto>
+{
+    #region Implementations
+
+    public async Task<ProductDto> Handle(GetProductQuery query, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Getting product {Id}", query.Id);
+        var product = await repository.GetByIdAsync(query.Id, cancellationToken);
+        return mapper.Map<ProductDto>(product);
+    }
+
+    #endregion
+}
+```
+
+### GlobalUsing.cs Pattern
+```csharp
+global using BuildingBlocks.CQRS;
+global using FluentValidation;
+global using Common.Models;
+global using Common.Constants;
+global using Common.Extensions;
+global using BuildingBlocks.Pagination;
+global using BuildingBlocks.Exceptions;
+global using BuildingBlocks.Abstractions.ValueObjects;
+```
+
+---
+
+## Message Code Convention
+
+### Rule: Never Use Direct Messages in Exceptions, Responses, or Validations
+
+**❌ WRONG - Using direct string messages:**
+```csharp
+// Exception with direct message
+throw new ArgumentException("Invalid order status.", nameof(status));
+throw new DomainException("Product not found.");
+throw new NotFoundException("User does not exist.");
+
+// Response with direct message
+return new ApiErrorResponse("Invalid request data.");
+
+// Validation with direct message
+.WithMessage("Product name is required.");
+```
+
+**✅ CORRECT - Using MessageCode constants:**
+```csharp
+// Exception with MessageCode
+throw new ArgumentException(MessageCode.InvalidOrderStatus, nameof(status));
+throw new DomainException(MessageCode.ProductNotFound);
+throw new NotFoundException(MessageCode.UserNotFound);
+
+// Response with MessageCode
+return new ApiErrorResponse(MessageCode.InvalidRequestData);
+
+// Validation with MessageCode
+.WithMessage(MessageCode.ProductNameIsRequired);
+```
+
+### MessageCode Class Structure
+```csharp
+public static class MessageCode
+{
+    public const string InvalidOrderStatus = "INVALID_ORDER_STATUS";
+    public const string ProductNotFound = "PRODUCT_NOT_FOUND";
+    public const string UserNotFound = "USER_NOT_FOUND";
+    public const string InvalidRequestData = "INVALID_REQUEST_DATA";
+    public const string ProductNameIsRequired = "PRODUCT_NAME_IS_REQUIRED";
+    public const string BadRequest = "BAD_REQUEST";
+    public const string DecisionFlowIllegal = "DECISION_FLOW_ILLEGAL";
+    // ... more constants
+}
+```
+
+### Checklist
+- [ ] **Exceptions**: All exception messages use `MessageCode` constants, never direct strings
+- [ ] **API Responses**: All error/success messages use `MessageCode` constants
+- [ ] **Validators**: All FluentValidation `.WithMessage()` use `MessageCode` constants
+- [ ] **Domain Exceptions**: All `DomainException` instances use `MessageCode` constants
+- [ ] **ArgumentException**: All `ArgumentException` instances use `MessageCode` constants
+- [ ] **NotFoundException**: All `NotFoundException` instances use `MessageCode` constants
+- [ ] **MessageCode Class**: All message codes are defined as `public const string` in `MessageCode` class
+- [ ] **Naming Convention**: Message code constants use UPPER_SNAKE_CASE format
+- [ ] **MessageCode Exists**: ALWAYS verify MessageCode constant exists in `Common.Constants.MessageCode` before using it
+
+### Where MessageCode Should Be Used
+1. **Exception Constructors**: `throw new XxxException(MessageCode.Xxx, ...)`
+2. **API Error Responses**: `new ApiErrorResponse(MessageCode.Xxx)`
+3. **FluentValidation Rules**: `.WithMessage(MessageCode.Xxx)`
+4. **Domain Rule Violations**: `throw new DomainException(MessageCode.Xxx)`
+5. **Argument Validation**: `throw new ArgumentException(MessageCode.Xxx, nameof(param))`
+6. **Business Logic Errors**: Any error message returned to clients
+
+### CRITICAL: MessageCode Verification Process
+
+**BEFORE using any MessageCode constant, you MUST:**
+
+1. **Check if the constant exists** in `src/Shared/Common/Constants/MessageCode.cs`
+2. **If it does NOT exist**, you MUST create it first with proper naming convention
+3. **Never use a MessageCode that doesn't exist** - this will cause compilation errors
+
+**Workflow:**
+```
+Step 1: Write code that needs MessageCode
+Step 2: Search for the constant in MessageCode.cs
+Step 3a: If EXISTS → Use it
+Step 3b: If NOT EXISTS → Add it to MessageCode.cs first, then use it
+```
+
+**Example - WRONG Approach:**
+```csharp
+// ❌ DON'T DO THIS - Using MessageCode without checking if it exists
+RuleFor(x => x.Dto.Day)
+    .InclusiveBetween(1, 31)
+    .WithMessage(MessageCode.InvalidDayRange); // May not exist!
+```
+
+**Example - CORRECT Approach:**
+```csharp
+// ✅ STEP 1: First, check MessageCode.cs
+// If MessageCode.InvalidDayRange doesn't exist, add it:
+
+// In MessageCode.cs:
+public const string InvalidDayRange = "INVALID_DAY_RANGE";
+
+// ✅ STEP 2: Then use it
+RuleFor(x => x.Dto.Day)
+    .InclusiveBetween(1, 31)
+    .WithMessage(MessageCode.InvalidDayRange);
+```
+
+**Common New MessageCodes to Check:**
+- When adding new validators → Check if validation message code exists
+- When adding new exceptions → Check if error message code exists
+- When adding new business rules → Check if rule violation message code exists
+
+---
+
+## Exception Handling Convention
+
+### Rule: ONLY Use Standard Exceptions in Application Layer
+
+**CRITICAL: In Application Layer (Command/Query Handlers), you MUST ONLY use these exceptions:**
+
+1. **`ClientValidationException`** - For client input validation errors and bad requests
+2. **`NotFoundException`** - For resource not found errors
+3. **`DomainException`** - For domain rule violations (from Domain layer)
+
+**❌ NEVER create custom exceptions in Application layer**
+**❌ NEVER use `BadRequestException` - use `ClientValidationException` instead**
+**❌ NEVER use other exception types like `ArgumentException`, `InvalidOperationException`, etc.**
+
+### Standard Exceptions Location
+```
+src/Shared/BuildingBlocks/Exceptions/
+├── ClientValidationException.cs
+├── NotFoundException.cs
+└── DomainException.cs
+```
+
+### Usage Examples
+
+**✅ CORRECT - Using standard exceptions:**
+```csharp
+public sealed class UpdateProductCommandHandler(IProductRepository repository) 
+    : ICommandHandler<UpdateProductCommand, Unit>
+{
+    public async Task<Unit> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
+    {
+        // ✅ Use NotFoundException for missing resources
+        var product = await repository.GetByIdAsync(command.Id, cancellationToken)
+            ?? throw new NotFoundException(MessageCode.ProductNotFound);
+
+        // ✅ Use ClientValidationException for invalid input/bad request
+        if (string.IsNullOrEmpty(command.Dto.Name))
+        {
+            throw new ClientValidationException(MessageCode.ProductNameIsRequired);
+        }
+
+        // ✅ Use ClientValidationException for business validation
+        if (command.Dto.Price < 0)
+        {
+            throw new ClientValidationException(MessageCode.PriceCannotBeNegative);
+        }
+
+        // ✅ DomainException is thrown from Domain layer
+        product.UpdatePrice(command.Dto.Price); // May throw DomainException internally
+
+        await repository.UpdateAsync(product, cancellationToken);
+        return Unit.Value;
+    }
+}
+```
+
+**❌ WRONG - Creating or using non-standard exceptions:**
+```csharp
+// ❌ DON'T create custom exception
+public class ProductValidationException : Exception { }
+
+// ❌ DON'T use BadRequestException - use ClientValidationException instead
+throw new BadRequestException(MessageCode.InvalidInput);
+
+// ❌ DON'T use ArgumentException
+throw new ArgumentException(MessageCode.InvalidInput, nameof(command));
+
+// ❌ DON'T use InvalidOperationException
+throw new InvalidOperationException(MessageCode.CannotProcess);
+
+// ❌ DON'T use generic Exception
+throw new Exception(MessageCode.SomethingWrong);
+```
+
+### Exception Guidelines by Layer
+
+| Layer | Allowed Exceptions | Notes |
+|-------|-------------------|-------|
+| **Application** | `ClientValidationException`, `NotFoundException` | Command/Query handlers |
+| **Domain** | `DomainException` | Business rule violations |
+| **Infrastructure** | Can throw any, but prefer standard ones | External service errors |
+| **API** | Should NOT throw - handled by middleware | Return responses only |
+
+### When to Use Each Exception
+
+**ClientValidationException:**
+- Invalid input from client
+- Business validation failures
+- Required field missing
+- Format validation errors
+- Range validation errors
+- Any client-side error (400 Bad Request)
+
+**NotFoundException:**
+- Resource not found by ID
+- Entity does not exist in database
+- Returns 404 Not Found to client
+
+**DomainException:**
+- Business rule violations in Domain layer
+- Thrown from Entity/Aggregate methods
+- Domain invariant violations
+- Should NOT be thrown directly in handlers
+
+### Validation Exceptions - Two Approaches
+
+**Approach 1: FluentValidation (Recommended)**
+- Define validators using `AbstractValidator<T>`
+- ValidationBehavior automatically converts to `ClientValidationException`
+- Preferred for standard field validations
+
+```csharp
+// ✅ CORRECT - Define validator, ValidationBehavior handles exception
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
+    {
+        RuleFor(x => x.Dto.Name)
+            .NotEmpty()
+            .WithMessage(MessageCode.ProductNameIsRequired);
+        
+        RuleFor(x => x.Dto.Price)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage(MessageCode.PriceCannotBeNegative);
+    }
+}
+```
+
+**Approach 2: Manual throw in Handler (For complex business validations)**
+- Throw `ClientValidationException` directly in handler
+- Use for validations requiring repository/database checks
+- Use for complex business logic validations
+
+```csharp
+// ✅ CORRECT - Manual ClientValidationException for business logic
+public async Task<Unit> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
+{
+    var product = await repository.GetByIdAsync(command.ProductId, cancellationToken)
+        ?? throw new NotFoundException(MessageCode.ProductNotFound);
+    
+    // Manual validation for business logic
+    if (product.Stock < command.Quantity)
+    {
+        throw new ClientValidationException(MessageCode.InsufficientStock);
+    }
+    
+    return Unit.Value;
+}
+```
+
+### Checklist
+- [ ] **Only Standard Exceptions**: Use only `ClientValidationException`, `NotFoundException`, `DomainException`
+- [ ] **No BadRequestException**: Use `ClientValidationException` instead of `BadRequestException`
+- [ ] **No Custom Exceptions**: Never create custom exception classes in Application layer
+- [ ] **No ArgumentException**: Don't use `ArgumentException` in handlers
+- [ ] **No Generic Exception**: Don't use base `Exception` class
+- [ ] **MessageCode Required**: All exceptions must use `MessageCode` constants
+- [ ] **Domain Exceptions**: `DomainException` should only be thrown from Domain layer entities/value objects
+- [ ] **Choose Right Exception**: Use `ClientValidationException` for client errors, `NotFoundException` for missing resources
+
+---
+
+## Best Practices
+
+1. **Keep Domain Layer Pure**: No external dependencies, only domain logic
+2. **Use Factory Methods**: Encapsulate entity creation logic in static Create() methods
+3. **Validate in Application Layer**: Use FluentValidation with ValidationBehavior pipeline
+4. **Use Outbox Pattern**: Ensure reliable event publishing across services
+5. **Primary Constructors**: Prefer for dependency injection in handlers
+6. **Regions**: Organize code with standard region names
+7. **File-Scoped Namespaces**: One namespace per file
+8. **Async All The Way**: Use async/await consistently
+9. **Use CancellationToken**: Pass through all async methods
+10. **Structured Logging**: Use ILogger with structured log messages
+11. **Configuration Classes**: Use XxxCfg classes for strongly-typed configuration
+12. **Scrutor for DI**: Auto-register services by naming convention
+13. **Commentary**: Do not use comments for Method/Class/Property definitions
+14. **Standard Exceptions Only**: Use only `ClientValidationException`, `NotFoundException`, `DomainException` in Application layer
+15. **No BadRequestException**: Always use `ClientValidationException` instead of `BadRequestException`

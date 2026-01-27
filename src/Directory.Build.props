@@ -1,0 +1,30 @@
+<Project>
+    <!-- ============================================ -->
+    <!-- Common Properties for All Projects -->
+    <!-- ============================================ -->
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>12</LangVersion>
+    </PropertyGroup>
+
+    <!-- ============================================ -->
+    <!-- Build Configuration -->
+    <!-- ============================================ -->
+    <PropertyGroup>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+
+    <!-- ============================================ -->
+    <!-- Assembly Information -->
+    <!-- ============================================ -->
+    <PropertyGroup>
+        <Company>Hyper Data Lab</Company>
+        <Authors>Hyper Data Lab</Authors>
+        <Copyright>Copyright © Hyper Data Lab 2026</Copyright>
+        <Product>Hyper Data Lab Microservices</Product>
+    </PropertyGroup>
+</Project>

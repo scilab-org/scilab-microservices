@@ -1,0 +1,14 @@
+﻿{
+  "profiles": {
+    "Catalog.Api": {
+      "commandName": "Project",
+      "launchUrl": "swagger/index.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:8082"
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json"
+}
