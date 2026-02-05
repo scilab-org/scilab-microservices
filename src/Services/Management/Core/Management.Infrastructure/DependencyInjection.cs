@@ -1,5 +1,6 @@
 ﻿#region using
 
+using Management.Domain.Entities;
 using Marten;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,9 @@ public static class DependencyInjection
         {
             opts.Connection(cfg[$"{ConnectionStringsCfg.Section}:{ConnectionStringsCfg.Database}"]!);
             opts.UseSystemTextJsonForSerialization();
+            
+            opts.Schema.For<ProjectEntity>().SoftDeleted();
+            opts.Schema.For<DatasetEntity>().SoftDeleted();
         }).UseLightweightSessions();
 
         services.Scan(s => s
