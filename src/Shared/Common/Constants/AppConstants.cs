@@ -8,6 +8,15 @@ public sealed class AppConstants
 
     #endregion
 
+    #region Bucket
+
+    public static class Bucket
+    {
+        public const string Datasets = "datasets";
+    }
+
+    #endregion
+    
     #region Service
 
     public static class Service

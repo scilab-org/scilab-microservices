@@ -1,6 +1,6 @@
 ﻿namespace Management.Application.Dtos.Abstractions;
 
-public class Dtold<T> : IDtoId<T>
+public class DtoId<T> : IDtoId<T>
 {
     #region Fields, Properties and Indexers
 

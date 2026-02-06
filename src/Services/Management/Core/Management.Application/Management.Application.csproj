@@ -20,9 +20,4 @@
       <ProjectReference Include="..\Management.Domain\Management.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Models\Filters\" />
-      <Folder Include="Models\Results\" />
-    </ItemGroup>
-
 </Project>

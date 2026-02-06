@@ -3,6 +3,7 @@
 using BuildingBlocks.Authentication.Extensions;
 using Common.Models.Context;
 using Management.Api.Constants;
+using Management.Application.Features.System;
 
 #endregion
 
@@ -18,26 +19,29 @@ public sealed class InitializeData : ICarterModule
             .WithTags(ApiRoutes.System.Tags)
             .WithName(nameof(InitializeData))
             .Produces<ApiUpdatedResponse<bool>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status400BadRequest);
+        // .RequireAuthorization();
     }
 
     #endregion
 
     #region Methods
 
-    private async Task<ApiGetResponse<UserContext>> HandleInitializeDataAsync(
+    private async Task<ApiUpdatedResponse<bool>> HandleInitializeDataAsync(
         ISender sender,
         IHttpContextAccessor httpContext)
     {
-        // var currentUser = httpContext.GetCurrentUser();
-        // var command = new InitialDataCommand(Actor.User(currentUser.Email));
-        // var result = await sender.Send(command);
-
-        // return new ApiUpdatedResponse<bool>(result);
-
         var currentUser = httpContext.GetCurrentUser();
-        return new ApiGetResponse<UserContext>(currentUser);
+        var actor = currentUser is not null
+            ? Actor.User(currentUser.Email)
+            : Actor.System("public-api");
+        var command = new InitialDataCommand(actor);
+        var result = await sender.Send(command);
+
+        return new ApiUpdatedResponse<bool>(result);
+
+        // var currentUser = httpContext.GetCurrentUser();
+        // return new ApiGetResponse<UserContext>(currentUser);
     }
 
     #endregion
