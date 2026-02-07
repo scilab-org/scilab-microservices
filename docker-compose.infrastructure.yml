@@ -2,39 +2,27 @@ services:
   # =========================
   # Reverse Proxy / Load Balancer
   # =========================
-#  nginx:
-#    image: ${NGINX_IMAGE_NAME}
-#    restart: unless-stopped
-#    ports:
-#      - 80:80
-#      - 443:443
-#    volumes:
-#      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+  nginx:
+    image: ${NGINX_IMAGE_NAME}
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/certbot/conf:/etc/letsencrypt
+      - ./config/nginx/certbot/www:/var/www/certbot
+    networks:
+      - hyper_data_lab_network
+  certbot:
+    image: ${CERTBOT_IMAGE_NAME}
+    volumes:
+      - ./config/nginx/certbot/conf:/etc/letsencrypt
+      - ./config/nginx/certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_EMAIL} -d ${KEYCLOAK_SERVER_DOMAIN} --agree-tos
   # =========================
   # Databases
   # =========================
-#  sql-server:
-#    image: ${MSSQL_IMAGE_NAME}
-#    container_name: sql-server
-#    platform: linux/amd64
-#    restart: unless-stopped
-#    user: root
-#    volumes:
-#      - ./docker-volumes/sql-server/data:/var/opt/mssql/data
-#      - ./docker-volumes/sql-server/log:/var/opt/mssql/log
-#    ports:
-#      - ${MSSQL_PORT}:1433
-#    environment:
-#      SA_PASSWORD: ${MSSQL_PASSWORD}
-#      ACCEPT_EULA: "Y"
-#    networks:
-#      - hyper_data_lab_network
-#    healthcheck:
-#      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "${MSSQL_PASSWORD}" -Q "SELECT 1" || exit 1
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#      start_period: 30s
 
   postgres-sql:
     image: ${POSTGRES_IMAGE_NAME}
@@ -57,33 +45,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-#  mongodb:
-#    image: ${MONGO_IMAGE_NAME}
-#    container_name: mongodb
-#    restart: unless-stopped
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-#      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-#    ports:
-#      - ${MONGO_PORT}:27017
-#    volumes:
-#      - ./docker-volumes/mongodb:/data/db
-#    networks:
-#      - hyper_data_lab_network
-#
-#  mysql:
-#    image: ${MYSQL_IMAGE_NAME}
-#    container_name: mysql
-#    restart: unless-stopped
-#    environment:
-#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-#    ports:
-#      - ${MYSQL_PORT}:3306
-#    volumes:
-#      - ./docker-volumes/mysql:/var/lib/mysql
-#    networks:
-#      - hyper_data_lab_network
 
   # =========================
   # Storage / Object store
@@ -120,23 +81,19 @@ services:
     restart: unless-stopped
     command:
       - start
-      - --import-realm
-    volumes:
-      - ./config/keycloak/realms:/opt/keycloak/data/import
-      - ./config/keycloak/providers:/opt/keycloak/providers
     environment:
       KC_CACHE: local
       KC_HOSTNAME: ${KEYCLOAK_HOSTNAME}
-      KC_HOSTNAME_STRICT: false
       KC_PROXY: edge
+      KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres-sql/keycloak_db
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_URL: ${KEYCLOAK_DB_URL}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USERNAME}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       WEBHOOK_URL: ${WEBHOOK_URL}
     ports:
       - "127.0.0.1:${KEYCLOAK_PORT}:8080"

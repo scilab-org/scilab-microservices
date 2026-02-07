@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoMapper" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
+        <PackageReference Include="Marten" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
+        <PackageReference Include="Scrutor" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\..\Shared\BuildingBlocks\BuildingBlocks.csproj" />
+        <ProjectReference Include="..\..\..\..\Shared\Common\Common.csproj" />
+        <ProjectReference Include="..\..\..\..\Shared\EventSourcing\EventSourcing.csproj" />
+        <ProjectReference Include="..\User.Domain\User.Domain.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Folder Include="Models\Filters\" />
+        <Folder Include="Models\Results\" />
+    </ItemGroup>
+
+</Project>
