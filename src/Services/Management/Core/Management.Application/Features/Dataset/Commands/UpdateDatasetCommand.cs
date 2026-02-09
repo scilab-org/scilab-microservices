@@ -55,7 +55,7 @@ public class UpdateDatasetCommandHandler(
             description: dto.Description!,
             status: dto.Status);
         
-        await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
+        await UploadFileAsync(entity.Id.ToString(), dto.UploadFile, entity, cancellationToken);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
@@ -67,11 +67,11 @@ public class UpdateDatasetCommandHandler(
     
     #region Methods
 
-    private async Task UploadFileAsync(UploadFileBytes? file, DatasetEntity entity, CancellationToken cancellationToken)
+    private async Task UploadFileAsync(string? fileId, UploadFileBytes? file, DatasetEntity entity, CancellationToken cancellationToken)
     {
         if (file is null) return;
         
-        var result = await minIo.UploadFilesAsync([file],
+        var result = await minIo.UploadFilesAsync(fileId, [file],
             AppConstants.Bucket.Datasets,
             true,
             cancellationToken);

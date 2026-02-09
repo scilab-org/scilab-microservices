@@ -4,7 +4,7 @@ public interface IMinIoCloudService
 {
     #region Methods
 
-    Task<List<UploadFileResult>> UploadFilesAsync(
+    Task<List<UploadFileResult>> UploadFilesAsync(string? fileId,
         List<UploadFileBytes> files,
         string bucketName,
         bool isPublicBucket = false,
