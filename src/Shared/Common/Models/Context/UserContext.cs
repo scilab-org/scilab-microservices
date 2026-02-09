@@ -17,8 +17,8 @@ public sealed class UserContext
     public string Email { get; init; } = default!;
 
     public bool EmailVerified { get; init; }
-
-    public string? Tenant { get; init; }
+    
+    public List<string>? Groups { get; init; }
 
     public List<string>? Roles { get; init; }
 
