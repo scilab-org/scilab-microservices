@@ -22,8 +22,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <Folder Include="Models\Filters\" />
-        <Folder Include="Models\Results\" />
+        <Folder Include="Features\Paper\" />
     </ItemGroup>
 
 </Project>
