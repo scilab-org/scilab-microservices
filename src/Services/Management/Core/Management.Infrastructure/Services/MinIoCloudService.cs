@@ -32,7 +32,7 @@ public class MinIoCloudService : IMinIoCloudService
 
     #region Implementations
 
-    public async Task<List<UploadFileResult>> UploadFilesAsync(
+    public async Task<List<UploadFileResult>> UploadFilesAsync(string? fileId,
         List<UploadFileBytes> files,
         string bucketName,
         bool isPublicBucket = false,
@@ -47,7 +47,7 @@ public class MinIoCloudService : IMinIoCloudService
 
             foreach (var f in files)
             {
-                var fileCloudId = Guid.NewGuid();
+                var fileCloudId = fileId;
                 var ext = Path.GetExtension(f.FileName);
                 var objectName = $"{fileCloudId:N}{ext}";
 
@@ -64,7 +64,7 @@ public class MinIoCloudService : IMinIoCloudService
 
                 results.Add(new UploadFileResult
                 {
-                    FileId = fileCloudId.ToString(),
+                    FileId = fileCloudId!,
                     FolderName = bucketName,
                     OriginalFileName = f.FileName,
                     FileName = objectName,

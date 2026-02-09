@@ -80,7 +80,7 @@ public class CreateDatasetCommandHandler(IMapper mapper,
     {
         if (file == null) return;
 
-        var result = await minIo.UploadFilesAsync([file],
+        var result = await minIo.UploadFilesAsync(entity.Id.ToString(), [file],
             AppConstants.Bucket.Datasets,
             true,
             cancellationToken);
