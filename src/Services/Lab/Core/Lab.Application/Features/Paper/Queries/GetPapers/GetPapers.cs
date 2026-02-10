@@ -4,6 +4,7 @@ using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 using Marten;
+using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
 using MediatR;
 
@@ -70,6 +71,11 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
         {
             var conferenceName = filter.ConferenceName.Trim();
             query = query.Where(x => x.ConferenceName != null && x.ConferenceName.Contains(conferenceName));
+        }
+
+        if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
+        {
+            query = query.Where(x => x.IsDeleted());
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
