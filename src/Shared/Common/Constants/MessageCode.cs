@@ -28,6 +28,60 @@ public sealed class MessageCode
 
     public const string StartDateMustBeBeforeEndDate = "START_DATE_MUST_BE_BEFORE_END_DATE";
 
+    #region User Management
+
+    public const string UsernameIsRequired = "USERNAME_IS_REQUIRED";
+
+    public const string EmailIsRequired = "EMAIL_IS_REQUIRED";
+
+    public const string InvalidEmail = "INVALID_EMAIL";
+
+    public const string InitialPasswordIsRequired = "INITIAL_PASSWORD_IS_REQUIRED";
+
+    public const string PasswordMinimumLength = "PASSWORD_MINIMUM_LENGTH";
+
+    public const string UserAlreadyExists = "USER_ALREADY_EXISTS";
+
+    public const string UserNotFound = "USER_NOT_FOUND";
+
+    public const string GroupNotFound = "GROUP_NOT_FOUND";
+
+    public const string FailedToCreateUser = "FAILED_TO_CREATE_USER";
+
+    public const string FailedToResetPassword = "FAILED_TO_RESET_PASSWORD";
+
+    public const string FailedToAssignGroup = "FAILED_TO_ASSIGN_GROUP";
+
+    public const string FailedToGetAccessToken = "FAILED_TO_GET_ACCESS_TOKEN";
+
+    public const string FailedToRetrieveUser = "FAILED_TO_RETRIEVE_USER";
+
+    public const string UserCreationCompensationFailed = "USER_CREATION_COMPENSATION_FAILED";
+
+    public const string UserIdIsRequired = "USER_ID_IS_REQUIRED";
+
+    public const string FailedToUpdateUser = "FAILED_TO_UPDATE_USER";
+
+    public const string FailedToDeactivateUser = "FAILED_TO_DEACTIVATE_USER";
+
+    public const string FailedToGetUsers = "FAILED_TO_GET_USERS";
+
+    public const string FailedToGetGroups = "FAILED_TO_GET_GROUPS";
+
+    public const string FailedToGetRoles = "FAILED_TO_GET_ROLES";
+
+    public const string FailedToGetGroupRoles = "FAILED_TO_GET_GROUP_ROLES";
+
+    public const string FailedToAddRoleToGroup = "FAILED_TO_ADD_ROLE_TO_GROUP";
+
+    public const string FailedToRemoveRoleFromGroup = "FAILED_TO_REMOVE_ROLE_FROM_GROUP";
+
+    public const string RoleNotFound = "ROLE_NOT_FOUND";
+
+    public const string GroupIdIsRequired = "GROUP_ID_IS_REQUIRED";
+
+    public const string RoleNamesAreRequired = "ROLE_NAMES_ARE_REQUIRED";
+
     #endregion
 
     #region Paper Message Codes

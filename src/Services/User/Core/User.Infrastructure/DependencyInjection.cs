@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
+using User.Infrastructure.ApiClients.Extensions;
 
 #endregion
 
@@ -44,6 +45,8 @@ public static class DependencyInjection
                     .WithSSL(cfg.GetValue<bool>(cfg[$"{MinIoCfg.Section}:{MinIoCfg.Secure}"]!))
                     .Build());
 
+        services.AddRefitClients(cfg);
+        
         return services;
     }
 
