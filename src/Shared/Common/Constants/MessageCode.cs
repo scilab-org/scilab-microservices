@@ -97,4 +97,18 @@ public sealed class MessageCode
     public const string PaperIdIsRequired = "PAPER_ID_IS_REQUIRED";
 
     #endregion
+
+    #region Tag Message Codes
+
+    public const string TagNameIsRequired = "TAG_NAME_IS_REQUIRED";
+
+    public const string TagIsNotExists = "TAG_IS_NOT_EXISTS";
+
+    public const string TagIdIsRequired = "TAG_ID_IS_REQUIRED";
+
+    public const string TagNameLengthExceeded = "TAG_NAME_LENGTH_EXCEEDED_50_CHARACTERS";
+
+    public const string TagNameMustStartWithHash = "TAG_NAME_MUST_START_WITH_HASH";
+
+    #endregion
 }

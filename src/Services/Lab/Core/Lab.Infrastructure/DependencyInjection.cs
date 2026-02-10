@@ -25,6 +25,7 @@ public static class DependencyInjection
             opts.UseSystemTextJsonForSerialization();
 
             opts.Schema.For<PaperEntity>().SoftDeleted();
+            opts.Schema.For<TagEntity>().SoftDeleted();
         }).UseLightweightSessions();
 
         services.Scan(s => s
