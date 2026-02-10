@@ -28,6 +28,8 @@ public sealed class MessageCode
 
     public const string StartDateMustBeBeforeEndDate = "START_DATE_MUST_BE_BEFORE_END_DATE";
 
+    #endregion
+
     #region User Management
 
     public const string UsernameIsRequired = "USERNAME_IS_REQUIRED";
