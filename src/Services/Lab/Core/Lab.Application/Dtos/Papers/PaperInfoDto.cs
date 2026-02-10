@@ -3,7 +3,7 @@ using Lab.Domain.Enums;
 
 namespace Lab.Application.Dtos.Papers;
 
-public class PaperInfoDto: DtoId<Guid>
+public class PaperInfoDto : DtoId<Guid>
 {
     #region Fields, Properties and Indexers
 
