@@ -4,6 +4,7 @@ using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 using Marten;
+using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
 
 namespace Lab.Application.Features.Tag.Queries.GetTags;
@@ -24,6 +25,11 @@ public class GetTagsQueryHandler(IDocumentSession session, IMapper mapper) : IQu
         {
             var name = filter.Name.Trim();
             query = query.Where(x => x.Name.Contains(name));
+        }
+
+        if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
+        {
+            query = query.Where(x => x.IsDeleted());
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
