@@ -1,6 +1,9 @@
 #region using
 
 using AutoMapper;
+using Lab.Application.Dtos.Papers;
+using Lab.Application.Models.Results;
+using Lab.Domain.Entities;
 
 #endregion
 
@@ -12,12 +15,20 @@ public sealed class LabMappingProfile : Profile
 
     public LabMappingProfile()
     {
+        CreatePaperMappings();
     }
 
     #endregion
 
-    #region Methods
+    #region Paper Mappings
+
+    private void CreatePaperMappings()
+    {
+        CreateMap<PaperEntity, PaperDto>();
+
+        CreateMap<PaperEntity, GetPaperByIdResult>()
+            .ForMember(dest => dest.Paper, opt => opt.MapFrom(src => src));
+    }
 
     #endregion
 }
-

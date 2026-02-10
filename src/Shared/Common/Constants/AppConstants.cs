@@ -13,10 +13,12 @@ public sealed class AppConstants
     public static class Bucket
     {
         public const string Datasets = "datasets";
+
+        public const string Papers = "papers";
     }
 
     #endregion
-    
+
     #region Service
 
     public static class Service

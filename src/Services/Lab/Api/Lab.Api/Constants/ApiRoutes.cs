@@ -14,4 +14,25 @@ public sealed class ApiRoutes
 
         #endregion
     }
+
+    public static class Paper
+    {
+        #region Constants
+
+        public const string Tags = "Papers";
+        private const string Base = "/papers";
+        private const string BaseAdmin = "/admin/papers";
+
+        #endregion
+
+        #region Enpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetPapers = $"{Base}";
+        public const string GetPaperById = $"{Base}/{{id}}";
+
+        #endregion
+    }
 }

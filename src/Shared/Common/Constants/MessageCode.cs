@@ -84,5 +84,15 @@ public sealed class MessageCode
 
     #endregion
 
+    #region Paper Message Codes
+
+    public const string PaperPublicationDateInvalid = "PAPER_PUBLICATION_DATE_INVALID";
+
+    public const string PaperTitleIsRequired = "PAPER_TITLE_IS_REQUIRED";
+
+    public const string PaperIsNotExists = "PAPER_IS_NOT_EXISTS";
+
+    public const string PaperIdIsRequired = "PAPER_ID_IS_REQUIRED";
+
     #endregion
 }
