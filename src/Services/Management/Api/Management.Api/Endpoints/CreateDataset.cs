@@ -31,7 +31,7 @@ public sealed class CreateDataset : ICarterModule
 
     #region Methods
     
-    private async Task<ApiCreatedResponse<Guid>> HandleCreateDatasetAsync(
+    private async Task<IResult> HandleCreateDatasetAsync(
         ISender sender,
         IMapper mapper,
         [FromForm] CreateDatasetRequest req)
@@ -60,7 +60,7 @@ public sealed class CreateDataset : ICarterModule
         var command = new CreateDatasetCommand(dto);
         var result = await sender.Send(command);
         
-        return new ApiCreatedResponse<Guid>(result);
+        return TypedResults.Created($"{ApiRoutes.Dataset.Create}/{result}", new ApiCreatedResponse<Guid>(result));
     }
     
     #endregion

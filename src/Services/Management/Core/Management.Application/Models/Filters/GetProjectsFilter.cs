@@ -1,3 +1,11 @@
-﻿namespace Management.Application.Models.Filters;
+﻿using Management.Domain.Enums;
 
-public record class GetProjectsFilter(string? SearchText);
+namespace Management.Application.Models.Filters;
+
+public record class GetProjectsFilter
+{
+    public string? Name { get; set; } = null!;
+    public string? Code { get; set; }
+    public ProjectStatus? Status { get; set; }
+    public bool? IsDeleted { get; set; } = false;
+}

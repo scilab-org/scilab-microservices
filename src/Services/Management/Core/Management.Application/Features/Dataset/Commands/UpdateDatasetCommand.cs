@@ -34,7 +34,6 @@ public class UpdateDatasetCommandValidator : AbstractValidator<UpdateDatasetComm
 }
 
 public class UpdateDatasetCommandHandler(
-    IMapper mapper,
     IDocumentSession session,
     IMinIoCloudService minIo) : ICommandHandler<UpdateDatasetCommand, Guid>
 {

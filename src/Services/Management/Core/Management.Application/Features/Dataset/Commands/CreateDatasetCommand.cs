@@ -33,40 +33,38 @@ public class CreateDatasetCommandValidator : AbstractValidator<CreateDatasetComm
     #endregion
 }
 
-public class CreateDatasetCommandHandler(IMapper mapper,
-    IDocumentSession session,
+public class CreateDatasetCommandHandler(IDocumentSession session,
     IMinIoCloudService minIo) : ICommandHandler<CreateDatasetCommand, Guid>
 {
     #region Implementations
 
     public async Task<Guid> Handle(CreateDatasetCommand command, CancellationToken cancellationToken)
     {
-        
-        
         var dto = command.Dto;
-        
-        var projectDatasetExists = await session.LoadAsync<ProjectEntity>(dto.ProjectId, cancellationToken);
-        if (projectDatasetExists == null)
+
+        var project = await session.LoadAsync<ProjectEntity>(dto.ProjectId, cancellationToken);
+        if (project == null)
             throw new ClientValidationException(
                 MessageCode.ProjectIsNotExists, dto.ProjectId.ToString());
-        
+
         var datasetId = Guid.NewGuid();
+
         await session.BeginTransactionAsync(cancellationToken);
+
         var entity = DatasetEntity.Create(
             datasetId,
             dto.Name!,
             dto.Description);
         
         await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
-        
         session.Store(entity);
-        
-        var projectDataset = ProjectDatasetEntity.Create(
-            dto.ProjectId,
-            datasetId);
-        session.Store(projectDataset);
+
+        //add dataset vào project
+        project.DatasetIds.Add(entity.Id);
+        session.Store(project);
+
         await session.SaveChangesAsync(cancellationToken);
-        
+
         return entity.Id;
     }
 

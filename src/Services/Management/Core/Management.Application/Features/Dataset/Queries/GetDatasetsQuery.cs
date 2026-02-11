@@ -23,10 +23,11 @@ public sealed class GetDatasetsQueryHandler(IDocumentSession session, IMapper ma
         // Filter base on project Id
         if (query.ProjectId.HasValue)
         {
-            var datasetIds = await session.Query<ProjectDatasetEntity>()
-                .Where(pd => pd.ProjectId == query.ProjectId.Value)
-                .Select(pd => pd.DatasetId)
-                .ToListAsync(cancellationToken);
+            var project = await session.LoadAsync<ProjectEntity>(query.ProjectId.Value, cancellationToken);
+            if (project == null)
+                return new GetDatasetsResult([], 0, query.Paging);
+
+            var datasetIds = project.DatasetIds ?? [];
 
             datasetQuery = datasetQuery.Where(d => datasetIds.Contains(d.Id));
         }

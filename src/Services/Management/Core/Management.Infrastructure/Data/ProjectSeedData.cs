@@ -1,4 +1,5 @@
 ﻿using Management.Domain.Entities;
+using Management.Domain.Enums;
 
 namespace Management.Infrastructure.Data;
 
@@ -25,6 +26,7 @@ public static class ProjectSeedData
                 name: "AI Recommendation System",
                 description: "Build AI-based recommendation system",
                 code: "AI-REC-001",
+                status: ProjectStatus.Draft,
                 startDate: DateTimeOffset.UtcNow.AddMonths(-2),
                 endDate: DateTimeOffset.UtcNow.AddMonths(4)),
 
@@ -33,6 +35,7 @@ public static class ProjectSeedData
                 name: "Market Analysis",
                 description: "Analyze market trends",
                 code: "MK-ANA-002",
+                status: ProjectStatus.Draft,
                 startDate: DateTimeOffset.UtcNow.AddMonths(-1),
                 endDate: DateTimeOffset.UtcNow.AddMonths(2))
         };

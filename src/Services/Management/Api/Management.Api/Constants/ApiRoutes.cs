@@ -26,6 +26,8 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAdmin}/{{projectId}}";
         public const string GetProjects = $"{BaseAdmin}";
         public const string GetProjectById = $"{Base}/{{projectId}}";
+        public const string AddPaperProject = $"{Base}/{{projectId}}/papers";
+        public const string GetSubProjects = $"{Base}/{{parentProjectId}}/subprojects";
         
         #endregion
     }
@@ -36,7 +38,7 @@ public sealed class ApiRoutes
         public const string Tags = "Datasets";
         
         private const string Base = "/datasets";
-        private const string BaseProjectManager = "/mananger/datasets";
+        private const string BaseProjectManager = "/manager/datasets";
         public const string Create = $"{BaseProjectManager}";
         public const string Update = $"{BaseProjectManager}/{{datasetId}}";
         public const string Delete = $"{BaseProjectManager}/{{datasetId}}";

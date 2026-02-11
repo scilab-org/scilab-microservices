@@ -13,17 +13,22 @@ public sealed class ProjectEntity : Entity<Guid>
     public ProjectStatus? Status { get; set; }
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
-
+    public Guid? ParentProjectId { get; set; }
+    public List<Guid> DatasetIds { get; set; } = new();
+    public Guid? PaperId { get; set; }
     #endregion
 
     #region Factories
 
     public static ProjectEntity Create(Guid id,
-        string name,
-        string? description,
-        string? code,
-        DateTimeOffset? startDate,
-        DateTimeOffset? endDate)
+        string? name = null,
+        string? description = null,
+        string? code = null,
+        ProjectStatus? status = null,
+        DateTimeOffset? startDate = null,
+        DateTimeOffset? endDate = null,
+        Guid? parentProjectId = null,
+        Guid? paperId = null)
     {
         return new ProjectEntity()
         {
@@ -31,11 +36,13 @@ public sealed class ProjectEntity : Entity<Guid>
             Name = name,
             Description = description,
             Code = code,
-            Status = ProjectStatus.Draft,
+            Status = status,
             StartDate = startDate,
             EndDate = endDate,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
+            ParentProjectId = parentProjectId,
+            PaperId = paperId
         };
     }
 
