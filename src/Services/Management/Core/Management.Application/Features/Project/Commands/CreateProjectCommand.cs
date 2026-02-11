@@ -49,6 +49,7 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
             name: dto.Name!,
             description: dto.Description,
             code: dto.Code,
+            status: dto.Status,
             startDate: dto.StartDate,
             endDate: dto.EndDate);
 

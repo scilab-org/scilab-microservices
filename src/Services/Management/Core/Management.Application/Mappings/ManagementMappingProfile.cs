@@ -28,7 +28,6 @@ public class ManagementMappingProfile : Profile
         // ProjectEntity -> GetProjectByIdResult
         CreateMap<ProjectEntity, GetProjectByIdResult>()
             .ForMember(dest => dest.Project, opt => opt.MapFrom(src => src));
-
     }
 
     private void CreateDatasetMappings()

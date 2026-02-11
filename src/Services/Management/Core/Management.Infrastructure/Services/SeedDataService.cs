@@ -31,12 +31,6 @@ public class SeedDataService : ISeedDataService
             var projects = DatasetSeedData.GetDatasets(performedBy);
             session.Store(projects);
         }
-        if (!await session.Query<ProjectDatasetEntity>().AnyAsync(cancellationToken))
-        {
-            hasChanges = true;
-            var projectDatasets = ProjectDatasetSeedData.GetProjectDatasets();
-            session.Store(projectDatasets);
-        }
         if (hasChanges)
         {
             await session.SaveChangesAsync(cancellationToken);

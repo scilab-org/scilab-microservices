@@ -20,7 +20,7 @@ public class DeleteDatasetValidator : AbstractValidator<DeleteDatasetCommand>
     #endregion
 }
 
-public class DeleteDatasetCommandHandler(IDocumentSession session, IMediator mediator)
+public class DeleteDatasetCommandHandler(IDocumentSession session)
     : ICommandHandler<DeleteDatasetCommand, Unit>
 {
     #region Implementations
@@ -31,6 +31,17 @@ public class DeleteDatasetCommandHandler(IDocumentSession session, IMediator med
             ?? throw new ClientValidationException(MessageCode.DatasetIsNotExists, command.DatasetId.ToString());
 
         session.Delete(dataset);
+        
+        var projects = await session.Query<ProjectEntity>()
+            .Where(p => p.DatasetIds.Contains(dataset.Id))
+            .ToListAsync(cancellationToken);
+
+        foreach (var project in projects)
+        {
+            project.DatasetIds.Remove(dataset.Id);
+            session.Store(project);
+        }
+        
         await session.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

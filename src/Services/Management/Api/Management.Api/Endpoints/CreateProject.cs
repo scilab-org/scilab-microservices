@@ -23,7 +23,7 @@ public sealed class CreateProject : ICarterModule
 
     #region Methods
 
-    private async Task<ApiCreatedResponse<Guid>> HandleCreateProjectAsync(
+    private async Task<IResult> HandleCreateProjectAsync(
         ISender sender,
         IHttpContextAccessor httpContext,
         [FromBody] CreateProjectDto req)
@@ -32,7 +32,7 @@ public sealed class CreateProject : ICarterModule
 
         var result = await sender.Send(command);
 
-        return new ApiCreatedResponse<Guid>(result);
+        return TypedResults.Created($"{ApiRoutes.Project.Create}/{result}", new ApiCreatedResponse<Guid>(result));
     }
 
     #endregion

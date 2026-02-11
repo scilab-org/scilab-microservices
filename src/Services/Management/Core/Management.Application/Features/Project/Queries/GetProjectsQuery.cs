@@ -4,6 +4,7 @@ using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
 using Management.Domain.Entities;
 using Marten;
+using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
 using MediatR;
 
@@ -18,20 +19,31 @@ public sealed class GetProjectsQueryHandler(IDocumentSession session, IMapper ma
 {
     #region Implementations
 
-    public async Task<GetProjectsResult> Handle(GetProjectsQuery query, CancellationToken cancellationToken)
+    public async Task<GetProjectsResult> Handle(GetProjectsQuery request, CancellationToken cancellationToken)
     {
-        var filter = query.Filter;
-        var paging = query.Paging;
-        var projectQuery = session.Query<ProjectEntity>().AsQueryable();
+        var filter = request.Filter;
+        var paging = request.Paging;
+        var query = session.Query<ProjectEntity>().AsQueryable().Where(x => x.ParentProjectId == null);
 
-        if (!filter.SearchText.IsNullOrWhiteSpace())
+        if (!filter.Name.IsNullOrWhiteSpace())
         {
-            var search = filter.SearchText.Trim();
-            projectQuery = projectQuery.Where(x => x.Name != null && x.Name.Contains(search));
+            var name = filter.Name.Trim();
+            query = query.Where(x => x.Name != null && x.Name.Contains(name));
         }
-
-        var totalCount = await projectQuery.CountAsync(cancellationToken);
-        var result = await projectQuery
+        if(!filter.Code.IsNullOrWhiteSpace())
+        {
+            var code = filter.Code.Trim();
+            query = query.Where(x => x.Code != null && x.Code.Contains(code));
+        }
+        if (filter.Status.HasValue)        {
+            query = query.Where(x => x.Status == filter.Status.Value);
+        }
+        if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
+            query = query.Where(x => x.IsDeleted());
+        
+        
+        var totalCount = await query.CountAsync(cancellationToken);
+        var result = await query
             .OrderByDescending(x => x.CreatedOnUtc)
             .ToPagedListAsync(paging.PageNumber, paging.PageSize, cancellationToken);
 
