@@ -12,10 +12,14 @@ public sealed class PaperEntity : Entity<Guid>
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public PaperStatus? Status { get; set; }
+    public string? ParsedText { get; set; }
+    public bool? IsIngested { get; set; } = false;
+    public bool? IsAutoTagged { get; set; } = false;
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
+    public List<string> TagNames { get; set; } = new();
 
     #endregion
 
@@ -26,10 +30,14 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText,
         string? doi,
         PaperStatus? status,
+        string? parsedText,
+        bool? isIngested,
+        bool? isAutoTagged,
         DateTimeOffset? publicationDate,
         string? paperType,
         string? journalName,
-        string? conferenceName)
+        string? conferenceName,
+        List<string>? tagNames = null)
     {
         return new PaperEntity()
         {
@@ -38,10 +46,14 @@ public sealed class PaperEntity : Entity<Guid>
             Abstract = abstractText,
             Doi = doi,
             Status = status ?? PaperStatus.Draft,
+            ParsedText = parsedText ?? string.Empty,
+            IsIngested = isIngested ?? false,
+            IsAutoTagged = isAutoTagged ?? false,
             PublicationDate = publicationDate,
             PaperType = paperType,
             JournalName = journalName,
             ConferenceName = conferenceName,
+            TagNames = tagNames ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -55,19 +67,23 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText,
         string? doi,
         PaperStatus? status,
+        bool? isAutoTagged,
         DateTimeOffset? publicationDate,
         string? paperType,
         string? journalName,
-        string? conferenceName)
+        string? conferenceName,
+        List<string>? tagNames = null)
     {
         Title = title ?? Title;
         Abstract = abstractText;
         Doi = doi;
         Status = status;
+        IsAutoTagged = isAutoTagged ?? IsAutoTagged;
         PublicationDate = publicationDate;
         PaperType = paperType;
         JournalName = journalName;
         ConferenceName = conferenceName;
+        TagNames = tagNames ?? TagNames;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

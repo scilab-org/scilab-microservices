@@ -62,12 +62,12 @@ public class UpdatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
             abstractText: dto.Abstract,
             doi: dto.Doi,
             status: dto.Status,
+            isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
             journalName: dto.JournalName,
-            conferenceName: dto.ConferenceName);
-
-        await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
+            conferenceName: dto.ConferenceName,
+            tagNames: NomalizeTagNames(dto.TagNames));
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
@@ -77,23 +77,11 @@ public class UpdatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
 
     #region Methods
 
-    private async Task UploadFileAsync(UploadFileBytes? file,
-        PaperEntity entity,
-        CancellationToken cancellationToken)
+    private List<string> NomalizeTagNames(List<string>? tagNames)
     {
-        if (file == null) return;
+        if (tagNames == null) return new List<string>();
 
-        var result = await minIo.UploadFilesAsync(entity.Id.ToString(), [file],
-            AppConstants.Bucket.Papers,
-            true,
-            cancellationToken);
-
-        var uploaded = result.FirstOrDefault();
-
-        if (uploaded != null)
-        {
-            entity.UpdateFilePath(uploaded.PublicURL);
-        }
+        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
     }
 
     #endregion

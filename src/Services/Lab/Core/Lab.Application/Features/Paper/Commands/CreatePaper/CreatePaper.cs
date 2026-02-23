@@ -1,5 +1,4 @@
-﻿using BuildingBlocks.CQRS;
-using Lab.Application.Dtos.Papers;
+﻿using Lab.Application.Dtos.Papers;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
@@ -28,6 +27,10 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .LessThanOrEqualTo(DateTimeOffset.UtcNow)
                     .When(x => x.Dto.PublicationDate.HasValue)
                     .WithMessage(MessageCode.PaperPublicationDateInvalid);
+
+                RuleFor(x => x.Dto.UploadFile)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperFileIsRequired);
             });
     }
 }
@@ -49,10 +52,14 @@ public class CreatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
             abstractText: dto.Abstract,
             doi: dto.Doi,
             status: dto.Status,
+            parsedText: dto.ParsedText,
+            isIngested: dto.IsIngested,
+            isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
             journalName: dto.JournalName,
-            conferenceName: dto.ConferenceName);
+            conferenceName: dto.ConferenceName,
+            tagNames: NomalizeTagNames(dto.TagNames));
 
         await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
 
@@ -83,6 +90,13 @@ public class CreatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
         {
             entity.UpdateFilePath(uploaded.PublicURL);
         }
+    }
+
+    private List<string> NomalizeTagNames(List<string>? tagNames)
+    {
+        if (tagNames == null) return new List<string>();
+
+        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
     }
 
     #endregion

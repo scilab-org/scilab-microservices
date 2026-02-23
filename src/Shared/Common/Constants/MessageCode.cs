@@ -14,7 +14,7 @@ public sealed class MessageCode
 
     public const string UnknownError = "UNKNOWN_ERROR";
     #endregion
-    
+
     #region Project Management
 
     public const string ProjectNameIsRequired = "PROJECT_NAME_IS_REQUIRED";
@@ -22,13 +22,13 @@ public sealed class MessageCode
     public const string ProjectIdIsRequired = "PROJECT_ID_IS_REQUIRED";
 
     public const string ProjectIsNotExists = "PROJECT_IS_NOT_EXISTS";
-    
+
     public const string StartDateMustBeBeforeEndDate = "START_DATE_MUST_BE_BEFORE_END_DATE";
 
     public const string AllPapersAlreadyExist = "ALL_PAPERS_ALREADY_EXIST";
-    
+
     #endregion
-    
+
     #region Dataset Management
 
     public const string DatasetNameIsRequired = "DATASET_NAME_IS_REQUIRED";
@@ -107,6 +107,8 @@ public sealed class MessageCode
 
     public const string PaperIdIsRequired = "PAPER_ID_IS_REQUIRED";
 
+    public const string PaperFileIsRequired = "PAPER_FILE_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
@@ -120,6 +122,14 @@ public sealed class MessageCode
     public const string TagNameLengthExceeded = "TAG_NAME_LENGTH_EXCEEDED_50_CHARACTERS";
 
     public const string TagNameMustStartWithHash = "TAG_NAME_MUST_START_WITH_HASH";
+
+    #endregion
+
+    #region PaperTag Message Codes
+
+    public const string PaperTagIsNotExists = "PAPER_TAG_IS_NOT_EXISTS";
+
+    public const string PaperTagIdIsRequired = "AT_LEAST_ONE_TAG_ID_IS_REQUIRED";
 
     #endregion
 }

@@ -6,7 +6,6 @@ using Lab.Domain.Entities;
 using Marten;
 using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
-using MediatR;
 
 namespace Lab.Application.Features.Paper.Queries.GetPapers;
 
@@ -78,6 +77,21 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
             query = query.Where(x => x.IsDeleted());
         }
 
+        if (filter.Tag?.Any() == true)
+        {
+            var tagNames = NomalizeTagNames(filter.Tag);
+
+            foreach (var searchTag in tagNames)
+            {
+                var local = searchTag;
+
+                query = query.Where(p =>
+                    p.TagNames.Count != 0 &&
+                    p.TagNames.Any(t => t.Contains(local))
+                );
+            }
+        }
+
         var totalCount = await query.CountAsync(cancellationToken);
         var result = await query
             .OrderByDescending(x => x.CreatedOnUtc)
@@ -89,6 +103,17 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
         var reponse = new GetPapersResult(items, totalCount, paging);
 
         return reponse;
+    }
+
+    #endregion
+
+    #region Methods
+
+    private List<string> NomalizeTagNames(string[]? tagNames)
+    {
+        if (tagNames == null) return new List<string>();
+
+        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
     }
 
     #endregion
