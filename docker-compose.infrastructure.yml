@@ -14,12 +14,6 @@ services:
       - ./config/nginx/certbot/www:/var/www/certbot
     networks:
       - hyper_data_lab_network
-  certbot:
-    image: ${CERTBOT_IMAGE_NAME}
-    volumes:
-      - ./config/nginx/certbot/conf:/etc/letsencrypt
-      - ./config/nginx/certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERTBOT_EMAIL} -d ${KEYCLOAK_SERVER_DOMAIN} --agree-tos
   # =========================
   # Databases
   # =========================

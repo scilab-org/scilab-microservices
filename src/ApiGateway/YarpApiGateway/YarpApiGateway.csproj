@@ -9,14 +9,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="..\..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <PackageReference Include="Yarp.ReverseProxy" />
+        <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Yarp.ReverseProxy" />
-        <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
+      <Content Include="..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

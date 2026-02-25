@@ -14,6 +14,8 @@ COPY ["src/Shared/Common/Common.csproj", "src/Shared/Common/"]
 COPY ["src/Shared/EventSourcing/EventSourcing.csproj", "src/Shared/EventSourcing/"]
 COPY ["src/Services/Lab/Core/Lab.Domain/Lab.Domain.csproj", "src/Services/Lab/Core/Lab.Domain/"]
 COPY ["src/Services/Lab/Core/Lab.Infrastructure/Lab.Infrastructure.csproj", "src/Services/Lab/Core/Lab.Infrastructure/"]
+COPY ["src/Directory.Build.props", "src/"]
+COPY ["src/Directory.Packages.props", "src/"]
 RUN dotnet restore "src/Services/Lab/Api/Lab.Api/Lab.Api.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Lab/Api/Lab.Api"

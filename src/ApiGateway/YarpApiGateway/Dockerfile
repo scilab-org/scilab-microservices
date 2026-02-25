@@ -1,11 +1,15 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/ApiGateway/YarpApiGateway/YarpApiGateway.csproj", "src/ApiGateway/YarpApiGateway/"]
+COPY ["src/Directory.Build.props", "src/"]
+COPY ["src/Directory.Packages.props", "src/"]
 RUN dotnet restore "src/ApiGateway/YarpApiGateway/YarpApiGateway.csproj"
 COPY . .
 WORKDIR "/src/src/ApiGateway/YarpApiGateway"
