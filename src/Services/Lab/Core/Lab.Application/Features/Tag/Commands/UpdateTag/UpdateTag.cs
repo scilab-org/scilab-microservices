@@ -12,9 +12,6 @@ public class UpdateTagCommandValidator : AbstractValidator<UpdateTagCommand>
     {
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage(MessageCode.TagIdIsRequired);
-
-        RuleFor(x => x.Name)
-            .Must(name => name != null && name.StartsWith($"#")).WithMessage(MessageCode.TagNameMustStartWithHash);
     }
 }
 
@@ -31,8 +28,17 @@ public class UpdateTagCommandHandler(IDocumentSession session) : IRequestHandler
         if (entity == null)
             throw new ClientValidationException(MessageCode.TagIsNotExists, request.Id);
 
+        var nomalizeName = "";
+        if(request.Name != null)
+            nomalizeName = request.Name.Trim().ToLowerInvariant();
+        var existingTagName = await session.Query<TagEntity>()
+            .FirstOrDefaultAsync(x => x.Name == nomalizeName, cancellationToken);
+
+        if (existingTagName != null)
+            throw new ClientValidationException(MessageCode.TagNameAlreadyExists, nomalizeName);
+
         entity.Update(
-            name: request.Name);
+            name: nomalizeName);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

@@ -10,6 +10,7 @@ public class UpdatePaperDto
     public string? Abstract { get; init; }
     public string? Doi { get; init; }
     public PaperStatus? Status { get; init; }
+    public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; init; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; init; }

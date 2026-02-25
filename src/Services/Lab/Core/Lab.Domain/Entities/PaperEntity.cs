@@ -67,6 +67,7 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText,
         string? doi,
         PaperStatus? status,
+        bool? isIngested,
         bool? isAutoTagged,
         DateTimeOffset? publicationDate,
         string? paperType,
@@ -78,6 +79,7 @@ public sealed class PaperEntity : Entity<Guid>
         Abstract = abstractText;
         Doi = doi;
         Status = status;
+        IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
         PublicationDate = publicationDate;
         PaperType = paperType;

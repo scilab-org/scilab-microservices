@@ -119,9 +119,7 @@ public sealed class MessageCode
 
     public const string TagIdIsRequired = "TAG_ID_IS_REQUIRED";
 
-    public const string TagNameLengthExceeded = "TAG_NAME_LENGTH_EXCEEDED_50_CHARACTERS";
-
-    public const string TagNameMustStartWithHash = "TAG_NAME_MUST_START_WITH_HASH";
+    public const string TagNameAlreadyExists = "TAG_NAME_ALREADY_EXISTS";
 
     #endregion
 

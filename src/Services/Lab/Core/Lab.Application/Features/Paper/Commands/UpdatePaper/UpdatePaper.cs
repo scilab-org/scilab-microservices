@@ -45,29 +45,33 @@ public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
     }
 }
 
-public class UpdatePaperCommandHandler(IDocumentSession session, IMinIoCloudService minIo)
+public class UpdatePaperCommandHandler(IDocumentSession session)
     : IRequestHandler<UpdatePaperCommand, Guid>
 {
     public async Task<Guid> Handle(UpdatePaperCommand request, CancellationToken cancellationToken)
     {
+        var dto = request.Dto;
+        var tagNames = NomalizeTagNames(dto.TagNames);
+
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = await session.LoadAsync<PaperEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id);
 
-        var dto = request.Dto;
+        await EnsureTagsExistAsync(tagNames, cancellationToken);
 
         entity.Update(
             title: dto.Title,
             abstractText: dto.Abstract,
             doi: dto.Doi,
             status: dto.Status,
+            isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
             journalName: dto.JournalName,
             conferenceName: dto.ConferenceName,
-            tagNames: NomalizeTagNames(dto.TagNames));
+            tagNames: tagNames);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
@@ -82,6 +86,33 @@ public class UpdatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
         if (tagNames == null) return new List<string>();
 
         return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
+    }
+
+    private async Task EnsureTagsExistAsync(
+        List<string> tagNames,
+        CancellationToken cancellationToken)
+    {
+        if (tagNames.Count == 0) return;
+
+        var existingTags = await session
+            .Query<TagEntity>()
+            .Where(x => tagNames.Contains(x.Name))
+            .ToListAsync(cancellationToken);
+
+        var existingTagNames = existingTags
+            .Select(x => x.Name)
+            .ToHashSet();
+
+        var newTagNames = tagNames
+            .Where(x => !existingTagNames.Contains(x))
+            .Distinct()
+            .ToList();
+
+        foreach (var name in newTagNames)
+        {
+            var tag = TagEntity.Create(Guid.NewGuid(), name);
+            session.Store(tag);
+        }
     }
 
     #endregion
