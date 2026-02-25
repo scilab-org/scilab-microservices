@@ -21,6 +21,8 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
         var paging = request.Paging;
         var query = session.Query<PaperEntity>().AsQueryable();
 
+        #region Query Filters
+
         if (!filter.Title.IsNullOrWhiteSpace())
         {
             var title = filter.Title.Trim();
@@ -91,6 +93,8 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
                 );
             }
         }
+
+        #endregion
 
         var totalCount = await query.CountAsync(cancellationToken);
         var result = await query
