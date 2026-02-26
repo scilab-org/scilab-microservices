@@ -4,9 +4,9 @@ public sealed class UpdateUserDto
 {
     #region Fields, Properties and Indexers
 
-    public string FirstName { get; set; } = string.Empty;
+    public string? FirstName { get; set; }
 
-    public string LastName { get; set; } = string.Empty;
+    public string? LastName { get; set; }
 
     public bool Enabled { get; set; } = true;
 

@@ -122,4 +122,20 @@ public sealed class MessageCode
     public const string TagNameMustStartWithHash = "TAG_NAME_MUST_START_WITH_HASH";
 
     #endregion
+    
+    #region Member Management
+
+    public const string UserIdsAreRequired = "USER_IDS_ARE_REQUIRED";
+
+    public const string AllMembersAlreadyExist = "ALL_MEMBERS_ALREADY_EXIST";
+
+    public const string MemberProjectIdIsRequired = "MEMBER_PROJECT_ID_IS_REQUIRED";
+
+    public const string MemberIdsAreRequired = "MEMBER_IDS_ARE_REQUIRED";
+
+    public const string MembersNotFound = "MEMBERS_NOT_FOUND";
+
+    public const string GroupNameIsRequired = "GROUP_NAME_IS_REQUIRED";
+
+    #endregion
 }
