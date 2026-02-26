@@ -36,8 +36,8 @@ on:
           - nginx
 
 env:
-  PROJECT_DIR: /opt/scilab-microservices
-  COMPOSE_DIR: /opt/scilab-microservices/deploy/prod/services
+  PROJECT_DIR: /root/hyperdatalab/scilab-microservices
+  COMPOSE_DIR: /root/hyperdatalab/scilab-microservices/deploy/prod/services
 
 jobs:
   # ============================================================================
@@ -145,30 +145,23 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT || 22 }}
           envs: SERVICES
           command_timeout: 30m
           script: |
             set -euo pipefail
 
-            PROJECT_DIR="/opt/scilab-microservices"
+            PROJECT_DIR="/root/hyperdatalab/scilab-microservices"
             COMPOSE_DIR="$PROJECT_DIR/deploy/prod/services"
-            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-            echo "=========================================="
-            echo "  Deployment started at $(date)"
-            echo "  Services: $SERVICES"
-            echo "  Commit: ${{ github.sha }}"
-            echo "=========================================="
+            echo "Deploying services: $SERVICES"
 
             # ------------------------------------------------------------------
             # 1. Pull latest code
             # ------------------------------------------------------------------
-            echo ">>> Pulling latest code..."
             cd "$PROJECT_DIR"
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch -q origin main
+            git reset --hard origin/main >/dev/null
 
             # ------------------------------------------------------------------
             # 2. Determine which docker compose services to rebuild
@@ -197,43 +190,43 @@ jobs:
             # 3. Rebuild changed services (no cache)
             # ------------------------------------------------------------------
             if [ -n "$BUILD_SERVICES" ]; then
-              echo ">>> Rebuilding: $BUILD_SERVICES"
               docker compose build --no-cache $BUILD_SERVICES
-
-              echo ">>> Restarting rebuilt services..."
-              docker compose up -d --no-deps $BUILD_SERVICES
+              docker compose up -d --no-deps $BUILD_SERVICES >/dev/null
             fi
 
             # ------------------------------------------------------------------
             # 4. Restart nginx if config changed
             # ------------------------------------------------------------------
             if [ -n "$RESTART_ONLY" ]; then
-              echo ">>> Restarting: $RESTART_ONLY"
-              docker compose up -d --no-deps --force-recreate $RESTART_ONLY
+              docker compose up -d --no-deps --force-recreate $RESTART_ONLY >/dev/null
             fi
 
             # ------------------------------------------------------------------
             # 5. Health check (wait for services to be ready)
             # ------------------------------------------------------------------
-            echo ">>> Waiting for services to stabilize (30s)..."
             sleep 30
 
-            echo ">>> Service status:"
-            docker compose ps
+            # Check for unhealthy containers only among deployed services
+            UNHEALTHY_SERVICES=""
+            for SERVICE in $SERVICES; do
+              CID=$(docker compose ps -q "$SERVICE" 2>/dev/null || true)
+              if [ -z "$CID" ]; then
+                continue
+              fi
 
-            # Check for unhealthy containers
-            UNHEALTHY=$(docker compose ps --format json | grep -c '"unhealthy"' || true)
-            if [ "$UNHEALTHY" -gt 0 ]; then
-              echo "::error::WARNING: $UNHEALTHY unhealthy container(s) detected!"
-              docker compose ps | grep -i unhealthy
-              echo ""
-              echo ">>> Logs from unhealthy services:"
-              for SERVICE in $SERVICES; do
-                STATUS=$(docker compose ps --format "{{.Health}}" "$SERVICE" 2>/dev/null || echo "unknown")
-                if [ "$STATUS" = "unhealthy" ]; then
-                  echo "--- $SERVICE logs ---"
-                  docker compose logs --tail=30 "$SERVICE"
-                fi
+              HEALTH=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$CID" 2>/dev/null || echo "unknown")
+              if [ "$HEALTH" = "unhealthy" ]; then
+                UNHEALTHY_SERVICES="$UNHEALTHY_SERVICES $SERVICE"
+              fi
+            done
+
+            UNHEALTHY_SERVICES=$(echo "$UNHEALTHY_SERVICES" | xargs || true)
+            if [ -n "$UNHEALTHY_SERVICES" ]; then
+              UNHEALTHY_COUNT=$(echo "$UNHEALTHY_SERVICES" | wc -w | xargs)
+              echo "::error::WARNING: $UNHEALTHY_COUNT unhealthy deployed service(s): $UNHEALTHY_SERVICES"
+              for SERVICE in $UNHEALTHY_SERVICES; do
+                echo "--- $SERVICE logs ---"
+                docker compose logs --tail=30 "$SERVICE"
               done
               exit 1
             fi
@@ -241,16 +234,9 @@ jobs:
             # ------------------------------------------------------------------
             # 6. Cleanup old Docker resources
             # ------------------------------------------------------------------
-            echo ">>> Cleaning up dangling images..."
-            docker image prune -f
-
-            echo ">>> Cleaning up build cache..."
-            docker builder prune -f --filter "until=24h"
-
-            echo "=========================================="
-            echo "  Deployment completed at $(date)"
-            echo "  Services deployed: $SERVICES"
-            echo "=========================================="
+            docker image prune -f >/dev/null || true
+            docker builder prune -f --filter "until=24h" >/dev/null || true
+            echo "Deployment completed"
 
       - name: Deployment summary
         if: always()

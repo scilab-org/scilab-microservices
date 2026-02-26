@@ -73,7 +73,7 @@ services:
       user-service:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"200\" <&3'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -104,6 +104,8 @@ services:
       - ApiClients__Keycloak__ClientSecret=${KEYCLOAK_SERVICE_ACCOUNT_SECRET}
       - ApiClients__Keycloak__GrantType=client_credentials
       - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
+      - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
+      - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
     networks:
       - scilab_network
@@ -133,6 +135,8 @@ services:
       - ApiClients__Keycloak__ClientSecret=${KEYCLOAK_SERVICE_ACCOUNT_SECRET}
       - ApiClients__Keycloak__GrantType=client_credentials
       - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
+      - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
+      - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
     networks:
       - scilab_network
@@ -162,6 +166,8 @@ services:
       - ApiClients__Keycloak__ClientSecret=${KEYCLOAK_SERVICE_ACCOUNT_SECRET}
       - ApiClients__Keycloak__GrantType=client_credentials
       - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
+      - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
+      - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
     networks:
       - scilab_network
