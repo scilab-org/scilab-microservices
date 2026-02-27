@@ -29,30 +29,28 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./docker-volumes/nginx/conf.d:/etc/nginx/conf.d
       - ./docker-volumes/nginx/certbot/conf:/etc/letsencrypt
-      - ./docker-volumes/nginx/certbot/www:/var/www/certbot
       - ./docker-volumes/nginx/cache:/var/cache/nginx
       - ./docker-volumes/nginx/log:/var/log/nginx
     networks:
       - scilab_network
-    healthcheck:
-      test: ["CMD-SHELL", "nginx -t -q"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    depends_on:
+      certbot:
+        condition: service_completed_successfully
 
   certbot:
     image: ${CERTBOT_IMAGE_NAME}
-    environment:
-      - TZ=${TZ}
+    container_name: certbot
+    ports:
+      - "80:80"
     volumes:
       - ./docker-volumes/nginx/certbot/conf:/etc/letsencrypt
-      - ./docker-volumes/nginx/certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --non-interactive --expand --email ${CERTBOT_EMAIL} -d ${YARP_API_GATEWAY_DOMAIN} --agree-tos
-    healthcheck:
-      test: ["CMD", "certbot", "--version"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    command: >
+      certonly --standalone
+      --non-interactive
+      --agree-tos
+      --email ${CERTBOT_EMAIL}
+      -d ${YARP_API_GATEWAY_DOMAIN}
+    restart: "no"
 
   # ---------------------------------------------------------------------------
   # API Gateway (YARP)
@@ -187,5 +185,4 @@ services:
 # =============================================================================
 networks:
   scilab_network:
-    external: true
     name: prod_hyper_data_lab_network
