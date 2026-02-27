@@ -20,6 +20,8 @@ services:
   nginx:
     image: ${NGINX_IMAGE_NAME}
     restart: unless-stopped
+    environment:
+      - TZ=${TZ}
     ports:
       - 80:80
       - 443:443
@@ -40,6 +42,8 @@ services:
 
   certbot:
     image: ${CERTBOT_IMAGE_NAME}
+    environment:
+      - TZ=${TZ}
     volumes:
       - ./docker-volumes/nginx/certbot/conf:/etc/letsencrypt
       - ./docker-volumes/nginx/certbot/www:/var/www/certbot
@@ -60,9 +64,12 @@ services:
     container_name: api-gateway
     restart: unless-stopped
     environment:
+      - TZ=${TZ}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:8080
       - CorsConfig__Domains__0=${CORS_ORIGIN}
+      - ReverseProxy__Routes__ai-route__Match__Path=${AI_ROUTE_PATH}
+      - ReverseProxy__Clusters__ai-cluster__Destinations__destination1__Address=${AI_SERVICE_URL}
     networks:
       - scilab_network
     depends_on:
@@ -89,6 +96,7 @@ services:
     container_name: user-service
     restart: unless-stopped
     environment:
+      - TZ=${TZ}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__Database=${USER_DB_CONNECTION}
@@ -120,6 +128,7 @@ services:
     container_name: management-service
     restart: unless-stopped
     environment:
+      - TZ=${TZ}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__Database=${MANAGEMENT_DB_CONNECTION}
@@ -151,6 +160,7 @@ services:
     container_name: lab-service
     restart: unless-stopped
     environment:
+      - TZ=${TZ}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__Database=${LAB_DB_CONNECTION}
