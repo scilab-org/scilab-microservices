@@ -22,4 +22,26 @@ public sealed class ApiClientCfg
 
         #endregion
     }
+
+    public static class UserService
+    {
+        #region Constants
+
+        public const string Section = "ApiClients:UserService";
+
+        public const string BaseUrl = "BaseUrl";
+
+        #endregion
+    }
+
+    public static class LabService
+    {
+        #region Constants
+
+        public const string Section = "ApiClients:LabService";
+
+        public const string BaseUrl = "BaseUrl";
+
+        #endregion
+    }
 }

@@ -21,17 +21,7 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
 
         RuleFor(x => x.Dto)
             .NotNull()
-            .WithMessage(MessageCode.BadRequest)
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.Dto.FirstName)
-                    .NotEmpty()
-                    .WithMessage(MessageCode.BadRequest);
-
-                RuleFor(x => x.Dto.LastName)
-                    .NotEmpty()
-                    .WithMessage(MessageCode.BadRequest);
-            });
+            .WithMessage(MessageCode.BadRequest);
     }
 
     #endregion

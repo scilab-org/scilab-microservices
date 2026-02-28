@@ -1,6 +1,7 @@
 ﻿#region using
 
 using Management.Domain.Entities;
+using Management.Infrastructure.ApiClients.Extensions;
 using Marten;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,7 @@ public static class DependencyInjection
             
             opts.Schema.For<ProjectEntity>().SoftDeleted();
             opts.Schema.For<DatasetEntity>().SoftDeleted();
+            opts.Schema.For<MemberEntity>().SoftDeleted();
         }).UseLightweightSessions();
 
         services.Scan(s => s
@@ -51,6 +53,7 @@ public static class DependencyInjection
 
         //services.InitializeMartenWith<InitialData>();
 
+        services.AddRefitClients(cfg);
         return services;
     }
 

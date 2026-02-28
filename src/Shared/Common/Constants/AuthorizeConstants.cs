@@ -9,7 +9,8 @@ public sealed class AuthorizeConstants
     public const string ProjectManager = "project:project-manager";
 
     public const string User = "app:user";
-
+    
+    public const string ProjectAuthor = "project:author";
     #endregion
 
     #region Role Constants
