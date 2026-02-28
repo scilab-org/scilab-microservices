@@ -1,0 +1,188 @@
+################################################################################
+#  SCILAB MICROSERVICES - PRODUCTION BACKEND SERVICES
+#  Requires infrastructure to be running first:
+#    cd deploy/prod && docker compose -f docker-compose.infrastructure.yml up -d
+#  Then run:
+#    cd deploy/prod/services && docker compose up -d --build
+################################################################################
+
+services:
+  # ===========================================================================
+  # APPLICATION SERVICES
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Nginx (reverse proxy for backend services)
+  # ---------------------------------------------------------------------------
+  # =========================
+  # Reverse Proxy / Load Balancer
+  # =========================
+  nginx:
+    image: ${NGINX_IMAGE_NAME}
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker-volumes/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker-volumes/nginx/certbot/conf:/etc/letsencrypt
+      - ./docker-volumes/nginx/cache:/var/cache/nginx
+      - ./docker-volumes/nginx/log:/var/log/nginx
+    networks:
+      - scilab_network
+    depends_on:
+      certbot:
+        condition: service_completed_successfully
+
+  certbot:
+    image: ${CERTBOT_IMAGE_NAME}
+    container_name: certbot
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker-volumes/nginx/certbot/conf:/etc/letsencrypt
+    command: >
+      certonly --standalone
+      --non-interactive
+      --agree-tos
+      --email ${CERTBOT_EMAIL}
+      -d ${YARP_API_GATEWAY_DOMAIN}
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # API Gateway (YARP)
+  # ---------------------------------------------------------------------------
+  api-gateway:
+    build:
+      context: ../../../
+      dockerfile: src/ApiGateway/YarpApiGateway/Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - CorsConfig__Domains__0=${CORS_ORIGIN}
+      - ReverseProxy__Routes__ai-route__Match__Path=${AI_ROUTE_PATH}
+      - ReverseProxy__Clusters__ai-cluster__Destinations__destination1__Address=${AI_SERVICE_URL}
+    networks:
+      - scilab_network
+    depends_on:
+      lab-service:
+        condition: service_started
+      management-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"200\" <&3'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # User Service
+  # ---------------------------------------------------------------------------
+  user-service:
+    build:
+      context: ../../../
+      dockerfile: src/Services/User/Api/User.Api/Dockerfile
+    container_name: user-service
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Database=${USER_DB_CONNECTION}
+      - MinIO__Endpoint=${MINIO_HOSTNAME}
+      - MinIO__AccessKey=${MINIO_ROOT_USER}
+      - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
+      - MinIO__Secure=true
+      - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
+      - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
+      - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
+      - ApiClients__Keycloak__Realm=hyper-data-lab-realm
+      - ApiClients__Keycloak__ClientId=hyper-data-lab-service-account
+      - ApiClients__Keycloak__ClientSecret=${KEYCLOAK_SERVICE_ACCOUNT_SECRET}
+      - ApiClients__Keycloak__GrantType=client_credentials
+      - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
+      - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
+      - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
+      - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
+    networks:
+      - scilab_network
+
+  # ---------------------------------------------------------------------------
+  # Management Service
+  # ---------------------------------------------------------------------------
+  management-service:
+    build:
+      context: ../../../
+      dockerfile: src/Services/Management/Api/Management.Api/Dockerfile
+    container_name: management-service
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Database=${MANAGEMENT_DB_CONNECTION}
+      - MinIO__Endpoint=${MINIO_HOSTNAME}
+      - MinIO__AccessKey=${MINIO_ROOT_USER}
+      - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
+      - MinIO__Secure=true
+      - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
+      - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
+      - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
+      - ApiClients__Keycloak__Realm=hyper-data-lab-realm
+      - ApiClients__Keycloak__ClientId=hyper-data-lab-service-account
+      - ApiClients__Keycloak__ClientSecret=${KEYCLOAK_SERVICE_ACCOUNT_SECRET}
+      - ApiClients__Keycloak__GrantType=client_credentials
+      - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
+      - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
+      - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
+      - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
+    networks:
+      - scilab_network
+
+  # ---------------------------------------------------------------------------
+  # Lab Service
+  # ---------------------------------------------------------------------------
+  lab-service:
+    build:
+      context: ../../../
+      dockerfile: src/Services/Lab/Api/Lab.Api/Dockerfile
+    container_name: lab-service
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Database=${LAB_DB_CONNECTION}
+      - MinIO__Endpoint=${MINIO_HOSTNAME}
+      - MinIO__AccessKey=${MINIO_ROOT_USER}
+      - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
+      - MinIO__Secure=true
+      - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
+      - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
+      - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
+      - ApiClients__Keycloak__Realm=hyper-data-lab-realm
+      - ApiClients__Keycloak__ClientId=hyper-data-lab-service-account
+      - ApiClients__Keycloak__ClientSecret=${KEYCLOAK_SERVICE_ACCOUNT_SECRET}
+      - ApiClients__Keycloak__GrantType=client_credentials
+      - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
+      - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
+      - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
+      - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
+    networks:
+      - scilab_network
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  scilab_network:
+    name: prod_hyper_data_lab_network

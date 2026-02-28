@@ -1,14 +1,15 @@
 ﻿using Management.Application.Dtos.Projects;
+using Management.Application.Services;
 using Management.Domain.Entities;
 using Marten;
 
 namespace Management.Application.Features.Project.Commands;
 
-public record AddPaperProjectCommand(Guid ParentProjectId, AddPaperProjectDto Dto) : ICommand<List<Guid>>;
+public record CreateProjectPaperCommand(Guid ParentProjectId, CreateProjectPaperDto Dto) : ICommand<List<Guid>>;
 
-public class AddPaperProjectValidator : AbstractValidator<AddPaperProjectCommand>
+public class CreateProjectPaperValidator : AbstractValidator<CreateProjectPaperCommand>
 {
-    public AddPaperProjectValidator()
+    public CreateProjectPaperValidator()
     {
         RuleFor(x => x.ParentProjectId)
             .NotEmpty()
@@ -20,11 +21,13 @@ public class AddPaperProjectValidator : AbstractValidator<AddPaperProjectCommand
     }
 }
 
-public class AddPaperProjectCommandHandler(IDocumentSession session) : ICommandHandler<AddPaperProjectCommand, List<Guid>>
+public class CreateProjectPaperCommandHandler(
+    IDocumentSession session,
+    ILabApiService labApiService) : ICommandHandler<CreateProjectPaperCommand, List<Guid>>
 {
     #region Implementations
 
-    public async Task<List<Guid>> Handle(AddPaperProjectCommand command, CancellationToken cancellationToken)
+    public async Task<List<Guid>> Handle(CreateProjectPaperCommand command, CancellationToken cancellationToken)
     {
         var dto = command.Dto;
 
@@ -39,7 +42,11 @@ public class AddPaperProjectCommandHandler(IDocumentSession session) : ICommandH
         var createdIds = new List<Guid>();
         await session.BeginTransactionAsync(cancellationToken);
         
-        foreach (var paperId in dto.PaperIds.Distinct())
+        var validPaperIds = await labApiService.GetExistingPaperIdsAsync(dto.PaperIds, cancellationToken);
+        if (validPaperIds.Count == 0)
+            throw new NotFoundException(MessageCode.PaperIsNotExists);
+        
+        foreach (var paperId in validPaperIds.Distinct())
         {
             var alreadyExists = subProjects.Any(x => x.PaperId == paperId);
             if (alreadyExists) continue;

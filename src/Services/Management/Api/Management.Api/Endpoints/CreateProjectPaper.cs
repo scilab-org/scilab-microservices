@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Management.Api.Endpoints;
 
-public class CreatePaperProject : ICarterModule
+public class CreateProjectPaper : ICarterModule
 {
     #region Implementations
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost(ApiRoutes.Project.AddPaperProject, HandleAddPaperProjectAsync)
-            .WithTags(ApiRoutes.Project.Tags)
-            .WithName(nameof(CreatePaperProject))
+        app.MapPost(ApiRoutes.ProjectPaper.CreateProjectPaper, HandleCreateProjectPaperAsync)
+            .WithTags(ApiRoutes.ProjectPaper.Tags)
+            .WithName(nameof(CreateProjectPaper))
             .Produces<ApiCreatedResponse<List<Guid>>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest);
         // .RequireAuthorization();
@@ -22,12 +22,12 @@ public class CreatePaperProject : ICarterModule
     
     #region Methods
     
-    private async Task<ApiCreatedResponse<List<Guid>>> HandleAddPaperProjectAsync(
+    private async Task<ApiCreatedResponse<List<Guid>>> HandleCreateProjectPaperAsync(
         ISender sender,
         [FromRoute] Guid projectId,
-        [FromBody] AddPaperProjectDto req)
+        [FromBody] CreateProjectPaperDto req)
     {
-        var command = new AddPaperProjectCommand(projectId, req);
+        var command = new CreateProjectPaperCommand(projectId, req);
 
         var result = await sender.Send(command);
 
