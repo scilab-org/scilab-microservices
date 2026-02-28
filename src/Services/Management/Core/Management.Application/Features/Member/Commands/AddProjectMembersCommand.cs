@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Management.Application.Features.Member.Commands;
 
-public record AddProjectMembersCommand(Guid ProjectId, AddProjectMembersDto Dto, string UserId) : ICommand<List<Guid>>;
+public record AddProjectMembersCommand(Guid ProjectId, AddProjectMembersDto Dto, Guid UserId) : ICommand<List<Guid>>;
 
 public class AddProjectMembersValidator : AbstractValidator<AddProjectMembersCommand>
 {
@@ -33,8 +33,7 @@ public class AddProjectMembersValidator : AbstractValidator<AddProjectMembersCom
 
 public class AddProjectMembersCommandHandler(
     IDocumentSession session,
-    IUserApiService userApiService,
-    IHttpContextAccessor httpContextAccessor)
+    IUserApiService userApiService)
     : ICommandHandler<AddProjectMembersCommand, List<Guid>>
 {
     #region Implementations
@@ -56,8 +55,8 @@ public class AddProjectMembersCommandHandler(
         var isProjectManager = await session.Query<MemberEntity>()
             .AnyAsync(x =>
                     x.ProjectId == command.ProjectId &&
-                    x.UserId == Guid.Parse(command.UserId) &&
-                                              x.ProjectRole == AuthorizeConstants.ProjectManager,
+                    x.UserId == command.UserId &&
+                    x.ProjectRole == AuthorizeConstants.ProjectManager,
                 cancellationToken);
 
         if (!isProjectManager)

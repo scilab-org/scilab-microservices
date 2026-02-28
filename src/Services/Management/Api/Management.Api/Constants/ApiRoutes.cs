@@ -29,6 +29,7 @@ public sealed class ApiRoutes
         public const string GetAvailableProjectUsers = $"{Base}/{{projectId}}/users/available";
         public const string GetProjectsByUserId = $"{Base}/users/{{userId}}";
         public const string GetMyProjects = $"{Base}/me";
+        public const string GetMyProjectRole = $"{Base}/{{projectId}}/my-role";
         #endregion
     }
     public static class ProjectPaper

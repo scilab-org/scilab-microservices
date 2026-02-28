@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Management.Application.Features.Member.Commands;
 
-public record DeleteProjectMembersCommand(Guid ProjectId, DeleteProjectMembersDto Dto, string UserId) : ICommand<List<Guid>>;
+public record DeleteProjectMembersCommand(Guid ProjectId, DeleteProjectMembersDto Dto, Guid UserId) : ICommand<List<Guid>>;
 
 public class DeleteProjectMembersValidator : AbstractValidator<DeleteProjectMembersCommand>
 {
@@ -23,8 +23,7 @@ public class DeleteProjectMembersValidator : AbstractValidator<DeleteProjectMemb
 }
 
 public class DeleteProjectMembersCommandHandler(
-    IDocumentSession session,
-    IHttpContextAccessor httpContextAccessor)
+    IDocumentSession session)
     : ICommandHandler<DeleteProjectMembersCommand, List<Guid>>
 {
     #region Implementations
@@ -41,8 +40,8 @@ public class DeleteProjectMembersCommandHandler(
         var isProjectManager = await session.Query<MemberEntity>()
             .AnyAsync(x =>
                     x.ProjectId == command.ProjectId &&
-                    x.UserId == Guid.Parse(command.UserId) &&
-                                              x.ProjectRole == AuthorizeConstants.ProjectManager,
+                    x.UserId == command.UserId &&
+                    x.ProjectRole == AuthorizeConstants.ProjectManager,
                 cancellationToken);
         if (!isProjectManager)
             throw new NoPermissionException(MessageCode.AccessDenied);

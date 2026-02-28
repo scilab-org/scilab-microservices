@@ -35,7 +35,7 @@ public sealed class DeleteProjectMembers : ICarterModule
         if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
             return Results.Unauthorized();
         
-        var command = new DeleteProjectMembersCommand(projectId, req, currentUser.Id);
+        var command = new DeleteProjectMembersCommand(projectId, req, userId);
 
         var result = await sender.Send(command);
 

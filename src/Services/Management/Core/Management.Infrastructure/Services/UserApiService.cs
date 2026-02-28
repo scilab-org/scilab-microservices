@@ -137,8 +137,11 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Enabled = u.Enabled,
-                Groups = u.Groups?.Select(g => g.Name).Where(n => n is not null).ToList()! ?? new List<string>()
-            })
+                Groups = u.Groups?
+                             .Select(g => g.Name)
+                             .OfType<string>()   // tự động loại null
+                             .ToList()
+                         ?? new List<string>()     })
             .ToList();
     }
 
