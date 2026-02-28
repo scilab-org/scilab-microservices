@@ -1,6 +1,7 @@
 ﻿using Lab.Application.Dtos.Papers;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 using MediatR;
 
@@ -54,7 +55,7 @@ public class CreatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
             title: dto.Title,
             abstractText: dto.Abstract,
             doi: dto.Doi,
-            status: dto.Status,
+            status: dto.Status ?? PaperStatus.Sampled,
             parsedText: dto.ParsedText,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,

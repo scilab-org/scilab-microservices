@@ -3,6 +3,7 @@ using Lab.Application.Dtos.Papers;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
@@ -93,6 +94,9 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
                 );
             }
         }
+
+        // Exclude Draft and Processing papers by default
+        query = query.Where(x => x.Status != PaperStatus.Draft && x.Status != PaperStatus.Processing);
 
         #endregion
 
