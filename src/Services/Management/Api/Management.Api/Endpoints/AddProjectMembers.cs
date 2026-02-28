@@ -35,7 +35,7 @@ public sealed class AddProjectMembers : ICarterModule
         if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
             return Results.Unauthorized();
         
-        var command = new AddProjectMembersCommand(projectId, req, currentUser.Id);
+        var command = new AddProjectMembersCommand(projectId, req, userId);
 
         var result = await sender.Send(command);
 
