@@ -24,8 +24,12 @@ public static class DependencyInjection
             opts.Connection(cfg[$"{ConnectionStringsCfg.Section}:{ConnectionStringsCfg.Database}"]!);
             opts.UseSystemTextJsonForSerialization();
 
-            opts.Schema.For<PaperEntity>().SoftDeleted();
-            opts.Schema.For<TagEntity>().SoftDeleted();
+            opts.Schema.For<PaperEntity>()
+                .SoftDeleted()
+                .Index(p => p.TagNames);
+            opts.Schema.For<TagEntity>()
+                .SoftDeleted()
+                .Index(t => t.Name, idx => { idx.IsUnique = true; });
         }).UseLightweightSessions();
 
         services.Scan(s => s

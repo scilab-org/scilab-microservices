@@ -44,7 +44,7 @@ public sealed class CreatePaper : ICarterModule
         {
             using var ms = new MemoryStream();
             await req.File.CopyToAsync(ms);
-            dto.UploadFile ??= new UploadFileBytes()
+            dto.UploadFile = new UploadFileBytes()
             {
                 FileName = req.File.FileName,
                 ContentType = req.File.ContentType,

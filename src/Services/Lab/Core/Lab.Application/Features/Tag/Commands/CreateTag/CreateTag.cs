@@ -12,9 +12,7 @@ public class CreateTagCommandValidator : AbstractValidator<CreateTagCommand>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage(MessageCode.TagNameIsRequired)
-            .MaximumLength(50).WithMessage(MessageCode.TagNameLengthExceeded)
-            .NotNull().WithMessage(MessageCode.TagNameIsRequired)
-            .Must(name => name != null && name.StartsWith($"#")).WithMessage(MessageCode.TagNameMustStartWithHash);
+            .NotNull().WithMessage(MessageCode.TagNameIsRequired);
     }
 }
 
@@ -26,9 +24,17 @@ public class CreateTagCommandHandler(IDocumentSession session) : IRequestHandler
     {
         await session.BeginTransactionAsync(cancellationToken);
 
+		var nomalizeName = request.Name.Trim().ToLowerInvariant();
+
+        var existingTag = await session.Query<TagEntity>()
+            .FirstOrDefaultAsync(x => x.Name == nomalizeName, cancellationToken);
+
+        if (existingTag != null)
+            throw new ClientValidationException(MessageCode.TagNameAlreadyExists, request.Name);
+
         var entity = TagEntity.Create(
             id: Guid.NewGuid(),
-            name: request.Name);
+            name: nomalizeName);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

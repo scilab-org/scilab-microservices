@@ -45,29 +45,33 @@ public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
     }
 }
 
-public class UpdatePaperCommandHandler(IDocumentSession session, IMinIoCloudService minIo)
+public class UpdatePaperCommandHandler(IDocumentSession session)
     : IRequestHandler<UpdatePaperCommand, Guid>
 {
     public async Task<Guid> Handle(UpdatePaperCommand request, CancellationToken cancellationToken)
     {
+        var dto = request.Dto;
+        var tagNames = NomalizeTagNames(dto.TagNames);
+
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = await session.LoadAsync<PaperEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id);
 
-        var dto = request.Dto;
+        await EnsureTagsExistAsync(tagNames, cancellationToken);
 
         entity.Update(
             title: dto.Title,
             abstractText: dto.Abstract,
             doi: dto.Doi,
             status: dto.Status,
+            isIngested: dto.IsIngested,
+            isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
             journalName: dto.JournalName,
-            conferenceName: dto.ConferenceName);
-
-        await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
+            conferenceName: dto.ConferenceName,
+            tagNames: tagNames);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
@@ -77,22 +81,37 @@ public class UpdatePaperCommandHandler(IDocumentSession session, IMinIoCloudServ
 
     #region Methods
 
-    private async Task UploadFileAsync(UploadFileBytes? file,
-        PaperEntity entity,
+    private List<string> NomalizeTagNames(List<string>? tagNames)
+    {
+        if (tagNames == null) return new List<string>();
+
+        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
+    }
+
+    private async Task EnsureTagsExistAsync(
+        List<string> tagNames,
         CancellationToken cancellationToken)
     {
-        if (file == null) return;
+        if (tagNames.Count == 0) return;
 
-        var result = await minIo.UploadFilesAsync(entity.Id.ToString(), [file],
-            AppConstants.Bucket.Papers,
-            true,
-            cancellationToken);
+        var existingTags = await session
+            .Query<TagEntity>()
+            .Where(x => tagNames.Contains(x.Name))
+            .ToListAsync(cancellationToken);
 
-        var uploaded = result.FirstOrDefault();
+        var existingTagNames = existingTags
+            .Select(x => x.Name)
+            .ToHashSet();
 
-        if (uploaded != null)
+        var newTagNames = tagNames
+            .Where(x => !existingTagNames.Contains(x))
+            .Distinct()
+            .ToList();
+
+        foreach (var name in newTagNames)
         {
-            entity.UpdateFilePath(uploaded.PublicURL);
+            var tag = TagEntity.Create(Guid.NewGuid(), name);
+            session.Store(tag);
         }
     }
 

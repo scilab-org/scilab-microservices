@@ -2,7 +2,6 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Swagger.Extensions;
 using Common.Constants;
-using Common.Models;
 using Lab.Api.Constants;
 using Lab.Api.Models.Papers;
 using Lab.Application.Dtos.Papers;
@@ -33,18 +32,6 @@ public class UpdatePaper : ICarterModule
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
 
         var dto = mapper.Map<UpdatePaperDto>(req);
-
-        if (req.File != null)
-        {
-            using var ms = new MemoryStream();
-            await req.File.CopyToAsync(ms);
-            dto.UploadFile ??= new UploadFileBytes()
-            {
-                FileName = req.File.FileName,
-                ContentType = req.File.ContentType,
-                Bytes = ms.ToArray()
-            };
-        }
 
         var command = new UpdatePaperCommand(id, dto);
         var result = await sender.Send(command);

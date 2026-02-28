@@ -13,5 +13,6 @@ public record class GetPapersFilter
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
+    public string[]? Tag { get; set; }
     public bool? IsDeleted { get; set; } = false;
 }
