@@ -3,6 +3,7 @@
 using AutoMapper;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Tags;
+using Lab.Application.Dtos.Template;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 
@@ -18,6 +19,7 @@ public sealed class LabMappingProfile : Profile
     {
         CreatePaperMappings();
         CreateTagMappings();
+        CreateTemplateMappings();
     }
 
     #endregion
@@ -42,6 +44,15 @@ public sealed class LabMappingProfile : Profile
 
         CreateMap<TagEntity, GetTagByIdResult>()
             .ForMember(dest => dest.Tag, opt => opt.MapFrom(src => src));
+    }
+
+    #endregion
+
+    #region Template Mappings
+
+    private void CreateTemplateMappings()
+    {
+        CreateMap<TemplateEntity, TemplateDto>();
     }
 
     #endregion

@@ -12,11 +12,11 @@ public class DeleteProjectPapersValidator : AbstractValidator<DeleteProjectPaper
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage(MessageCode.MemberProjectIdIsRequired);
+            .WithMessage(MessageCode.ProjectIdIsRequired);
 
         RuleFor(x => x.Dto.PaperIds)
             .NotEmpty()
-            .WithMessage(MessageCode.MemberIdsAreRequired);
+            .WithMessage(MessageCode.PaperIdIsRequired);
     }
 }
 
@@ -36,24 +36,16 @@ public class DeleteProjectPapersCommandHandler(IDocumentSession session)
 
         if (paperIdSet.Count == 0)
             throw new ClientValidationException(MessageCode.MemberIdsAreRequired);
-
-        var papersToRemove = await session.Query<ProjectEntity>()
-            .Where(x => x.ParentProjectId == command.ProjectId && x.PaperId.HasValue && paperIdSet.Contains(x.PaperId.Value))
-            .ToListAsync(cancellationToken);
-
-        if (!papersToRemove.Any())
-            throw new NotFoundException(MessageCode.MembersNotFound);
-
-        var removedIds = new List<Guid>();
-        foreach (var paper in papersToRemove)
-        {
-            session.Delete(paper);
-            removedIds.Add(paper.Id);
-        }
-
+        
+        var removedPaperIds = project.RemovePapers(paperIdSet);
+        
+        if (!removedPaperIds.Any())
+            throw new NotFoundException(MessageCode.PaperNotFoundInProject);
+        
+        session.Store(project);
         await session.SaveChangesAsync(cancellationToken);
 
-        return removedIds;
+        return removedPaperIds;
     }
 
     #endregion

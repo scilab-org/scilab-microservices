@@ -40,10 +40,12 @@ public sealed class ApiRoutes
         private const string BaseManager = "/manager/projects";
 
         public const string CreateProjectPaper = $"{BaseManager}/{{projectId}}/papers";
-        public const string GetProjectPapers = $"{Base}/{{projectId}}/papers";
         public const string GetAvailablePapers = $"{BaseManager}/{{projectId}}/papers/available";
         public const string DeleteProjectPapers = $"{BaseManager}/{{projectId}}/papers/remove";
-    }
+        public const string CreateSubProject = $"{Base}/{{projectId}}/sub-projects";
+        public const string GetSubProjects = $"{Base}/{{projectId}}/sub-projects";
+        public const string GetProjectPapers = $"{Base}/{{projectId}}/papers";
+   }
     public static class Member
     {
         #region Constants

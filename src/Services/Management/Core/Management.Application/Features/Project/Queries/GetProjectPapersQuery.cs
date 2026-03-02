@@ -1,3 +1,4 @@
+using Management.Application.Dtos.Papers;
 using Management.Application.Models.Results;
 using Management.Application.Services;
 using Management.Domain.Entities;
@@ -33,15 +34,9 @@ public class GetProjectPapersQueryHandler(
         if (project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
 
-        // Get all sub-projects (papers) belonging to this project
-        var subProjects = await session.Query<ProjectEntity>()
-            .Where(x => x.ParentProjectId == query.ProjectId)
-            .ToListAsync(cancellationToken);
-
-        var paperIds = subProjects
-            .Where(x => x.PaperId.HasValue)
-            .Select(x => x.PaperId!.Value)
-            .Distinct();
+        var paperIds = project.PaperIds.Distinct().ToList();
+        if (!paperIds.Any())
+            return new GetProjectPapersResult(new List<PaperInfoDto>());
 
         // Fetch full paper details from Lab service
         var papers = await labApiService.GetPapersByIdsAsync(
