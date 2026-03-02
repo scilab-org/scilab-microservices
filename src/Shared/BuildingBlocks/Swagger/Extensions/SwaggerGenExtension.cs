@@ -1,10 +1,10 @@
 ﻿#region using
 
+using Common.Configurations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Common.Configurations;
 
 #endregion
 
@@ -97,7 +97,7 @@ public static class SwaggerGenExtension
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+            c.SwaggerEndpoint("v1/swagger.json", "v1");
             c.OAuthClientId(clientId);
             c.OAuthClientSecret(clientSecret);
             c.OAuthUsePkce();
