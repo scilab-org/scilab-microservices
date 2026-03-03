@@ -111,6 +111,8 @@ public sealed class MessageCode
     
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
+    public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
@@ -132,7 +134,7 @@ public sealed class MessageCode
     public const string PaperTagIdIsRequired = "AT_LEAST_ONE_TAG_ID_IS_REQUIRED";
 
     #endregion
-    
+
     #region Member Management
 
     public const string UserIdsAreRequired = "USER_IDS_ARE_REQUIRED";

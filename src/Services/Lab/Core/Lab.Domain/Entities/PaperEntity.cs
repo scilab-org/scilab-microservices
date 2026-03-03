@@ -59,6 +59,26 @@ public sealed class PaperEntity : Entity<Guid>
         };
     }
 
+    public static PaperEntity Init(Guid id,
+        string title,
+        string? abstractText,
+        string? doi,
+        PaperStatus? status,
+        string? paperType)
+    {
+        return new PaperEntity()
+        {
+            Id = id,
+            Title = title,
+            Abstract = abstractText,
+            Doi = doi,
+            Status = status ?? PaperStatus.Draft,
+            PaperType = paperType,
+            CreatedOnUtc = DateTimeOffset.UtcNow,
+            LastModifiedOnUtc = DateTimeOffset.UtcNow,
+        };
+    }
+
     #endregion
 
     #region Methods

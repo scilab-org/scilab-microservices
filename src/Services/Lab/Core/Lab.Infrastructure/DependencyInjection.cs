@@ -1,11 +1,13 @@
-﻿#region using
+﻿﻿#region using
 
 using Lab.Domain.Entities;
+using Lab.Infrastructure.ApiClients;
 using Marten;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
+using Refit;
 
 #endregion
 
@@ -51,6 +53,13 @@ public static class DependencyInjection
                     .WithCredentials(cfg[$"{MinIoCfg.Section}:{MinIoCfg.AccessKey}"], cfg[$"{MinIoCfg.Section}:{MinIoCfg.SecretKey}"])
                     .WithSSL(cfg.GetValue<bool>(cfg[$"{MinIoCfg.Section}:{MinIoCfg.Secure}"]!))
                     .Build());
+
+        services.AddRefitClient<IManagementServiceApi>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.ManagementService.Section}:{ApiClientCfg.ManagementService.BaseUrl}"]!);
+                c.Timeout = TimeSpan.FromSeconds(30);
+            });
 
         //services.InitializeMartenWith<InitialData>();
 

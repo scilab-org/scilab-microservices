@@ -33,6 +33,7 @@ public sealed class ApiRoutes
         public const string GetPapers = $"{Base}";
         public const string GetPaperById = $"{Base}/{{id}}";
         public const string GetPaperSamples = $"{Base}/sample";
+        public const string Initialize = $"{BaseAdmin}/initialize";
 
         #endregion
     }

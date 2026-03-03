@@ -19,5 +19,6 @@ public class CreatePaperDto
     public string? JournalName { get; init; }
     public string? ConferenceName { get; init; }
     public List<string>? TagNames { get; init; }
+
     #endregion
 }
