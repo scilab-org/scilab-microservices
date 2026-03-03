@@ -35,14 +35,7 @@ public class GetAvailablePapersQueryHandler(
         if (project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
 
-        // Collect all paperIds already added to sub-projects of this project
-        var existingSubProjects = await session.Query<ProjectEntity>()
-            .Where(x => x.ParentProjectId == query.ProjectId)
-            .ToListAsync(cancellationToken);
-
-        var existingPaperIds = existingSubProjects
-            .Where(x => x.PaperId.HasValue)
-            .Select(x => x.PaperId!.Value);
+        var existingPaperIds = project.PaperIds.Distinct();
 
         // Fetch papers from Lab service excluding already-added ones
         var papers = await labApiService.GetAvailablePapersAsync(

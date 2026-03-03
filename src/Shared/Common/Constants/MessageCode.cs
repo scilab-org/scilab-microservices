@@ -108,6 +108,8 @@ public sealed class MessageCode
     public const string PaperIdIsRequired = "PAPER_ID_IS_REQUIRED";
 
     public const string PaperFileIsRequired = "PAPER_FILE_IS_REQUIRED";
+    
+    public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
     #endregion
 

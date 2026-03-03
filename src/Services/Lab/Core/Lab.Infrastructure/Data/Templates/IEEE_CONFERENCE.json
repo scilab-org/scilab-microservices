@@ -1,0 +1,14 @@
+﻿{
+  "templateCode": "IEEE_CONFERENCE",
+  "sections": [
+    { "key": "abstract", "title": "Abstract", "displayOrder": 1, "latex": "\\section{\\textbf{Abstract}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "keywords", "title": "Index Terms", "displayOrder": 2, "latex": "\\section{\\textbf{Index Terms}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "introduction", "title": "Introduction", "displayOrder": 3, "latex": "\\section{\\textbf{Introduction}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "system_model", "title": "Proposed Method / System Model", "displayOrder": 4, "latex": "\\section{\\textbf{Proposed Method / System Model}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "experiment_setup", "title": "Experimental Setup", "displayOrder": 5, "latex": "\\section{\\textbf{Experimental Setup}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "results", "title": "Results", "displayOrder": 6, "latex": "\\section{\\textbf{Results}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "conclusion", "title": "Conclusion", "displayOrder": 7, "latex": "\\section{\\textbf{Conclusion}}", "numbered": true, "required": true, "allowSubsections": false },
+    { "key": "acknowledgment", "title": "Acknowledgment", "displayOrder": 8, "latex": "\\section{\\textbf{Acknowledgment}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "references", "title": "References", "displayOrder": 9, "latex": "\\section{\\textbf{References}}", "numbered": false, "required": true, "allowSubsections": false }
+  ]
+}

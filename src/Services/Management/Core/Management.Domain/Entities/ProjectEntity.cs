@@ -15,7 +15,7 @@ public sealed class ProjectEntity : Entity<Guid>
     public DateTimeOffset? EndDate { get; set; }
     public Guid? ParentProjectId { get; set; }
     public List<Guid> DatasetIds { get; set; } = new();
-    public Guid? PaperId { get; set; }
+    public List<Guid> PaperIds { get; set; } = new();
     #endregion
 
     #region Factories
@@ -28,7 +28,7 @@ public sealed class ProjectEntity : Entity<Guid>
         DateTimeOffset? startDate = null,
         DateTimeOffset? endDate = null,
         Guid? parentProjectId = null,
-        Guid? paperId = null)
+        List<Guid>? paperIds = null)
     {
         return new ProjectEntity()
         {
@@ -42,7 +42,7 @@ public sealed class ProjectEntity : Entity<Guid>
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
             ParentProjectId = parentProjectId,
-            PaperId = paperId
+            PaperIds = paperIds?.Distinct().ToList() ?? new List<Guid>()
         };
     }
 
@@ -65,7 +65,32 @@ public sealed class ProjectEntity : Entity<Guid>
         EndDate = endDate;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
+    public void AddPapers(IEnumerable<Guid> paperIds)
+    {
+        foreach (var paperId in paperIds.Distinct())
+        {
+            if (!PaperIds.Contains(paperId))
+                PaperIds.Add(paperId);
+        }
 
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+    
+    public List<Guid> RemovePapers(IEnumerable<Guid> paperIds)
+    {
+        var removed = new List<Guid>();
+
+        foreach (var id in paperIds.Distinct())
+        {
+            if (PaperIds.Remove(id))
+                removed.Add(id);
+        }
+
+        if (removed.Any())
+            LastModifiedOnUtc = DateTimeOffset.UtcNow;
+
+        return removed;
+    }
     #endregion
     
 }
