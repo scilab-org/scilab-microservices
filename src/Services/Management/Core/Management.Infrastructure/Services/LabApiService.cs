@@ -62,7 +62,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     {
         var existingSet = existingPaperIds.ToHashSet();
 
-        var response = await labServiceApi.GetPapersAsync(
+        var response = await labServiceApi.GetPapersSampleAsync(
             pageNumber: 1,
             pageSize: 1000,
             title: searchText);
@@ -158,5 +158,41 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
 
         return validIds;
     }
+
+    public async Task<(List<PaperInfoDto> Items, long TotalCount)> GetPapersByIdsPagedAsync(
+        IEnumerable<Guid> paperIds,
+        string? title = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var idSet = paperIds.ToHashSet();
+        if (idSet.Count == 0)
+            return (new List<PaperInfoDto>(), 0);
+
+        // Fetch all papers for the given IDs
+        var allPapers = await GetPapersByIdsAsync(idSet, cancellationToken);
+
+        // Apply optional title filter (client-side)
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            var search = title.Trim();
+            allPapers = allPapers
+                .Where(p => p.Title != null && p.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        var totalCount = allPapers.Count;
+
+        // Apply paging
+        var skip = (pageNumber - 1) * pageSize;
+        var items = allPapers
+            .Skip(skip)
+            .Take(pageSize)
+            .ToList();
+
+        return (items, totalCount);
+    }
+
     #endregion
 }

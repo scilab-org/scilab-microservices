@@ -134,6 +134,8 @@ services:
       - "9000"
       - "9443"
       - "8000"
+    ports:
+      - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./docker-volumes/portainer:/data

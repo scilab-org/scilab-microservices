@@ -31,40 +31,20 @@ public class CreateProjectPaperCommandHandler(
     {
         var dto = command.Dto;
 
-        var parentProject = await session.LoadAsync<ProjectEntity>(command.ParentProjectId, cancellationToken);
-        if(parentProject == null)
+        var project = await session.LoadAsync<ProjectEntity>(command.ParentProjectId, cancellationToken);
+        if(project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
-        
-        var subProjects = await session.Query<ProjectEntity>()
-            .Where(x => x.ParentProjectId == command.ParentProjectId)
-            .ToListAsync(cancellationToken);
-        
-        var createdIds = new List<Guid>();
-        await session.BeginTransactionAsync(cancellationToken);
         
         var validPaperIds = await labApiService.GetExistingPaperIdsAsync(dto.PaperIds, cancellationToken);
         if (validPaperIds.Count == 0)
             throw new NotFoundException(MessageCode.PaperIsNotExists);
         
-        foreach (var paperId in validPaperIds.Distinct())
-        {
-            var alreadyExists = subProjects.Any(x => x.PaperId == paperId);
-            if (alreadyExists) continue;
-            
-            var subId  = Guid.NewGuid();
-            var subProject = ProjectEntity.Create(
-                id: subId ,
-                parentProjectId: command.ParentProjectId,
-                paperId: paperId);
-            session.Store(subProject);
-            createdIds.Add(subId);
-        }
-        if (!createdIds.Any())
-            throw new ClientValidationException(MessageCode.AllPapersAlreadyExist);
-
+        project.AddPapers(validPaperIds);
+        
+        session.Store(project);
         await session.SaveChangesAsync(cancellationToken);
 
-        return createdIds;
+        return project.PaperIds;
     }
     #endregion
 }

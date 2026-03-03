@@ -32,6 +32,7 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAdmin}/{{id}}";
         public const string GetPapers = $"{Base}";
         public const string GetPaperById = $"{Base}/{{id}}";
+        public const string GetPaperSamples = $"{Base}/sample";
         public const string Initialize = $"{BaseAdmin}/initialize";
 
         #endregion
@@ -54,6 +55,29 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAdmin}/{{id}}";
         public const string GetTags = $"{Base}";
         public const string GetTagById = $"{Base}/{{id}}";
+
+        #endregion
+    }
+    
+    public static class Template
+    {
+        #region Constants
+
+        public const string Tags = "Paper Templates";
+        private const string Base = "/paper-templates";
+        private const string BaseAdmin = "/admin/paper-templates";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+
+        public const string GetTemplates = $"{Base}";
+        public const string GetTemplateById = $"{Base}/{{id}}";
+        public const string GetByCode = $"{Base}/code/{{code}}";
 
         #endregion
     }

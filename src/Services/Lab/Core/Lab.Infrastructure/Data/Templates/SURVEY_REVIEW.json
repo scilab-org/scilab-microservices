@@ -1,0 +1,13 @@
+﻿{
+  "templateCode": "SURVEY_REVIEW",
+  "sections": [
+    { "key": "abstract", "title": "Abstract", "displayOrder": 1, "latex": "\\section{\\textbf{Abstract}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "introduction", "title": "Introduction", "displayOrder": 2, "latex": "\\section{\\textbf{Introduction}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "taxonomy", "title": "Taxonomy / Classification", "displayOrder": 3, "latex": "\\section{\\textbf{Taxonomy / Classification}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "comparison", "title": "Comparative Analysis", "displayOrder": 4, "latex": "\\section{\\textbf{Comparative Analysis}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "challenges", "title": "Challenges & Open Issues", "displayOrder": 5, "latex": "\\section{\\textbf{Challenges \\& Open Issues}}", "numbered": true, "required": false, "allowSubsections": true },
+    { "key": "future_directions", "title": "Future Directions", "displayOrder": 6, "latex": "\\section{\\textbf{Future Directions}}", "numbered": true, "required": false, "allowSubsections": true },
+    { "key": "conclusion", "title": "Conclusion", "displayOrder": 7, "latex": "\\section{\\textbf{Conclusion}}", "numbered": true, "required": true, "allowSubsections": false },
+    { "key": "references", "title": "References", "displayOrder": 8, "latex": "\\section{\\textbf{References}}", "numbered": false, "required": true, "allowSubsections": false }
+  ]
+}

@@ -1,0 +1,13 @@
+﻿{
+  "templateCode": "DATASET_PAPER",
+  "sections": [
+    { "key": "abstract", "title": "Abstract", "displayOrder": 1, "latex": "\\section{\\textbf{Abstract}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "background", "title": "Background & Summary", "displayOrder": 2, "latex": "\\section{\\textbf{Background \\& Summary}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "methods", "title": "Methods", "displayOrder": 3, "latex": "\\section{\\textbf{Methods}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "data_records", "title": "Data Records", "displayOrder": 4, "latex": "\\section{\\textbf{Data Records}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "technical_validation", "title": "Technical Validation", "displayOrder": 5, "latex": "\\section{\\textbf{Technical Validation}}", "numbered": true, "required": false, "allowSubsections": true },
+    { "key": "usage_notes", "title": "Usage Notes", "displayOrder": 6, "latex": "\\section{\\textbf{Usage Notes}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "code_availability", "title": "Code Availability", "displayOrder": 7, "latex": "\\section{\\textbf{Code Availability}}", "numbered": true, "required": false, "allowSubsections": false },
+    { "key": "references", "title": "References", "displayOrder": 8, "latex": "\\section{\\textbf{References}}", "numbered": false, "required": true, "allowSubsections": false }
+  ]
+}

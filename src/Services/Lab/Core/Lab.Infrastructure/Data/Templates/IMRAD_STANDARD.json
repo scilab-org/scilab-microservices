@@ -1,0 +1,14 @@
+﻿{
+  "templateCode": "IMRAD_STANDARD",
+  "sections": [
+    { "key": "abstract", "title": "Abstract", "displayOrder": 1, "latex": "\\section{\\textbf{Abstract}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "keywords", "title": "Keywords", "displayOrder": 2, "latex": "\\section{\\textbf{Keywords}}", "numbered": false, "required": true, "allowSubsections": false },
+    { "key": "introduction", "title": "Introduction", "displayOrder": 3, "latex": "\\section{\\textbf{Introduction}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "related_work", "title": "Related Work", "displayOrder": 4, "latex": "\\section{\\textbf{Related Work}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "methodology", "title": "Methodology", "displayOrder": 5, "latex": "\\section{\\textbf{Methodology}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "results", "title": "Results", "displayOrder": 6, "latex": "\\section{\\textbf{Results}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "discussion", "title": "Discussion", "displayOrder": 7, "latex": "\\section{\\textbf{Discussion}}", "numbered": true, "required": true, "allowSubsections": true },
+    { "key": "conclusion", "title": "Conclusion", "displayOrder": 8, "latex": "\\section{\\textbf{Conclusion}}", "numbered": true, "required": true, "allowSubsections": false },
+    { "key": "references", "title": "References", "displayOrder": 9, "latex": "\\section{\\textbf{References}}", "numbered": false, "required": true, "allowSubsections": false }
+  ]
+}

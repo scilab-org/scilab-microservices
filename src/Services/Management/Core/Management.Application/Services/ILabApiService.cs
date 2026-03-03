@@ -28,5 +28,16 @@ public interface ILabApiService
     Task<List<Guid>> GetExistingPaperIdsAsync(
         IEnumerable<Guid> paperIds,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Fetches paper details for the given set of paperIds from the Lab service,
+    /// with optional title search and paging applied.
+    /// </summary>
+    Task<(List<PaperInfoDto> Items, long TotalCount)> GetPapersByIdsPagedAsync(
+        IEnumerable<Guid> paperIds,
+        string? title = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
     #endregion
 }
