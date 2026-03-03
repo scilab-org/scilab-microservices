@@ -32,6 +32,7 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAdmin}/{{id}}";
         public const string GetPapers = $"{Base}";
         public const string GetPaperById = $"{Base}/{{id}}";
+        public const string Initialize = $"{BaseAdmin}/initialize";
 
         #endregion
     }
