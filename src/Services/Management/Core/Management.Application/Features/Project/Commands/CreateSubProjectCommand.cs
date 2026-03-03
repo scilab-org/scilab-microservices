@@ -31,13 +31,14 @@ public class CreateSubProjectCommandHandler(
         var project = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken);
         if(project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
-          
+
         var subProject = ProjectEntity.Create(
             id: Guid.NewGuid(),
-            parentProjectId: command.ProjectId);
-        
+            parentProjectId: command.ProjectId,
+            name: command.Dto.Name);
+
         subProject.AddPapers(new List<Guid> { command.Dto.PaperId });
-        
+
         session.Store(subProject);
         await session.SaveChangesAsync(cancellationToken);
 

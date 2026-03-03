@@ -1,4 +1,5 @@
 ﻿using Lab.Application.Dtos.Papers;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
@@ -25,7 +26,9 @@ public class InitPaperCommandValidator : AbstractValidator<InitPaperCommand>
     }
 }
 
-public class InitPaperCommandHandler(IDocumentSession session) : ICommandHandler<InitPaperCommand, Guid>
+public class InitPaperCommandHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService) : ICommandHandler<InitPaperCommand, Guid>
 {
     public async Task<Guid> Handle(InitPaperCommand request, CancellationToken cancellationToken)
     {
@@ -46,10 +49,11 @@ public class InitPaperCommandHandler(IDocumentSession session) : ICommandHandler
             foreach (var template in dto.Sections)
             {
                 var section = SectionEntity.Create(
-                    id: Guid.NewGuid(),
+                    id: template.Id,
                     content: template.Content,
                     paperId: entity.Id,
                     displayOrder: template.DisplayOrder,
+                    numbered: template.Numbered,
                     title: template.Title,
                     sectionSumary: template.SectionSumary,
                     parentSectionId: template.ParentSectionId
@@ -59,6 +63,12 @@ public class InitPaperCommandHandler(IDocumentSession session) : ICommandHandler
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
+
+        if (dto.ProjectId != Guid.Empty)
+        {
+            await managementApiService.CreateSubProjectAsync(
+                dto.ProjectId, entity.Id, dto.Title, cancellationToken);
+        }
 
         return entity.Id;
     }

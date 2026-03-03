@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Management.Api": {
+    "User.Api": {
       "commandName": "Project",
       "launchUrl": "swagger/index.html",
       "environmentVariables": {

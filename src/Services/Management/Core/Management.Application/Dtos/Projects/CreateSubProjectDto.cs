@@ -3,4 +3,5 @@
 public class CreateSubProjectDto
 {
     public Guid PaperId { get; set; }
+    public string? Name { get; set; }
 }

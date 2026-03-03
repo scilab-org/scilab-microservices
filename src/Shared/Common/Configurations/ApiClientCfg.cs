@@ -44,4 +44,15 @@ public sealed class ApiClientCfg
 
         #endregion
     }
+
+    public static class ManagementService
+    {
+        #region Constants
+
+        public const string Section = "ApiClients:ManagementService";
+
+        public const string BaseUrl = "BaseUrl";
+
+        #endregion
+    }
 }
