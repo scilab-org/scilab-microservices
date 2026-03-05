@@ -1,8 +1,6 @@
-﻿using BuildingBlocks.Authentication.Extensions;
-using Management.Application.Dtos.Members;
+﻿using Management.Application.Dtos.Members;
 using Management.Domain.Entities;
 using Marten;
-using Microsoft.AspNetCore.Http;
 
 namespace Management.Application.Features.Member.Commands;
 
@@ -49,19 +47,49 @@ public class DeleteProjectMembersCommandHandler(
         var memberIdSet = command.Dto.MemberIds.Where(x => x != Guid.Empty).Distinct().ToHashSet();
 
         if (memberIdSet.Count == 0)
-            throw new (MessageCode.MemberIdsAreRequired);
+            throw new ClientValidationException(MessageCode.MemberIdsAreRequired);
         
+        // Get members to delete from parent project
         var membersToDelete = await session.Query<MemberEntity>()
             .Where(x => x.ProjectId == command.ProjectId && memberIdSet.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
         if (!membersToDelete.Any())
             throw new NotFoundException(MessageCode.MembersNotFound);
-        // Soft-delete all matched members
+        
+        // Get UserIds of members being deleted
+        var userIdsToDelete = membersToDelete.Select(m => m.UserId).ToHashSet();
+        
+        // Check if this project has any subprojects
+        var subProjects = await session.Query<ProjectEntity>()
+            .Where(x => x.ParentProjectId == command.ProjectId)
+            .ToListAsync(cancellationToken);
+        
+        // Get all members from subprojects that have the same UserIds
+        var subProjectMembersToDelete = new List<MemberEntity>();
+        if (subProjects.Any())
+        {
+            var subProjectIds = subProjects.Select(sp => sp.Id).ToList();
+            var subProjectMembers = await session.Query<MemberEntity>()
+                .Where(x => subProjectIds.Contains(x.ProjectId) && userIdsToDelete.Contains(x.UserId))
+                .ToListAsync(cancellationToken);
+            subProjectMembersToDelete.AddRange(subProjectMembers);
+        }
+        
+        // Delete all matched members from parent project and subprojects
         await session.BeginTransactionAsync(cancellationToken);
 
         var deletedIds = new List<Guid>();
+        
+        // Delete from parent project
         foreach (var member in membersToDelete)
+        {
+            session.Delete(member);
+            deletedIds.Add(member.Id);
+        }
+        
+        // Delete from subprojects
+        foreach (var member in subProjectMembersToDelete)
         {
             session.Delete(member);
             deletedIds.Add(member.Id);

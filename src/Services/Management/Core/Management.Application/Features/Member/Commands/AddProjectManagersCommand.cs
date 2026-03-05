@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Management.Application.Features.Member.Commands;
 
-public record AddProjectManagersCommand(Guid ProjectId, AddProjectManagersDto Dto) : ICommand<List<Guid>>;
-
+public record AddProjectManagersCommand(Guid ProjectId, AddProjectManagersDto Dto) : ICommand<Guid>;
 public class AddProjectManagersValidator : AbstractValidator<AddProjectManagersCommand>
 {
     public AddProjectManagersValidator()
@@ -17,7 +16,7 @@ public class AddProjectManagersValidator : AbstractValidator<AddProjectManagersC
             .NotEmpty()
             .WithMessage(MessageCode.MemberProjectIdIsRequired);
 
-        RuleFor(x => x.Dto.UserIds)
+        RuleFor(x => x.Dto.UserId)
             .NotEmpty()
             .WithMessage(MessageCode.UserIdsAreRequired);
     }
@@ -26,74 +25,65 @@ public class AddProjectManagersValidator : AbstractValidator<AddProjectManagersC
 public class AddProjectManagersCommandHandler(
     IDocumentSession session,
     IUserApiService userApiService)
-    : ICommandHandler<AddProjectManagersCommand, List<Guid>>
+    : ICommandHandler<AddProjectManagersCommand, Guid>
 {
     #region Implementations
 
-    public async Task<List<Guid>> Handle(AddProjectManagersCommand command, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(AddProjectManagersCommand command, CancellationToken cancellationToken)
     {
-        // Only SystemAdmin can add managers
-        // if (command.Groups == null ||
-        //     !command.Groups.Any(g => g.Equals(AuthorizeConstants.SystemAdmin, StringComparison.OrdinalIgnoreCase)))
-        //     throw new NoPermissionException(MessageCode.AccessDenied);
-
         var dto = command.Dto;
 
         // Verify project exists
         var project = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken);
         if (project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
+        
+        //Check project already has manager 
+        var hasManager = await session.Query<MemberEntity>()
+            .AnyAsync(x =>
+                    x.ProjectId == command.ProjectId &&
+                    x.ProjectRole == AuthorizeConstants.ProjectManager,
+                cancellationToken);
 
+        if (hasManager)
+            throw new ClientValidationException(MessageCode.ProjectAlreadyHasManager);
+        
         // Verify users exist in User service
-        var distinctUserIds = dto.UserIds.Distinct().ToList();
-
-        var validUserIds = await userApiService.GetExistingUserIdsAsync(distinctUserIds, cancellationToken);
-        if (validUserIds.Count == 0)
+        var isExist = await userApiService.IsUserExistAsync(dto.UserId, cancellationToken);
+        if (!isExist)
             throw new NotFoundException(MessageCode.UserNotFound);
 
         // Load existing members to prevent duplicates
-        var existingMembers = await session.Query<MemberEntity>()
-            .Where(x => x.ProjectId == command.ProjectId)
-            .ToListAsync(cancellationToken);
+        var isAlreadyMember = await session.Query<MemberEntity>()
+            .AnyAsync(x =>
+                    x.ProjectId == command.ProjectId &&
+                    x.UserId == dto.UserId,
+                cancellationToken);
 
-        var existingUserIds = existingMembers.Select(x => x.UserId).ToHashSet();
+        if (isAlreadyMember)
+            throw new ClientValidationException(MessageCode.MemberAlreadyExists);
 
         // Admin assigns managers — always use ProjectManager Keycloak group
         const string keycloakGroupName = AuthorizeConstants.ProjectManager;
-
-        // Add only new, valid members
-        var createdIds = new List<Guid>();
-        var newUserIds = new List<Guid>();
+        
         await session.BeginTransactionAsync(cancellationToken);
+        
+        var member = MemberEntity.Create(
+            id: Guid.NewGuid(),
+            userId: dto.UserId,
+            projectId: command.ProjectId,
+            projectRole: keycloakGroupName,
+            joinedAt: DateTimeOffset.UtcNow);
 
-        foreach (var userId in validUserIds)
-        {
-            if (existingUserIds.Contains(userId)) continue;
-
-            var member = MemberEntity.Create(
-                id: Guid.NewGuid(),
-                userId: userId,
-                projectId: command.ProjectId,
-                projectRole: keycloakGroupName,
-                joinedAt: DateTimeOffset.UtcNow);
-
-            session.Store(member);
-            createdIds.Add(member.Id);
-            newUserIds.Add(userId);
-        }
-
-        if (!createdIds.Any())
-            throw new ClientValidationException(MessageCode.AllMembersAlreadyExist);
-
+        session.Store(member);
+  
         // Assign Keycloak "manager" group to each new manager via User service
-        foreach (var userId in newUserIds)
-        {
-            await userApiService.AssignUserRoleAsync(userId, keycloakGroupName, cancellationToken);
-        }
+        await userApiService.AssignUserRoleAsync(dto.UserId, keycloakGroupName, cancellationToken);
+
 
         await session.SaveChangesAsync(cancellationToken);
 
-        return createdIds;
+        return member.Id;
     }
 
     #endregion

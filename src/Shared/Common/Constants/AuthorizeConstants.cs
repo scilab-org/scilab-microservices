@@ -11,6 +11,7 @@ public sealed class AuthorizeConstants
     public const string User = "app:user";
     
     public const string ProjectAuthor = "project:author";
+    public const string ProjectMember = "project:member";
     #endregion
 
     #region Role Constants

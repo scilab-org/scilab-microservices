@@ -1,65 +1,54 @@
-﻿using BuildingBlocks.Authentication.Extensions;
-using Management.Application.Dtos.Members;
+﻿using Management.Application.Dtos.Members;
 using Management.Application.Services;
 using Management.Domain.Entities;
 using Marten;
-using Microsoft.AspNetCore.Http;
 
 namespace Management.Application.Features.Member.Commands;
 
-public record AddProjectMembersCommand(Guid ProjectId, AddProjectMembersDto Dto, Guid UserId) : ICommand<List<Guid>>;
+public sealed record AddSubProjectMembersCommand(Guid SubProjectId, AddProjectMembersDto Dto, Guid UserId) : ICommand<List<Guid>>;
 
-public class AddProjectMembersValidator : AbstractValidator<AddProjectMembersCommand>
+public class AddSubProjectMembersValidator : AbstractValidator<AddSubProjectMembersCommand>
 {
-    public AddProjectMembersValidator()
+    public AddSubProjectMembersValidator()
     {
-        RuleFor(x => x.ProjectId)
+        RuleFor(x => x.SubProjectId)
             .NotEmpty()
             .WithMessage(MessageCode.MemberProjectIdIsRequired);
-
-        RuleFor(x => x.Dto.Members)
-            .NotEmpty()
-            .WithMessage(MessageCode.UserIdsAreRequired);
 
         RuleForEach(x => x.Dto.Members).ChildRules(member =>
         {
             member.RuleFor(m => m.UserId)
                 .NotEmpty()
                 .WithMessage(MessageCode.UserIdsAreRequired);
-            
         });
     }
 }
 
-public class AddProjectMembersCommandHandler(
+public class AddSubProjectMembersCommandHandler(
     IDocumentSession session,
     IUserApiService userApiService)
-    : ICommandHandler<AddProjectMembersCommand, List<Guid>>
+    : ICommandHandler<AddSubProjectMembersCommand, List<Guid>>
 {
     #region Implementations
 
-    public async Task<List<Guid>> Handle(AddProjectMembersCommand command, CancellationToken cancellationToken)
+    public async Task<List<Guid>> Handle(AddSubProjectMembersCommand command, CancellationToken cancellationToken)
     {
         var dto = command.Dto;
-
-        // Block system-admin group assignment via this endpoint
-        if (dto.Members.Any(m =>
-            m.GroupName.Contains(AuthorizeConstants.SystemAdmin, StringComparison.OrdinalIgnoreCase)))
-            throw new(MessageCode.AccessDenied);
-
-        // Verify project exists
-        var project = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken);
-        if (project == null)
-            throw new NotFoundException(MessageCode.ProjectIsNotExists);
+        
+        var subProject = await session.LoadAsync<ProjectEntity>(command.SubProjectId, cancellationToken);
+        if (subProject == null)
+            throw new NotFoundException(MessageCode.SubProjectNotFound);
+        
         // Check current user is ProjectManager in this project
-        var isProjectManager = await session.Query<MemberEntity>()
+        var isManagerAuthor = await session.Query<MemberEntity>()
             .AnyAsync(x =>
-                    x.ProjectId == command.ProjectId &&
+                    x.ProjectId == subProject.ParentProjectId &&
                     x.UserId == command.UserId &&
-                    x.ProjectRole == AuthorizeConstants.ProjectManager,
+                    (x.ProjectRole == AuthorizeConstants.ProjectManager
+                || x.ProjectRole == AuthorizeConstants.ProjectAuthor),
                 cancellationToken);
 
-        if (!isProjectManager)
+        if (!isManagerAuthor)
             throw new NoPermissionException(MessageCode.AccessDenied);
         
         // Deduplicate by UserId (keep last entry wins)
@@ -75,16 +64,14 @@ public class AddProjectMembersCommandHandler(
             throw new NotFoundException(MessageCode.UserNotFound);
 
         // Load existing members to prevent duplicates
-        var existingMembers = await session.Query<MemberEntity>()
-            .Where(x => x.ProjectId == command.ProjectId)
-            .ToListAsync(cancellationToken);
-
-        var existingUserIds = existingMembers.Select(x => x.UserId).ToHashSet();
+        var existingUserIds = (await session.Query<MemberEntity>()
+                .Where(x => x.ProjectId == subProject.Id)
+                .Select(x => x.UserId)
+                .ToListAsync(cancellationToken))
+            .ToHashSet();
 
         // Add only new, valid members
         var createdIds = new List<Guid>();
-        var newUserRoles = new List<(Guid UserId, string GroupName)>();
-        await session.BeginTransactionAsync(cancellationToken);
 
         foreach (var userId in validUserIds)
         {
@@ -95,23 +82,16 @@ public class AddProjectMembersCommandHandler(
             var member = MemberEntity.Create(
                 id: Guid.NewGuid(),
                 userId: userId,
-                projectId: command.ProjectId,
+                projectId: subProject.Id,
                 projectRole: groupName,
                 joinedAt: DateTimeOffset.UtcNow);
 
             session.Store(member);
             createdIds.Add(member.Id);
-            newUserRoles.Add((userId, groupName));
         }
 
         if (!createdIds.Any())
             throw new ClientValidationException(MessageCode.AllMembersAlreadyExist);
-
-        // Assign Keycloak group per user
-        foreach (var (userId, groupName) in newUserRoles)
-        {
-            await userApiService.AssignUserRoleAsync(userId, groupName, cancellationToken);
-        }
 
         await session.SaveChangesAsync(cancellationToken);
 

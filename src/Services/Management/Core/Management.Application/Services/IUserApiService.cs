@@ -11,6 +11,13 @@ public interface IUserApiService
         IEnumerable<Guid> userIds,
         CancellationToken cancellationToken = default);
     /// <summary>
+    /// Checks whether all provided userIds exist in the User service.
+    /// Returns only the IDs that are valid/existing.
+    /// </summary>
+    Task<bool> IsUserExistAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
+    /// <summary>
     /// Returns all users from User service that are NOT already members of the project
     /// and are NOT admins (i.e. not in the admin group).
     /// </summary>

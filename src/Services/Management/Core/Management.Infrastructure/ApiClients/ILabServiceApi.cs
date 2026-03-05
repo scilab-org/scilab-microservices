@@ -21,6 +21,11 @@ public interface ILabServiceApi
     [Get("/papers/{paperId}")]
     Task<HttpResponseMessage> GetPaperByIdAsync([AliasAs("paperId")] Guid paperId);
 
+    /// <summary>
+    /// DELETE /admin/papers/{paperId} — deletes a paper by id.
+    /// </summary>
+    [Delete("/admin/papers/{paperId}")]
+    Task<HttpResponseMessage> DeletePaperAsync([AliasAs("paperId")] Guid paperId);
+
     #endregion
 }
-

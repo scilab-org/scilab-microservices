@@ -41,7 +41,7 @@ public sealed class GetMyProjectsQueryHandler(IDocumentSession session, IMapper 
             .ToListAsync(cancellationToken);
 
         var query = session.Query<ProjectEntity>()
-            .Where(x => memberProjectIds.Contains(x.Id))
+            .Where(x => memberProjectIds.Contains(x.Id) && x.ParentProjectId == null)
             .AsQueryable();
 
         if (!filter.Name.IsNullOrWhiteSpace())
