@@ -26,6 +26,8 @@ public sealed class MessageCode
     public const string StartDateMustBeBeforeEndDate = "START_DATE_MUST_BE_BEFORE_END_DATE";
 
     public const string AllPapersAlreadyExist = "ALL_PAPERS_ALREADY_EXIST";
+    
+    public const string SubProjectNotFound = "SUB_PROJECT_NOT_FOUND";
 
     #endregion
 
@@ -138,6 +140,10 @@ public sealed class MessageCode
     #region Member Management
 
     public const string UserIdsAreRequired = "USER_IDS_ARE_REQUIRED";
+    
+    public const string MemberAlreadyExists = "MEMBER_ALREADY_EXISTS";
+    
+    public const string ProjectAlreadyHasManager = "PROJECT_ALREADY_HAS_MANAGER";
 
     public const string AllMembersAlreadyExist = "ALL_MEMBERS_ALREADY_EXIST";
 

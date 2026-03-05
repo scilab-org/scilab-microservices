@@ -2,5 +2,5 @@
 
 public class AddProjectManagersDto
 {
-    public List<Guid> UserIds { get; set; } = new();
+    public Guid UserId { get; set; } = new();
 }

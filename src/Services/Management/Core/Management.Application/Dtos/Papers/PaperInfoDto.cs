@@ -5,6 +5,7 @@ public sealed class PaperInfoDto
     #region Fields, Properties and Indexers
 
     public Guid Id { get; set; }
+    public Guid? SubProjectId { get; set; }
     public string? Title { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }

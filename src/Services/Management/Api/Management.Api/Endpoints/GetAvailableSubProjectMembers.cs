@@ -7,16 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Management.Api.Endpoints;
 
-public sealed class GetProjectMembers : ICarterModule
+public class GetAvailableSubProjectMembers: ICarterModule
 {
     #region Implementations
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet(ApiRoutes.Member.GetProjectMembers, HandleGetProjectMembersAsync)
-            .WithTags(ApiRoutes.Member.Tags)
-            .WithName(nameof(GetProjectMembers))
-            .Produces<ApiGetResponse<GetProjectMembersResult>>(StatusCodes.Status200OK)
+        app.MapGet(ApiRoutes.SubProject.GetAvailableSubProjectMembers, HandleGetAvailableSubProjectMembersAsync)
+            .WithTags(ApiRoutes.SubProject.Tags)
+            .WithName(nameof(GetAvailableSubProjectMembers))
+            .Produces<ApiGetResponse<GetAvailableProjectUsersResult>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
         // .RequireAuthorization();
     }
@@ -25,14 +25,13 @@ public sealed class GetProjectMembers : ICarterModule
 
     #region Methods
 
-    private async Task<IResult> HandleGetProjectMembersAsync(
+    private async Task<IResult> HandleGetAvailableSubProjectMembersAsync(
         ISender sender,
-        [FromRoute] Guid projectId,
-        [AsParameters] GetProjectMembersFilter req,
+        [FromRoute] Guid subProjectId,
+        [AsParameters] GetAvailableSubProjectMembersFilter req,
         [AsParameters] PaginationRequest paging)
     {
-        
-        var query = new GetProjectMembersQuery(projectId, req, paging);
+        var query = new GetAvailableSubProjectMembersQuery(subProjectId, req, paging);
 
         var result = await sender.Send(query);
 
@@ -41,5 +40,3 @@ public sealed class GetProjectMembers : ICarterModule
 
     #endregion
 }
-
-

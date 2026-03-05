@@ -7,42 +7,43 @@ using Marten;
 
 namespace Management.Application.Features.Member.Queries;
 
-public record GetProjectMembersQuery(
-    Guid ProjectId,
+public sealed record GetSubProjectMembersQuery(
+    Guid SubProjectId,
     GetProjectMembersFilter Filter,
     PaginationRequest Paging) : IQuery<GetProjectMembersResult>;
 
-public class GetProjectMembersValidator : AbstractValidator<GetProjectMembersQuery>
+public class GetSubProjectMembersValidator : AbstractValidator<GetSubProjectMembersQuery>
 {
-    public GetProjectMembersValidator()
+    public GetSubProjectMembersValidator()
     {
-        RuleFor(x => x.ProjectId)
+        RuleFor(x => x.SubProjectId)
             .NotEmpty()
             .WithMessage(MessageCode.MemberProjectIdIsRequired);
     }
 }
 
-public class GetProjectMembersQueryHandler(
+public class GetSubProjectMembersQueryHandler(
     IDocumentSession session,
     IUserApiService userApiService)
-    : IQueryHandler<GetProjectMembersQuery, GetProjectMembersResult>
+    : IQueryHandler<GetSubProjectMembersQuery, GetProjectMembersResult>
 {
     #region Implementations
 
     public async Task<GetProjectMembersResult> Handle(
-        GetProjectMembersQuery request,
+        GetSubProjectMembersQuery request,
         CancellationToken cancellationToken)
     {
-        // Verify project exists
-        var project = await session.LoadAsync<ProjectEntity>(request.ProjectId, cancellationToken);
-        if (project == null)
-            throw new NotFoundException(MessageCode.ProjectIsNotExists);
-
+        // Verify sub project exists
+        var subProject = await session.LoadAsync<ProjectEntity>(request.SubProjectId, cancellationToken);
+        if (subProject == null)
+            throw new NotFoundException(MessageCode.SubProjectNotFound);
+        
         // Load all members of the project
         var allMembers = await session.Query<MemberEntity>()
-            .Where(x => x.ProjectId == request.ProjectId)
+            .Where(x => x.ProjectId == subProject.Id)
             .ToListAsync(cancellationToken);
-
+        if (!allMembers.Any())
+            return new GetProjectMembersResult([], 0, request.Paging);
         // Fetch user details (including Keycloak groups) from User service
         var userInfos = await userApiService.GetUsersByIdsAsync(
             userIds: allMembers.Select(x => x.UserId),

@@ -70,6 +70,19 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
         return validIds;
     }
 
+    public async Task<bool> IsUserExistAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await userServiceApi.GetUserByIdAsync(userId.ToString());
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public async Task<List<UserInfoDto>> GetAvailableProjectUsersAsync(
         IEnumerable<Guid> existingMemberUserIds,
         string adminGroupName,

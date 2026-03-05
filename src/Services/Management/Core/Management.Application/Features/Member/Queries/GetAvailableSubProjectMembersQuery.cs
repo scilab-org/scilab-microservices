@@ -7,49 +7,56 @@ using Marten;
 
 namespace Management.Application.Features.Member.Queries;
 
-public record GetProjectMembersQuery(
-    Guid ProjectId,
-    GetProjectMembersFilter Filter,
+public sealed record GetAvailableSubProjectMembersQuery(
+    Guid SubProjectId,
+    GetAvailableSubProjectMembersFilter Filter,
     PaginationRequest Paging) : IQuery<GetProjectMembersResult>;
 
-public class GetProjectMembersValidator : AbstractValidator<GetProjectMembersQuery>
-{
-    public GetProjectMembersValidator()
-    {
-        RuleFor(x => x.ProjectId)
-            .NotEmpty()
-            .WithMessage(MessageCode.MemberProjectIdIsRequired);
-    }
-}
 
-public class GetProjectMembersQueryHandler(
+public class GetAvailableSubProjectMembersQueryHandler(
     IDocumentSession session,
     IUserApiService userApiService)
-    : IQueryHandler<GetProjectMembersQuery, GetProjectMembersResult>
+    : IQueryHandler<GetAvailableSubProjectMembersQuery, GetProjectMembersResult>
 {
     #region Implementations
 
     public async Task<GetProjectMembersResult> Handle(
-        GetProjectMembersQuery request,
+        GetAvailableSubProjectMembersQuery request,
         CancellationToken cancellationToken)
     {
-        // Verify project exists
-        var project = await session.LoadAsync<ProjectEntity>(request.ProjectId, cancellationToken);
-        if (project == null)
-            throw new NotFoundException(MessageCode.ProjectIsNotExists);
-
-        // Load all members of the project
-        var allMembers = await session.Query<MemberEntity>()
-            .Where(x => x.ProjectId == request.ProjectId)
+        // Verify sub project exists
+        var subProject = await session.LoadAsync<ProjectEntity>(request.SubProjectId, cancellationToken);
+        if (subProject == null)
+            throw new NotFoundException(MessageCode.SubProjectNotFound);
+        
+        // Load all members of the PARENT project
+        var parentProjectMembers = await session.Query<MemberEntity>()
+            .Where(x => x.ProjectId == subProject.ParentProjectId)
             .ToListAsync(cancellationToken);
-
-        // Fetch user details (including Keycloak groups) from User service
+        
+        // Load all members of the SUB-project (to exclude them)
+        var subProjectMembers = await session.Query<MemberEntity>()
+            .Where(x => x.ProjectId == subProject.Id)
+            .ToListAsync(cancellationToken);
+        
+        // Get UserIds that are already in subproject
+        var subProjectUserIds = subProjectMembers.Select(x => x.UserId).ToHashSet();
+        
+        // Filter parent members: exclude those already in subproject
+        var availableMembers = parentProjectMembers
+            .Where(m => !subProjectUserIds.Contains(m.UserId))
+            .ToList();
+        
+        if (!availableMembers.Any())
+            return new GetProjectMembersResult(new List<ProjectMemberDto>(), 0, request.Paging);
+        
+        // Fetch user details from User service
         var userInfos = await userApiService.GetUsersByIdsAsync(
-            userIds: allMembers.Select(x => x.UserId),
+            userIds: availableMembers.Select(x => x.UserId),
             cancellationToken: cancellationToken);
-
-        // Join member records with user info, apply email search
-        var joined = allMembers
+        
+        // Join member records with user info
+        var joined = availableMembers
             .Join(userInfos,
                 m => m.UserId.ToString(),
                 u => u.Id,
@@ -66,9 +73,11 @@ public class GetProjectMembersQueryHandler(
                     JoinedAt  = m.JoinedAt
                 })
             .Where(dto =>
+                // Filter by email if provided
                 (string.IsNullOrWhiteSpace(request.Filter.SearchEmail) ||
                  (dto.Email != null && dto.Email.Contains(request.Filter.SearchEmail, StringComparison.OrdinalIgnoreCase)))
                 &&
+                // Filter by ProjectRole if provided
                 (string.IsNullOrWhiteSpace(request.Filter.ProjectRole) ||
                  string.Equals(dto.Role, request.Filter.ProjectRole, StringComparison.OrdinalIgnoreCase))
             )
@@ -76,14 +85,17 @@ public class GetProjectMembersQueryHandler(
             .ToList();
         
         var totalCount = joined.Count;
+        
+        // Apply pagination
         var paged = joined
             .Skip((request.Paging.PageNumber - 1) * request.Paging.PageSize)
             .Take(request.Paging.PageSize)
             .ToList();
-
+       
         return new GetProjectMembersResult(paged, totalCount, request.Paging);
     }
 
     #endregion
     
 }
+    

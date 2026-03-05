@@ -32,6 +32,24 @@ public sealed class ApiRoutes
         public const string GetMyProjectRole = $"{Base}/{{projectId}}/my-role";
         #endregion
     }
+    
+    public static class SubProject
+    {
+        #region Constants
+        public const string Tags = "Sub-Projects";
+        
+        private const string Base = "/sub-projects";
+        private const string BaseProjectManager = "/manager/sub-projects";
+
+        public const string AddSubProjectMember = $"{Base}/{{subProjectId}}/members";
+        public const string DeleteSubProjectMembers = $"{BaseProjectManager}/{{subProjectId}}/members/remove";
+        public const string DeleteSubProjectPaper = $"{BaseProjectManager}/{{subProjectId}}";
+        public const string GetAvailableSubProjectMembers = $"{Base}/{{subProjectId}}/members/available";
+        public const string GetSubProjectMembers = $"{Base}/{{subProjectId}}/members";
+        #endregion
+    }
+    
+    
     public static class ProjectPaper
     {
         public const string Tags = "Project Papers";
