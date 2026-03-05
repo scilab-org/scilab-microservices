@@ -39,5 +39,13 @@ public interface ILabApiService
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a paper by its ID from the Lab service.
+    /// </summary>
+    Task<bool> DeletePaperAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default);
+
     #endregion
 }

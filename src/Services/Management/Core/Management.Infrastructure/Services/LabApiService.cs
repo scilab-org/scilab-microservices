@@ -194,5 +194,21 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         return (items, totalCount);
     }
 
+    public async Task<bool> DeletePaperAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.DeletePaperAsync(paperId);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            // If Lab service is unreachable or returns an error, return false
+            return false;
+        }
+    }
+
     #endregion
 }

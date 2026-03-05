@@ -46,11 +46,19 @@ public class GetSubProjectsQueryHandler(
             return new GetSubProjectsPapersResult(
                 new List<PaperInfoDto>(), 0, query.Paging);
 
+        // Create a dictionary to map paperId -> subProjectId
+        var paperToSubProjectMap = new Dictionary<Guid, Guid>();
+        foreach (var subProject in subProjects)
+        {
+            foreach (var paperId in subProject.PaperIds)
+            {
+                if (!paperToSubProjectMap.ContainsKey(paperId))
+                    paperToSubProjectMap[paperId] = subProject.Id;
+            }
+        }
+
         // Collect all distinct paper IDs across all sub-projects
-        var allPaperIds = subProjects
-            .SelectMany(sp => sp.PaperIds)
-            .Distinct()
-            .ToList();
+        var allPaperIds = paperToSubProjectMap.Keys.ToList();
 
         if (!allPaperIds.Any())
             return new GetSubProjectsPapersResult(
@@ -63,6 +71,13 @@ public class GetSubProjectsQueryHandler(
             pageNumber: query.Paging.PageNumber,
             pageSize: query.Paging.PageSize,
             cancellationToken: cancellationToken);
+
+        // Map SubProjectId to each paper
+        foreach (var paper in items)
+        {
+            if (paperToSubProjectMap.TryGetValue(paper.Id, out var subProjectId))
+                paper.SubProjectId = subProjectId;
+        }
 
         return new GetSubProjectsPapersResult(items, totalCount, query.Paging);
     }
