@@ -58,7 +58,7 @@ public sealed class ApiRoutes
 
         #endregion
     }
-    
+
     public static class Template
     {
         #region Constants
@@ -80,5 +80,25 @@ public sealed class ApiRoutes
         public const string GetByCode = $"{Base}/code/{{code}}";
 
         #endregion
+    }
+
+    public static class Section
+    {
+        #region Constants
+
+        public const string Tags = "Sections";
+        private const string Base = "/sections";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
+        public const string Delete = $"{Base}/{{id}}";
+        public const string GetSectionById = $"{Base}/{{id}}";
+
+        #endregion
+
     }
 }

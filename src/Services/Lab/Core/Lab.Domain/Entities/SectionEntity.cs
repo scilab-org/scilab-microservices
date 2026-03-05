@@ -11,6 +11,7 @@ public class SectionEntity : Entity<Guid>
     public string? SectionSumary { get; set; }
     public float DisplayOrder { get; set; }
     public bool? Numbered { get; set; } = true;
+    public bool? IsMainSection { get; set; } = false;
     public string? FilePath { get; set; }
     public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
@@ -26,6 +27,7 @@ public class SectionEntity : Entity<Guid>
         Guid paperId,
         float displayOrder,
         bool? numbered = true,
+        bool? isMainSection = false,
         string? title = null,
         string? sectionSumary = null,
         Guid? parentSectionId = null,
@@ -42,6 +44,7 @@ public class SectionEntity : Entity<Guid>
             SectionSumary = sectionSumary,
             DisplayOrder = displayOrder,
             Numbered = numbered,
+            IsMainSection = isMainSection,
             ParentSectionId = parentSectionId,
             PreviousVersionSectionId = previousVersionSectionId,
             NextVersionSectionId = nextVersionSectionId,
@@ -54,8 +57,25 @@ public class SectionEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update()
+    public void Update(string? content,
+        string? title = null,
+        float? displayOrder = null,
+        string? sectionSumary = null,
+        bool? numbered = true,
+        bool? isMainSection = false,
+        Guid? parentSectionId = null,
+        Guid? previousVersionSectionId = null,
+        Guid? nextVersionSectionId = null)
     {
+        Content = content ?? Content;
+        Title = title ?? Title;
+        DisplayOrder = displayOrder ?? DisplayOrder;
+        SectionSumary = sectionSumary ?? SectionSumary;
+        Numbered = numbered ?? Numbered;
+        IsMainSection = isMainSection ?? IsMainSection;
+        ParentSectionId = parentSectionId ?? ParentSectionId;
+        PreviousVersionSectionId = previousVersionSectionId ?? PreviousVersionSectionId;
+        NextVersionSectionId = nextVersionSectionId ?? NextVersionSectionId;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

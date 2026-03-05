@@ -25,4 +25,19 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
 
         return body?.Value;
     }
+
+    public async Task<string?> GetMyProjectRoleAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await managementServiceApi.GetMyProjectRoleAsync(projectId);
+
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<string>>(
+            cancellationToken: cancellationToken);
+
+        return body?.Result;
+    }
 }

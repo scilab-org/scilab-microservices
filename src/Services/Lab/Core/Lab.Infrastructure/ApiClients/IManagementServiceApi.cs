@@ -11,6 +11,13 @@ public interface IManagementServiceApi
     Task<HttpResponseMessage> CreateSubProjectAsync(
         [AliasAs("projectId")] Guid projectId,
         [Body] CreateSubProjectRequest body);
+
+    /// <summary>
+    /// GET /projects/{projectId}/my-role — gets current user's role in the project.
+    /// </summary>
+    [Get("/projects/{projectId}/my-role")]
+    Task<HttpResponseMessage> GetMyProjectRoleAsync(
+        [AliasAs("projectId")] Guid projectId);
 }
 
 public class CreateSubProjectRequest

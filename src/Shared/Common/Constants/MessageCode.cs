@@ -108,7 +108,7 @@ public sealed class MessageCode
     public const string PaperIdIsRequired = "PAPER_ID_IS_REQUIRED";
 
     public const string PaperFileIsRequired = "PAPER_FILE_IS_REQUIRED";
-    
+
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
     public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
@@ -148,6 +148,12 @@ public sealed class MessageCode
     public const string MembersNotFound = "MEMBERS_NOT_FOUND";
 
     public const string GroupNameIsRequired = "GROUP_NAME_IS_REQUIRED";
+
+    #endregion
+
+    #region Section Management
+
+    public const string SectionIdIsRequired = "SECTION_ID_IS_REQUIRED";
 
     #endregion
 }
