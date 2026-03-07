@@ -111,6 +111,8 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
     expose:
       - "8080"
+    volumes:
+      - ./config/keycloak:/opt/keycloak/providers/
     depends_on:
       postgres-sql:
         condition: service_healthy
