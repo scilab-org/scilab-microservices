@@ -9,6 +9,9 @@ public sealed class ProjectMemberDto
 
     public Guid UserId { get; set; }
 
+    /// <summary>SubProject (or Project) that this member belongs to.</summary>
+    public Guid SubProjectId { get; set; }
+
     public string? Username { get; set; }
 
     public string? Email { get; set; }

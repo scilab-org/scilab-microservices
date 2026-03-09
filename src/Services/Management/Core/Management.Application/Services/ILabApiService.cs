@@ -47,5 +47,19 @@ public interface ILabApiService
         Guid paperId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns all sections for a given paperId from the Lab service.</summary>
+    Task<List<LabSectionDto>> GetSectionsByPaperIdAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Creates a paper contributor record in the Lab service.</summary>
+    Task<bool> CreatePaperContributorAsync(
+        string sectionRole,
+        Guid paperId,
+        Guid memberId,
+        Guid markSectionId,
+        Guid? sectionId = null,
+        CancellationToken cancellationToken = default);
+
     #endregion
 }

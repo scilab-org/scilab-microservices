@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Lab.Application.Dtos.Papers;
+using Lab.Application.Dtos.Sections;
 using Lab.Application.Dtos.Tags;
 using Lab.Application.Dtos.Template;
 using Lab.Application.Models.Results;
@@ -20,6 +21,7 @@ public sealed class LabMappingProfile : Profile
         CreatePaperMappings();
         CreateTagMappings();
         CreateTemplateMappings();
+        CreateSectionMappings();
     }
 
     #endregion
@@ -53,6 +55,15 @@ public sealed class LabMappingProfile : Profile
     private void CreateTemplateMappings()
     {
         CreateMap<TemplateEntity, TemplateDto>();
+    }
+
+    #endregion
+
+    #region Section Mappings
+
+    private void CreateSectionMappings()
+    {
+        CreateMap<SectionEntity, SectionDto>();
     }
 
     #endregion

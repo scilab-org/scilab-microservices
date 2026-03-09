@@ -21,11 +21,19 @@ public class MinIoCloudService : IMinIoCloudService
     #endregion
 
     #region Ctors
-
     public MinIoCloudService(IMinioClient minioClient)
     {
         _minioClient = minioClient;
-        _endPoint = _minioClient.Config.Endpoint;
+
+        var endpoint = _minioClient.Config.Endpoint;
+
+        // remove port
+        if (!endpoint.StartsWith("http"))
+            endpoint = $"https://{endpoint}";
+
+        var uri = new Uri(endpoint);
+
+        _endPoint = $"{uri.Scheme}://{uri.Host}";
     }
 
     #endregion

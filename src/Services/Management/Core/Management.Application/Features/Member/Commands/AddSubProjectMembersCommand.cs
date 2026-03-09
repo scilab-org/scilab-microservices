@@ -26,7 +26,8 @@ public class AddSubProjectMembersValidator : AbstractValidator<AddSubProjectMemb
 
 public class AddSubProjectMembersCommandHandler(
     IDocumentSession session,
-    IUserApiService userApiService)
+    IUserApiService userApiService,
+    ILabApiService labApiService)
     : ICommandHandler<AddSubProjectMembersCommand, List<Guid>>
 {
     #region Implementations
@@ -34,24 +35,24 @@ public class AddSubProjectMembersCommandHandler(
     public async Task<List<Guid>> Handle(AddSubProjectMembersCommand command, CancellationToken cancellationToken)
     {
         var dto = command.Dto;
-        
+
         var subProject = await session.LoadAsync<ProjectEntity>(command.SubProjectId, cancellationToken);
         if (subProject == null)
             throw new NotFoundException(MessageCode.SubProjectNotFound);
-        
-        // Check current user is ProjectManager in this project
+
+        // Check current user is ProjectManager or Author in parent project
         var isManagerAuthor = await session.Query<MemberEntity>()
             .AnyAsync(x =>
                     x.ProjectId == subProject.ParentProjectId &&
                     x.UserId == command.UserId &&
                     (x.ProjectRole == AuthorizeConstants.ProjectManager
-                || x.ProjectRole == AuthorizeConstants.ProjectAuthor),
+                  || x.ProjectRole == AuthorizeConstants.ProjectAuthor),
                 cancellationToken);
 
         if (!isManagerAuthor)
             throw new NoPermissionException(MessageCode.AccessDenied);
-        
-        // Deduplicate by UserId (keep last entry wins)
+
+        // Deduplicate by UserId
         var memberMap = dto.Members
             .Where(m => m.UserId != Guid.Empty)
             .GroupBy(m => m.UserId)
@@ -70,8 +71,9 @@ public class AddSubProjectMembersCommandHandler(
                 .ToListAsync(cancellationToken))
             .ToHashSet();
 
-        // Add only new, valid members
-        var createdIds = new List<Guid>();
+        var createdIds  = new List<Guid>();
+        // track author members: (memberId, userId) for post-save Lab calls
+        var authorMembers = new List<(Guid MemberId, Guid UserId)>();
 
         foreach (var userId in validUserIds)
         {
@@ -88,12 +90,36 @@ public class AddSubProjectMembersCommandHandler(
 
             session.Store(member);
             createdIds.Add(member.Id);
+
+            if (string.Equals(groupName, AuthorizeConstants.ProjectAuthor, StringComparison.OrdinalIgnoreCase))
+                authorMembers.Add((member.Id, userId));
         }
 
         if (!createdIds.Any())
             throw new ClientValidationException(MessageCode.AllMembersAlreadyExist);
 
         await session.SaveChangesAsync(cancellationToken);
+
+        // For each author member, fetch sections from Lab and create a PaperContributor per section
+        if (authorMembers.Count > 0 && subProject.PaperIds.Count > 0)
+        {
+            var paperId  = subProject.PaperIds.First();
+            var sections = await labApiService.GetSectionsByPaperIdAsync(paperId, cancellationToken);
+
+            foreach (var (memberId, _) in authorMembers)
+            {
+                foreach (var section in sections)
+                {
+                    await labApiService.CreatePaperContributorAsync(
+                        sectionRole   : AuthorizeConstants.ProjectAuthor,
+                        paperId       : paperId,
+                        memberId      : memberId,
+                        markSectionId : section.Id,
+                        sectionId     : section.Id,
+                        cancellationToken: cancellationToken);
+                }
+            }
+        }
 
         return createdIds;
     }
