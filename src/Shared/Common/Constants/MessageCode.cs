@@ -114,6 +114,12 @@ public sealed class MessageCode
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
     public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
+    
+    public const string PaperContributorIdIsRequired = "PAPER_CONTRIBUTOR_ID_IS_REQUIRED";
+    
+    public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
+
+    public const string SectionIdIsRequired = "SECTION_ID_IS_REQUIRED";
 
     #endregion
 
@@ -150,6 +156,9 @@ public sealed class MessageCode
     public const string MemberProjectIdIsRequired = "MEMBER_PROJECT_ID_IS_REQUIRED";
 
     public const string MemberIdsAreRequired = "MEMBER_IDS_ARE_REQUIRED";
+    public const string MemberIdIsRequired = "MEMBER_ID_IS_REQUIRED";
+
+    public const string MemberNotFound = "MEMBER_NOT_FOUND";
 
     public const string MembersNotFound = "MEMBERS_NOT_FOUND";
 

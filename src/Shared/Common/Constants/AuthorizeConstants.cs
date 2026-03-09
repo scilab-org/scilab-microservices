@@ -17,6 +17,8 @@ public sealed class AuthorizeConstants
     #region Role Constants
 
     public const string ProjectCreate = "project:create";
+    public const string SectionWrite = "section:write";
+    public const string SectionRead = "section:read";
 
     #endregion
 }

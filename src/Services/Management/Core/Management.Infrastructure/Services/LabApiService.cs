@@ -210,5 +210,82 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<bool> CreatePaperContributorAsync(
+        string sectionRole,
+        Guid paperId,
+        Guid memberId,
+        Guid markSectionId,
+        Guid? sectionId = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.CreatePaperContributorAsync(new CreatePaperContributorRequest
+            {
+                SectionRole   = sectionRole,
+                PaperId       = paperId,
+                MemberId      = memberId,
+                MarkSectionId = markSectionId,
+                SectionId     = sectionId
+            });
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<List<LabSectionDto>> GetSectionsByPaperIdAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetSectionsByPaperIdAsync(paperId);
+            if (!response.IsSuccessStatusCode)
+                return new List<LabSectionDto>();
+
+            var body = await response.Content
+                .ReadFromJsonAsync<LabGetSectionsResponse>(cancellationToken: cancellationToken);
+
+            return body?.Result?.Items?
+                .Select(s => new LabSectionDto
+                {
+                    Id             = s.Id,
+                    Title          = s.Title,
+                    DisplayOrder   = s.DisplayOrder,
+                    ParentSectionId = s.ParentSectionId,
+                    PaperId        = s.PaperId
+                })
+                .ToList() ?? new List<LabSectionDto>();
+        }
+        catch
+        {
+            return new List<LabSectionDto>();
+        }
+    }
+
     #endregion
 }
+
+// Internal shapes for GET /papers/{paperId}/sections response
+file sealed class LabSectionItem
+{
+    public Guid Id { get; set; }
+    public string? Title { get; set; }
+    public float DisplayOrder { get; set; }
+    public Guid? ParentSectionId { get; set; }
+    public Guid PaperId { get; set; }
+}
+
+file sealed class LabGetSectionsResult
+{
+    public List<LabSectionItem>? Items { get; set; }
+}
+
+file sealed class LabGetSectionsResponse
+{
+    public LabGetSectionsResult? Result { get; set; }
+}
+

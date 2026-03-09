@@ -34,6 +34,8 @@ public sealed class ApiRoutes
         public const string GetPaperById = $"{Base}/{{id}}";
         public const string GetPaperSamples = $"{Base}/sample";
         public const string Initialize = $"{BaseAdmin}/initialize";
+        public const string GetAssignedPaperSections = $"{Base}/{{id}}/assigned-sections";
+        public const string GetSectionsByPaperId = $"{Base}/{{id}}/sections";
 
         #endregion
     }
@@ -78,6 +80,28 @@ public sealed class ApiRoutes
         public const string GetTemplates = $"{Base}";
         public const string GetTemplateById = $"{Base}/{{id}}";
         public const string GetByCode = $"{Base}/code/{{code}}";
+
+        #endregion
+    }
+    
+    public static class PaperContributor
+    {
+        #region Constants
+
+        public const string Tags = "Paper Contributors";
+        private const string Base = "/paper-contributors";
+        private const string BaseAuthor = "/author/paper-contributors";
+
+        #endregion
+
+        #region Enpoints
+
+        public const string Create = $"{BaseAuthor}";
+        public const string Update = $"{BaseAuthor}/{{id}}";
+        public const string Delete = $"{BaseAuthor}/{{id}}";
+        public const string GetMemberSection = $"{Base}/{{sectionId}}/members";
+        public const string GetAvailableMemberSection = $"{Base}/{{sectionId}}/members/available";
+        
 
         #endregion
     }
