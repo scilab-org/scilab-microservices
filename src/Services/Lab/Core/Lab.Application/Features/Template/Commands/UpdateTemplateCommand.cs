@@ -7,7 +7,7 @@ namespace Lab.Application.Features.Template.Commands;
 
 public sealed record UpdateTemplateCommand(Guid Id, CreateTemplateVersionDto Dto) : ICommand<Guid>;
 
-public class CreateTemplateVersionCommandHandler(IDocumentSession session)
+public class UpdateTemplateCommandCommandHandler(IDocumentSession session)
     : ICommandHandler<UpdateTemplateCommand, Guid>
 {
     #region Implementations
