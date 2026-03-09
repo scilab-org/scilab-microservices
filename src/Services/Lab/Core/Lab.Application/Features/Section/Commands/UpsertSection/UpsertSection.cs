@@ -1,5 +1,4 @@
 ﻿using Lab.Application.Dtos.Sections;
-using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 
@@ -16,11 +15,11 @@ public class UpsertSectionCommandValidator : AbstractValidator<UpsertSectionComm
             .WithMessage(MessageCode.BadRequest)
             .DependentRules(() =>
             {
-                RuleFor(x => x.Dto.ProjectId)
+                RuleFor(x => x.Dto.MemberId)
                     .NotEmpty()
-                    .WithMessage(MessageCode.ProjectIdIsRequired)
+                    .WithMessage(MessageCode.MemberIdIsRequired)
                     .NotNull()
-                    .WithMessage(MessageCode.ProjectIdIsRequired);
+                    .WithMessage(MessageCode.MemberIdIsRequired);
 
                 RuleFor(x => x.Id)
                     .NotEmpty()
@@ -32,8 +31,7 @@ public class UpsertSectionCommandValidator : AbstractValidator<UpsertSectionComm
 }
 
 public class UpsertSectionCommandHandler(
-    IDocumentSession session,
-    IManagementApiService managementApiService) : ICommandHandler<UpsertSectionCommand, Guid>
+    IDocumentSession session) : ICommandHandler<UpsertSectionCommand, Guid>
 {
     public async Task<Guid> Handle(UpsertSectionCommand request, CancellationToken cancellationToken)
     {
@@ -43,11 +41,16 @@ public class UpsertSectionCommandHandler(
         var section = await session.LoadAsync<SectionEntity>(request.Id, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.SectionIdIsRequired, request.Id);
 
-        //TODO: Handle check paper contributor, if not throw forbidden exception
+        var query = session.Query<PaperContributorEntity>()
+            .Where(x => x.PaperId == section.PaperId && x.MemberId == dto.MemberId && x.SectionId == section.Id);
+        var contributor = await query.FirstOrDefaultAsync(cancellationToken);
+        if (contributor == null || contributor.SectionRole == AuthorizeConstants.SectionRead)
+            throw new UnauthorizedException(MessageCode.AccessDenied);
+
 
         //If writer is author the section will update in main section
-        var role = await managementApiService.GetMyProjectRoleAsync(dto.ProjectId, cancellationToken);
-        var isAuthor = string.Equals(role, AuthorizeConstants.ProjectAuthor, StringComparison.OrdinalIgnoreCase);
+        var isAuthor = string.Equals(contributor.SectionRole, AuthorizeConstants.PaperAuthor,
+            StringComparison.OrdinalIgnoreCase);
         if (isAuthor)
         {
             // Author can update the main section directly
@@ -64,7 +67,7 @@ public class UpsertSectionCommandHandler(
             return section.Id;
         }
 
-        //If the section is main section, create a new section and mark it as new version of main section, and update main section to be not main section, and return new section id, otherwise we will update the section and return the same section id
+        // If writer is not author, the section will be created as a new version of main section, and the new section will be updated by writer, the main section will be updated by author
         if (section.IsMainSection == true)
         {
             var newSection = SectionEntity.Create(
@@ -81,11 +84,19 @@ public class UpsertSectionCommandHandler(
                 previousVersionSectionId: section.Id
             );
 
+            // Update contributor to point to new section
+            contributor.Update(
+                sectionId: newSection.Id,
+                markSectionId: section.Id
+            );
+
             session.Store(newSection);
+            session.Update(contributor);
             await session.SaveChangesAsync(cancellationToken);
             return newSection.Id;
         }
 
+        // If the section is not main section, it means the section is already a new version of main section, so just update the section directly
         section.Update(
             content: dto.Content,
             numbered: dto.Numbered,

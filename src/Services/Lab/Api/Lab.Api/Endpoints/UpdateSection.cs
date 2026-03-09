@@ -15,7 +15,8 @@ public class UpdateSection : ICarterModule
             .WithName(nameof(UpdateSection))
             .Produces<ApiUpdatedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .DisableAntiforgery();
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     private async Task<ApiUpdatedResponse<Guid>> HandleUpdateSectionAsync(

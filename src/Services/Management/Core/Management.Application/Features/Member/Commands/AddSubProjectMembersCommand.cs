@@ -111,7 +111,7 @@ public class AddSubProjectMembersCommandHandler(
                 foreach (var section in sections)
                 {
                     await labApiService.CreatePaperContributorAsync(
-                        sectionRole   : AuthorizeConstants.ProjectAuthor,
+                        sectionRole   : AuthorizeConstants.PaperAuthor,
                         paperId       : paperId,
                         memberId      : memberId,
                         markSectionId : section.Id,

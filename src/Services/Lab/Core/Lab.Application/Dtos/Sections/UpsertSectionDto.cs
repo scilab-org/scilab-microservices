@@ -2,7 +2,7 @@
 
 public class UpsertSectionDto
 {
-    public Guid ProjectId { get; init; }
+    public Guid MemberId { get; init; }
     public string? Title { get; init; }
     public string? Content { get; init; } = null!;
     public bool? Numbered { get; init; } = true;
