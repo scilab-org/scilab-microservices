@@ -22,6 +22,11 @@ services:
     restart: unless-stopped
     environment:
       - TZ=${TZ}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "7"
     ports:
       - 80:80
       - 443:443
@@ -101,7 +106,7 @@ services:
       - MinIO__Endpoint=${MINIO_HOSTNAME}
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
-      - MinIO__Secure=fasle
+      - MinIO__Secure=true
       - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
       - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
       - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
@@ -134,7 +139,7 @@ services:
       - MinIO__Endpoint=${MINIO_HOSTNAME}
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
-      - MinIO__Secure=false
+      - MinIO__Secure=true
       - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
       - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
       - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
@@ -168,7 +173,7 @@ services:
       - MinIO__Endpoint=${MINIO_HOSTNAME}
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
-      - MinIO__Secure=false
+      - MinIO__Secure=true
       - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
       - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
       - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
