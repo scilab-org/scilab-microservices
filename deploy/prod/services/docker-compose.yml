@@ -101,7 +101,7 @@ services:
       - MinIO__Endpoint=${MINIO_HOSTNAME}
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
-      - MinIO__Secure=true
+      - MinIO__Secure=fasle
       - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
       - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
       - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
@@ -134,7 +134,7 @@ services:
       - MinIO__Endpoint=${MINIO_HOSTNAME}
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
-      - MinIO__Secure=true
+      - MinIO__Secure=false
       - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
       - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
       - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
@@ -168,7 +168,7 @@ services:
       - MinIO__Endpoint=${MINIO_HOSTNAME}
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
-      - MinIO__Secure=true
+      - MinIO__Secure=false
       - Authentication__Authority=https://${KEYCLOAK_HOSTNAME}/realms/hyper-data-lab-realm
       - Authentication__ClientSecret=${KEYCLOAK_WEB_CLIENT_SECRET}
       - ApiClients__Keycloak__BaseUrl=https://${KEYCLOAK_HOSTNAME}
