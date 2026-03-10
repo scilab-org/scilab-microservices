@@ -1,4 +1,5 @@
-﻿using Lab.Application.Dtos.Sections;
+﻿using JasperFx.Core;
+using Lab.Application.Dtos.Sections;
 using Lab.Domain.Entities;
 using Marten;
 
@@ -33,6 +34,8 @@ public class UpsertSectionCommandValidator : AbstractValidator<UpsertSectionComm
 public class UpsertSectionCommandHandler(
     IDocumentSession session) : ICommandHandler<UpsertSectionCommand, Guid>
 {
+    #region Implementations
+
     public async Task<Guid> Handle(UpsertSectionCommand request, CancellationToken cancellationToken)
     {
         var dto = request.Dto;
@@ -41,17 +44,18 @@ public class UpsertSectionCommandHandler(
         var section = await session.LoadAsync<SectionEntity>(request.Id, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.SectionIdIsRequired, request.Id);
 
-        var query = session.Query<PaperContributorEntity>()
-            .Where(x => x.PaperId == section.PaperId && x.MemberId == dto.MemberId && x.SectionId == section.Id);
-        var contributor = await query.FirstOrDefaultAsync(cancellationToken);
-        if (contributor == null || contributor.SectionRole == AuthorizeConstants.SectionRead)
+        var contributor = await session.Query<PaperContributorEntity>()
+            .Where(x => x.PaperId == section.PaperId &&
+                        x.MemberId == dto.MemberId &&
+                        x.SectionId == section.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (contributor == null || contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.SectionRead))
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
 
         //If writer is author the section will update in main section
-        var isAuthor = string.Equals(contributor.SectionRole, AuthorizeConstants.PaperAuthor,
-            StringComparison.OrdinalIgnoreCase);
-        if (isAuthor)
+        if (contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
         {
             // Author can update the main section directly
             section.Update(
@@ -109,4 +113,6 @@ public class UpsertSectionCommandHandler(
         await session.SaveChangesAsync(cancellationToken);
         return section.Id;
     }
+
+    #endregion
 }
