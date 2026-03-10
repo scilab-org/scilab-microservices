@@ -15,5 +15,5 @@ public sealed class MinIoCfg
     public const string Secure = "Secure";
 
     #endregion
-    
+
 }

@@ -48,7 +48,7 @@ public static class DependencyInjection
             .WithEndpoint(cfg[$"{MinIoCfg.Section}:{MinIoCfg.Endpoint}"])
             .WithCredentials(cfg[$"{MinIoCfg.Section}:{MinIoCfg.AccessKey}"],
                 cfg[$"{MinIoCfg.Section}:{MinIoCfg.SecretKey}"])
-            .WithSSL(cfg.GetValue<bool>(cfg[$"{MinIoCfg.Section}:{MinIoCfg.Secure}"]!))
+            .WithSSL(cfg.GetValue<bool>($"{MinIoCfg.Section}:{MinIoCfg.Secure}"))
             .Build());
 
         //services.InitializeMartenWith<InitialData>();
