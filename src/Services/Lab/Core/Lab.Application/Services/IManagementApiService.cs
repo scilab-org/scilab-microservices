@@ -1,4 +1,4 @@
-﻿namespace Lab.Application.Services;
+namespace Lab.Application.Services;
 
 public interface IManagementApiService
 {
@@ -37,6 +37,14 @@ public interface IManagementApiService
     Task<Dictionary<Guid, Guid>> GetUserIdsByMemberIdsAsync(
         Guid paperId,
         IEnumerable<Guid> memberIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Calls the Management service to get the current user's role in the given project.
+    /// Returns the role name string, or null if the call fails.
+    /// </summary>
+    Task<string?> GetMyProjectRoleAsync(
+        Guid projectId,
         CancellationToken cancellationToken = default);
 }
 

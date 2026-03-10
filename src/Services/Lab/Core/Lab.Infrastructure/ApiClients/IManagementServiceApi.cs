@@ -1,4 +1,4 @@
-﻿using Refit;
+using Refit;
 
 namespace Lab.Infrastructure.ApiClients;
 
@@ -25,6 +25,13 @@ public interface IManagementServiceApi
     [Get("/sub-projects/papers/{paperId}/members")]
     Task<HttpResponseMessage> GetSubProjectMembersByPaperIdAsync(
         [AliasAs("paperId")] Guid paperId);
+
+    /// <summary>
+    /// GET /projects/{projectId}/my-role — gets current user's role in the project.
+    /// </summary>
+    [Get("/projects/{projectId}/my-role")]
+    Task<HttpResponseMessage> GetMyProjectRoleAsync(
+        [AliasAs("projectId")] Guid projectId);
 }
 
 public class CreateSubProjectRequest

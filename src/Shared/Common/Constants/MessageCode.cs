@@ -26,7 +26,7 @@ public sealed class MessageCode
     public const string StartDateMustBeBeforeEndDate = "START_DATE_MUST_BE_BEFORE_END_DATE";
 
     public const string AllPapersAlreadyExist = "ALL_PAPERS_ALREADY_EXIST";
-    
+
     public const string SubProjectNotFound = "SUB_PROJECT_NOT_FOUND";
 
     #endregion
@@ -110,16 +110,14 @@ public sealed class MessageCode
     public const string PaperIdIsRequired = "PAPER_ID_IS_REQUIRED";
 
     public const string PaperFileIsRequired = "PAPER_FILE_IS_REQUIRED";
-    
+
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
     public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
-    
-    public const string PaperContributorIdIsRequired = "PAPER_CONTRIBUTOR_ID_IS_REQUIRED";
-    
-    public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
-    public const string SectionIdIsRequired = "SECTION_ID_IS_REQUIRED";
+    public const string PaperContributorIdIsRequired = "PAPER_CONTRIBUTOR_ID_IS_REQUIRED";
+
+    public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
     #endregion
 
@@ -146,9 +144,9 @@ public sealed class MessageCode
     #region Member Management
 
     public const string UserIdsAreRequired = "USER_IDS_ARE_REQUIRED";
-    
+
     public const string MemberAlreadyExists = "MEMBER_ALREADY_EXISTS";
-    
+
     public const string ProjectAlreadyHasManager = "PROJECT_ALREADY_HAS_MANAGER";
 
     public const string AllMembersAlreadyExist = "ALL_MEMBERS_ALREADY_EXIST";
@@ -165,5 +163,10 @@ public sealed class MessageCode
     public const string GroupNameIsRequired = "GROUP_NAME_IS_REQUIRED";
 
     #endregion
-    
+
+    #region Section Management
+
+    public const string SectionIdIsRequired = "SECTION_ID_IS_REQUIRED";
+    public const string UserIsNotInPaper = "USER_IS_NOT_IN_PAPER";
+    #endregion
 }

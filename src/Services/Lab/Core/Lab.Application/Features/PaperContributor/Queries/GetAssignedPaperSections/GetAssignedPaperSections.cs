@@ -45,7 +45,7 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
 
         // Collect assigned markSectionIds
         var markSectionIds = contributors
-            .Select(c => c.MarkSectionId)
+            .Select(c => c.SectionId)
             .Distinct()
             .ToList();
 
@@ -56,7 +56,7 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
             .ToPagedListAsync(paging.PageNumber, paging.PageSize, cancellationToken);
 
         // contributor lookup: markSectionId -> contributor (one contributor per markSection)
-        var contributorMap = contributors.ToDictionary(c => c.MarkSectionId);
+        var contributorMap = contributors.ToDictionary(c => c.SectionId);
 
         var assignedSections = pagedSections
             .Select(s =>

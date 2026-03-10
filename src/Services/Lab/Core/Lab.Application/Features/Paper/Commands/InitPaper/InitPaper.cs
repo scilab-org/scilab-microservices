@@ -54,6 +54,7 @@ public class InitPaperCommandHandler(
                     paperId: entity.Id,
                     displayOrder: template.DisplayOrder,
                     numbered: template.Numbered,
+                    isMainSection: true,
                     title: template.Title,
                     sectionSumary: template.SectionSumary,
                     parentSectionId: template.ParentSectionId
