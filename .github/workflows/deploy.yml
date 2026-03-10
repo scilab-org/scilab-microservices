@@ -33,6 +33,7 @@ on:
           - user-service
           - management-service
           - lab-service
+          - latex-service
           - nginx
 
 env:
@@ -51,6 +52,7 @@ jobs:
       user-service: ${{ steps.changes.outputs.user-service }}
       management-service: ${{ steps.changes.outputs.management-service }}
       lab-service: ${{ steps.changes.outputs.lab-service }}
+      latex-service: ${{ steps.changes.outputs.latex-service }}
       nginx: ${{ steps.changes.outputs.nginx }}
       shared: ${{ steps.changes.outputs.shared }}
       services-to-deploy: ${{ steps.resolve.outputs.services }}
@@ -72,6 +74,8 @@ jobs:
               - 'src/Services/Management/**'
             lab-service:
               - 'src/Services/Lab/**'
+            latex-service:
+              - 'src/Services/Latex/**'
             shared:
               - 'src/Shared/**'
               - 'src/Directory.Build.props'
@@ -89,7 +93,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TARGET="${{ github.event.inputs.deploy_target }}"
             if [ "$TARGET" = "all" ]; then
-              SERVICES="api-gateway user-service management-service lab-service nginx"
+              SERVICES="api-gateway user-service management-service lab-service latex-service nginx"
             else
               SERVICES="$TARGET"
             fi
@@ -105,6 +109,7 @@ jobs:
               [ "${{ steps.changes.outputs.user-service }}" = "true" ] && SERVICES="$SERVICES user-service"
               [ "${{ steps.changes.outputs.management-service }}" = "true" ] && SERVICES="$SERVICES management-service"
               [ "${{ steps.changes.outputs.lab-service }}" = "true" ] && SERVICES="$SERVICES lab-service"
+              [ "${{ steps.changes.outputs.latex-service }}" = "true" ] && SERVICES="$SERVICES latex-service"
             fi
 
             # Nginx config changed

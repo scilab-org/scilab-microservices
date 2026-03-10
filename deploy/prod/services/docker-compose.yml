@@ -82,8 +82,14 @@ services:
         condition: service_started
       user-service:
         condition: service_started
+      latex-service:
+        condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"200\" <&3'"]
+      test:
+        [
+          "CMD-SHELL",
+          "bash -ec 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3; grep -q \"200\" <&3'",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -187,6 +193,20 @@ services:
       - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
       - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
+    networks:
+      - scilab_network
+
+  # ---------------------------------------------------------------------------
+  # Latex Service (LaTeX to PDF compilation)
+  # ---------------------------------------------------------------------------
+  latex-service:
+    build:
+      context: ../../../
+      dockerfile: src/Services/Latex/Dockerfile
+    container_name: latex-service
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
     networks:
       - scilab_network
 
