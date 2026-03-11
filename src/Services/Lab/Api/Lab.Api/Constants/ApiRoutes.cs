@@ -101,7 +101,7 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAuthor}/{{id}}";
         public const string GetMemberSection = $"{Base}/{{sectionId}}/members";
         public const string GetAvailableMemberSection = $"{Base}/{{sectionId}}/members/available";
-        
+        public const string GetPaperContributors = $"{Base}/papers/{{paperId}}/contributors";
 
         #endregion
     }
