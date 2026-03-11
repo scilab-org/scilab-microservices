@@ -1,4 +1,4 @@
-﻿﻿#region using
+﻿#region using
 
 using Lab.Domain.Entities;
 using Lab.Infrastructure.ApiClients;
@@ -58,6 +58,13 @@ public static class DependencyInjection
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.ManagementService.Section}:{ApiClientCfg.ManagementService.BaseUrl}"]!);
+                c.Timeout = TimeSpan.FromSeconds(30);
+            });
+
+        services.AddRefitClient<IUserServiceApi>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.UserService.Section}:{ApiClientCfg.UserService.BaseUrl}"]!);
                 c.Timeout = TimeSpan.FromSeconds(30);
             });
 

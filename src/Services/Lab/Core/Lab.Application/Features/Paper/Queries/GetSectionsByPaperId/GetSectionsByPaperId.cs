@@ -26,7 +26,7 @@ public sealed class GetSectionsByPaperIdQueryHandler(IDocumentSession session, I
         CancellationToken cancellationToken)
     {
         var sections = await session.Query<SectionEntity>()
-            .Where(s => s.PaperId == request.PaperId)
+            .Where(s => s.PaperId == request.PaperId && s.IsMainSection == true)
             .OrderBy(s => s.DisplayOrder)
             .ToListAsync(cancellationToken);
 
