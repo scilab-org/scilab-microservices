@@ -23,17 +23,7 @@ public static class DependencyInjection
         // services.AddDistributedTracing(cfg);
         // services.AddSerilogLogging(cfg);
         services.AddCarter();
-        // CORS Configuration
-        services.AddCors(options =>
-        {
-            options.AddPolicy("AllowFrontend", policy =>
-            {
-                policy.WithOrigins("http://localhost:3000")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
-        });
+
         // HealthChecks
         {
             var dbType = cfg[$"{ConnectionStringsCfg.Section}:{ConnectionStringsCfg.DbType}"];
@@ -80,7 +70,6 @@ public static class DependencyInjection
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
 
-        app.UseCors("AllowFrontend");
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseSwaggerApi();
