@@ -71,6 +71,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ASPNETCORE_URLS=http://+:8080
       - CorsConfig__Domains__0=${CORS_ORIGIN}
+      - CorsConfig__Domains__1=http://localhost:3000
       - ReverseProxy__Routes__ai-route__Match__Path=${AI_ROUTE_PATH}
       - ReverseProxy__Clusters__ai-cluster__Destinations__destination1__Address=${AI_SERVICE_URL}
     networks:
