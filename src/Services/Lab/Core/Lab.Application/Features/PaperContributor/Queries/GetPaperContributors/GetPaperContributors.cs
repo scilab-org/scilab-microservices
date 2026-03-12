@@ -34,7 +34,7 @@ public sealed class GetPaperContributorsQueryHandler(
             .ToListAsync(cancellationToken);
 
         if (!contributors.Any())
-            return new GetPaperContributorsResult(request.PaperId, []);
+            return new GetPaperContributorsResult([]);
 
         // 2. Resolve MemberId -> UserId via Management service
         var allMembers = await managementApiService.GetSubProjectMembersByPaperIdAsync(
@@ -81,7 +81,7 @@ public sealed class GetPaperContributorsQueryHandler(
             };
         }).ToList();
 
-        return new GetPaperContributorsResult(request.PaperId, items);
+        return new GetPaperContributorsResult(items);
     }
 }
 

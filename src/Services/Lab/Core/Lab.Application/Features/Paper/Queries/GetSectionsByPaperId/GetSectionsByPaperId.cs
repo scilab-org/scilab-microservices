@@ -31,7 +31,7 @@ public sealed class GetSectionsByPaperIdQueryHandler(IDocumentSession session, I
             .ToListAsync(cancellationToken);
 
         var dtos = mapper.Map<List<SectionDto>>(sections);
-        return new GetSectionsByPaperIdResult(request.PaperId, dtos);
+        return new GetSectionsByPaperIdResult(dtos);
     }
 }
 

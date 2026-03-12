@@ -1,3 +1,5 @@
+using Lab.Api.Endpoints;
+
 namespace Lab.Api.Constants;
 
 public sealed class ApiRoutes
@@ -121,6 +123,7 @@ public sealed class ApiRoutes
         public const string Update = $"{Base}/{{id}}";
         public const string Delete = $"{Base}/{{id}}";
         public const string GetSectionById = $"{Base}/{{id}}";
+        public const string GetSectionByMarkSectionId = $"{Base}/mark-section/{{id}}";
 
         #endregion
 
