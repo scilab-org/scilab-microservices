@@ -41,6 +41,8 @@ public class UploadSectionFileCommandHandler(IDocumentSession session, IMinIoClo
 
         await UploadFileAsync(dto.UploadFile, section, cancellationToken);
 
+        session.Update(section);
+
         await session.SaveChangesAsync(cancellationToken);
 
         return section.Id;
