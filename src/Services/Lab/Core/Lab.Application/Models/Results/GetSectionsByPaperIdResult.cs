@@ -4,12 +4,10 @@ namespace Lab.Application.Models.Results;
 
 public class GetSectionsByPaperIdResult
 {
-    public Guid PaperId { get; init; }
     public List<SectionDto> Items { get; init; }
 
-    public GetSectionsByPaperIdResult(Guid paperId, List<SectionDto> items)
+    public GetSectionsByPaperIdResult(List<SectionDto> items)
     {
-        PaperId = paperId;
         Items = items;
     }
 }
