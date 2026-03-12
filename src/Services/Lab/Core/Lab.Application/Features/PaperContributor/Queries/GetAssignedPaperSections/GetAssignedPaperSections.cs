@@ -71,7 +71,6 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     SectionSumary      = s.SectionSumary,
                     DisplayOrder       = s.DisplayOrder,
                     Numbered           = s.Numbered,
-                    FilePath           = s.FilePath,
                     ParentSectionId    = s.ParentSectionId,
                     PaperContributorId = c.Id,
                     SectionRole        = c.SectionRole,

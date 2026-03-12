@@ -85,7 +85,7 @@ public sealed class ApiRoutes
 
         #endregion
     }
-    
+
     public static class PaperContributor
     {
         #region Constants
@@ -124,6 +124,8 @@ public sealed class ApiRoutes
         public const string Delete = $"{Base}/{{id}}";
         public const string GetSectionById = $"{Base}/{{id}}";
         public const string GetSectionByMarkSectionId = $"{Base}/mark-section/{{id}}";
+        public const string Upload = $"{Base}/{{id}}/upload-file";
+        public const string GetSectionFileById = $"{Base}/{{id}}/files";
 
         #endregion
 

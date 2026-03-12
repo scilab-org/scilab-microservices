@@ -15,7 +15,8 @@ public sealed class LabApiMappingProfile : Profile
     public LabApiMappingProfile()
     {
         CreatePaperMapping();
-	}
+        UploadSectionMapping();
+    }
 
     #endregion
 
@@ -27,6 +28,15 @@ public sealed class LabApiMappingProfile : Profile
         CreateMap<CreatePaperRequest, CreatePaperDto>();
 
         CreateMap<UpdatePaperRequest, UpdatePaperDto>();
+    }
+
+    #endregion
+
+    #region Section Mappings
+
+    private void UploadSectionMapping()
+    {
+        CreateMap<UploadSectionFileRequest, UploadSectionFileDto>();
     }
 
     #endregion
