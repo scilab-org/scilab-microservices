@@ -12,12 +12,12 @@ public class SectionDto : DtoId<Guid>
     public string? FilePath { get; set; }
     public Guid? ParentSectionId { get; set; }
     public Guid PaperId { get; set; }
+    public string SectionRole { get; set; } = "project:manager";
 }
 
 public class AssignedSectionDto : SectionDto
 {
     public Guid PaperContributorId { get; set; }
-    public string SectionRole { get; set; } = null!;
     public Guid MemberId { get; set; }
     public Guid MarkSectionId { get; set; }
 }

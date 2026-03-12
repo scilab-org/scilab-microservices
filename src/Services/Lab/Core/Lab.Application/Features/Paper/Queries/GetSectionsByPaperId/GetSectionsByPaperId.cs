@@ -30,6 +30,7 @@ public sealed class GetSectionsByPaperIdQueryHandler(IDocumentSession session, I
             .OrderBy(s => s.DisplayOrder)
             .ToListAsync(cancellationToken);
 
+        
         var dtos = mapper.Map<List<SectionDto>>(sections);
         return new GetSectionsByPaperIdResult(dtos);
     }
