@@ -12,11 +12,11 @@ public class SectionEntity : Entity<Guid>
     public float DisplayOrder { get; set; }
     public bool? Numbered { get; set; } = true;
     public bool? IsMainSection { get; set; } = false;
-    public string? FilePath { get; set; }
     public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
     public Guid? NextVersionSectionId { get; set; }
     public Guid PaperId { get; set; }
+    public List<string>? Files { get; set; }
 
     #endregion
 
@@ -83,7 +83,8 @@ public class SectionEntity : Entity<Guid>
     {
         if (string.IsNullOrWhiteSpace(url)) return;
 
-        FilePath = url;
+        Files ??= new List<string>();
+        Files.Add(url);
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

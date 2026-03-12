@@ -167,6 +167,12 @@ public sealed class MessageCode
     #region Section Management
 
     public const string SectionIdIsRequired = "SECTION_ID_IS_REQUIRED";
+
     public const string UserIsNotInPaper = "USER_IS_NOT_IN_PAPER";
+
+    public const string SectionFileIsRequired = "SECTION_FILE_IS_REQUIRED";
+
+    public const string SectionIsNotExists = "SECTION_IS_NOT_EXISTS";
+
     #endregion
 }

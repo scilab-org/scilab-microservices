@@ -15,6 +15,8 @@ public sealed class AppConstants
         public const string Datasets = "datasets";
 
         public const string Papers = "papers";
+
+        public const string Sections = "sections";
     }
 
     #endregion
