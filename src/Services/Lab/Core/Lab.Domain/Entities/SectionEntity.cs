@@ -62,7 +62,7 @@ public class SectionEntity : Entity<Guid>
         float? displayOrder = null,
         string? sectionSumary = null,
         bool? numbered = true,
-        bool? isMainSection = false,
+        bool? isMainSection = null,
         Guid? parentSectionId = null,
         Guid? previousVersionSectionId = null,
         Guid? nextVersionSectionId = null)
