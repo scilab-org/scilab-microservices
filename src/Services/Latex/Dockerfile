@@ -22,6 +22,6 @@ WORKDIR /service
 
 COPY src/Services/Latex/server.py .
 
-RUN pip install --no-cache-dir fastapi uvicorn
+RUN pip install --no-cache-dir fastapi uvicorn httpx python-multipart
 
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
