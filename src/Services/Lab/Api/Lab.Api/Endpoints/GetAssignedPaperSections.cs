@@ -14,7 +14,7 @@ public class GetAssignedPaperSections: ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapGet(ApiRoutes.Paper.GetAssignedPaperSections, HandleGetMySectionsAsync)
-            .WithTags(ApiRoutes.PaperContributor.Tags)
+            .WithTags(ApiRoutes.Paper.Tags)
             .WithName(nameof(GetAssignedPaperSections))
             .Produces<ApiGetResponse<GetMySectionsResult>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
