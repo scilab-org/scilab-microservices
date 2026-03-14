@@ -1,19 +1,19 @@
 ﻿using Lab.Domain.Abstractions;
 using Lab.Domain.Enums;
+using Lab.Domain.Models;
 
 namespace Lab.Domain.Entities;
 
-public sealed class PaperEntity : Entity<Guid>
+public sealed class PaperBankEntity : Entity<Guid>
 {
     #region Fields, Properties and Indexers
 
     public string Title { get; set; } = null!;
-    public string? Template { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public PaperStatus? Status { get; set; }
-    public string? ParsedText { get; set; }
+    public ParsedText? ParsedText { get; set; }
     public bool? IsIngested { get; set; } = false;
     public bool? IsAutoTagged { get; set; } = false;
     public DateTimeOffset? PublicationDate { get; set; }
@@ -26,30 +26,28 @@ public sealed class PaperEntity : Entity<Guid>
 
     #region Factories
 
-    public static PaperEntity Create(Guid id,
+    public static PaperBankEntity Create(Guid id,
         string title,
-        string? template = null,
-        string? abstractText = null,
-        string? doi = null,
-        PaperStatus? status = null,
-        string? parsedText = null,
-        bool? isIngested = null,
-        bool? isAutoTagged = null,
-        DateTimeOffset? publicationDate = null,
-        string? paperType = null,
-        string? journalName = null,
-        string? conferenceName = null,
+        string? abstractText,
+        string? doi,
+        PaperStatus? status,
+        ParsedText? parsedText,
+        bool? isIngested,
+        bool? isAutoTagged,
+        DateTimeOffset? publicationDate,
+        string? paperType,
+        string? journalName,
+        string? conferenceName,
         List<string>? tagNames = null)
     {
-        return new PaperEntity()
+        return new PaperBankEntity()
         {
             Id = id,
             Title = title,
-            Template = template,
             Abstract = abstractText,
             Doi = doi,
-            Status = status ?? PaperStatus.Processing,
-            ParsedText = parsedText ?? string.Empty,
+            Status = status ?? PaperStatus.Draft,
+            ParsedText = parsedText ?? new ParsedText(),
             IsIngested = isIngested ?? false,
             IsAutoTagged = isAutoTagged ?? false,
             PublicationDate = publicationDate,
@@ -66,30 +64,28 @@ public sealed class PaperEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string? title = null,
-        string? template = null,
-        string? abstractText = null,
-        string? doi = null,
-        PaperStatus? status = null,
-        bool? isIngested = null,
-        bool? isAutoTagged = null,
-        DateTimeOffset? publicationDate = null,
-        string? paperType = null,
-        string? journalName = null,
-        string? conferenceName = null,
+    public void Update(string? title,
+        string? abstractText,
+        string? doi,
+        PaperStatus? status,
+        bool? isIngested,
+        bool? isAutoTagged,
+        DateTimeOffset? publicationDate,
+        string? paperType,
+        string? journalName,
+        string? conferenceName,
         List<string>? tagNames = null)
     {
         Title = title ?? Title;
-        Template = template ?? Template;
-        Abstract = abstractText ?? Abstract;
-        Doi = doi  ?? Doi;
-        Status = status ?? Status;
+        Abstract = abstractText;
+        Doi = doi;
+        Status = status;
         IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
-        PublicationDate = publicationDate  ?? PublicationDate;
-        PaperType = paperType  ?? PaperType;
-        JournalName = journalName  ?? JournalName;
-        ConferenceName = conferenceName  ?? ConferenceName;
+        PublicationDate = publicationDate;
+        PaperType = paperType;
+        JournalName = journalName;
+        ConferenceName = conferenceName;
         TagNames = tagNames ?? TagNames;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }

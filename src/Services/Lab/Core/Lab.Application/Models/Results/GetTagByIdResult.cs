@@ -1,5 +1,4 @@
-﻿using Lab.Application.Dtos.Papers;
-using Lab.Application.Dtos.Tags;
+﻿using Lab.Application.Dtos.Tags;
 
 namespace Lab.Application.Models.Results;
 

@@ -1,8 +1,8 @@
-﻿using Lab.Application.Dtos.Papers;
+﻿using Lab.Application.Dtos.PaperBanks;
 
 namespace Lab.Application.Models.Results;
 
-public sealed class GetPapersResult
+public sealed class GetPaperBanksResult
 {
     #region Fields, Properties and Indexers
 
@@ -14,7 +14,7 @@ public sealed class GetPapersResult
 
     #region Ctors
 
-    public GetPapersResult(
+    public GetPaperBanksResult(
         List<PaperDto> items,
         long totalCount,
         PaginationRequest pagination)

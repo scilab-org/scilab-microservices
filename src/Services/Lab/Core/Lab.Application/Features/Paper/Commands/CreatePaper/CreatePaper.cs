@@ -3,7 +3,6 @@ using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
-using MediatR;
 
 namespace Lab.Application.Features.Paper.Commands.CreatePaper;
 
@@ -23,113 +22,56 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .WithMessage(MessageCode.PaperTitleIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperTitleIsRequired);
-
-                RuleFor(x => x.Dto.PublicationDate)
-                    .LessThanOrEqualTo(DateTimeOffset.UtcNow)
-                    .When(x => x.Dto.PublicationDate.HasValue)
-                    .WithMessage(MessageCode.PaperPublicationDateInvalid);
-
-                RuleFor(x => x.Dto.UploadFile)
-                    .NotNull()
-                    .WithMessage(MessageCode.PaperFileIsRequired);
             });
     }
 }
 
-public class CreatePaperCommandHandler(IDocumentSession session, IMinIoCloudService minIo)
-    : IRequestHandler<CreatePaperCommand, Guid>
+public class CreatePaperCommandHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService) : ICommandHandler<CreatePaperCommand, Guid>
 {
-    #region Implementations
-
     public async Task<Guid> Handle(CreatePaperCommand request, CancellationToken cancellationToken)
     {
         var dto = request.Dto;
-        var tagNames = NomalizeTagNames(dto.TagNames);
 
         await session.BeginTransactionAsync(cancellationToken);
-
-        await EnsureTagsExistAsync(tagNames, cancellationToken);
 
         var entity = PaperEntity.Create(
             id: Guid.NewGuid(),
             title: dto.Title,
+            template: dto.Template,
             abstractText: dto.Abstract,
             doi: dto.Doi,
-            status: dto.Status ?? PaperStatus.Sampled,
-            parsedText: dto.ParsedText,
-            isIngested: dto.IsIngested,
-            isAutoTagged: dto.IsAutoTagged,
-            publicationDate: dto.PublicationDate,
-            paperType: dto.PaperType,
-            journalName: dto.JournalName,
-            conferenceName: dto.ConferenceName,
-            tagNames: tagNames);
+            status: dto.Status ?? PaperStatus.Processing,
+            paperType: dto.PaperType
+        );
 
-        await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
+        if (dto.Sections != null && dto.Sections.Count != 0)
+            foreach (var template in dto.Sections)
+            {
+                var section = SectionEntity.Create(
+                    id: template.Id,
+                    content: template.Content,
+                    paperId: entity.Id,
+                    displayOrder: template.DisplayOrder,
+                    numbered: template.Numbered,
+                    isMainSection: true,
+                    title: template.Title,
+                    sectionSumary: template.SectionSumary,
+                    parentSectionId: template.ParentSectionId
+                );
+                session.Store(section);
+            }
 
         session.Store(entity);
-
         await session.SaveChangesAsync(cancellationToken);
+
+        if (dto.ProjectId != Guid.Empty)
+        {
+            await managementApiService.CreateSubProjectAsync(
+                dto.ProjectId, entity.Id, dto.Title, cancellationToken);
+        }
 
         return entity.Id;
     }
-
-    #endregion
-
-    #region Methods
-
-    private async Task UploadFileAsync(UploadFileBytes? file,
-        PaperEntity entity,
-        CancellationToken cancellationToken)
-    {
-        if (file == null) return;
-
-        var result = await minIo.UploadFilesAsync(entity.Id.ToString(), [file],
-            AppConstants.Bucket.Papers,
-            true,
-            cancellationToken);
-
-        var uploaded = result.FirstOrDefault();
-
-        if (uploaded != null)
-        {
-            entity.UpdateFilePath(uploaded.PublicURL);
-        }
-    }
-
-    private List<string> NomalizeTagNames(List<string>? tagNames)
-    {
-        if (tagNames == null) return new List<string>();
-
-        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
-    }
-
-    private async Task EnsureTagsExistAsync(
-        List<string> tagNames,
-        CancellationToken cancellationToken)
-    {
-        if (tagNames.Count == 0) return;
-
-        var existingTags = await session
-            .Query<TagEntity>()
-            .Where(x => tagNames.Contains(x.Name))
-            .ToListAsync(cancellationToken);
-
-        var existingTagNames = existingTags
-            .Select(x => x.Name)
-            .ToHashSet();
-
-        var newTagNames = tagNames
-            .Where(x => !existingTagNames.Contains(x))
-            .Distinct()
-            .ToList();
-
-        foreach (var name in newTagNames)
-        {
-            var tag = TagEntity.Create(Guid.NewGuid(), name);
-            session.Store(tag);
-        }
-    }
-
-    #endregion
 }

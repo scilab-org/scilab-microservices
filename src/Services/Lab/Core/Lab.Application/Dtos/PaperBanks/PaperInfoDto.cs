@@ -1,7 +1,8 @@
 ﻿using Lab.Application.Dtos.Abstractions;
 using Lab.Domain.Enums;
+using Lab.Domain.Models;
 
-namespace Lab.Application.Dtos.Papers;
+namespace Lab.Application.Dtos.PaperBanks;
 
 public class PaperInfoDto : DtoId<Guid>
 {
@@ -12,7 +13,7 @@ public class PaperInfoDto : DtoId<Guid>
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public PaperStatus? Status { get; set; }
-    public string? ParsedText { get; set; }
+    public ParsedText? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }

@@ -1,8 +1,8 @@
-﻿using Lab.Application.Dtos.Papers;
+﻿using Lab.Application.Dtos.PaperBanks;
 
 namespace Lab.Application.Models.Results;
 
-public class GetPaperByIdResult
+public class GetPaperBankByIdResult
 {
     #region Fields, Properties and Indexers
 
@@ -11,7 +11,7 @@ public class GetPaperByIdResult
     #endregion
 
     #region Ctors
-    public GetPaperByIdResult(PaperDto paper)
+    public GetPaperBankByIdResult(PaperDto paper)
     {
         Paper = paper;
     }

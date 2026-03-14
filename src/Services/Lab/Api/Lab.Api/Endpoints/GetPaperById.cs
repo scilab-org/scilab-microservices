@@ -1,30 +1,29 @@
 ﻿using Lab.Api.Constants;
-using Lab.Application.Features.Paper.Queries.GetPaperById;
+using Lab.Application.Features.PaperBank.Queries.GetPaperBankById;
 using Lab.Application.Models.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab.Api.Endpoints;
 
-public class GetPaperById : ICarterModule
+public class GetPaperBankById : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet(ApiRoutes.Paper.GetPaperById, HandleGetPaperByIdAsync)
-            .WithTags(ApiRoutes.Paper.Tags)
-            .WithName(nameof(GetPaperById))
-            .Produces<ApiGetResponse<GetPaperByIdResult>>(StatusCodes.Status200OK)
+        app.MapGet(ApiRoutes.PaperBank.GetPaperBankById, HandleGetPaperBankByIdAsync)
+            .WithTags(ApiRoutes.PaperBank.Tags)
+            .WithName(nameof(GetPaperBankById))
+            .Produces<ApiGetResponse<GetPaperBankByIdResult>>()
             .ProducesProblem(StatusCodes.Status400BadRequest);
-        // .Produces(StatusCodes.Status403Forbidden)
-        // .ProducesProblem(StatusCodes.Status404NotFound)
         // .RequireAuthorization();
     }
-    private async Task<ApiGetResponse<GetPaperByIdResult>> HandleGetPaperByIdAsync(
+
+    private async Task<ApiGetResponse<GetPaperBankByIdResult>> HandleGetPaperBankByIdAsync(
         ISender sender,
         [FromRoute] Guid id)
     {
-        var query = new GetPaperByIdQuery(id);
+        var query = new GetPaperBankByIdQuery(id);
         var result = await sender.Send(query);
 
-        return new ApiGetResponse<GetPaperByIdResult>(result);
+        return new ApiGetResponse<GetPaperBankByIdResult>(result);
     }
 }

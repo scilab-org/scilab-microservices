@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Lab.Application.Dtos.Papers;
+using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
@@ -8,19 +8,19 @@ using Marten;
 using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
 
-namespace Lab.Application.Features.Paper.Queries.GetPapers;
+namespace Lab.Application.Features.PaperBank.Queries.GetPaperBanks;
 
-public record GetPapersQuery(GetPapersFilter Filter, PaginationRequest Paging) : IQuery<GetPapersResult>;
+public record GetPaperBanksQuery(GetPaperBanksFilter Filter, PaginationRequest Paging) : IQuery<GetPaperBanksResult>;
 
-public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetPapersQuery, GetPapersResult>
+public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetPaperBanksQuery, GetPaperBanksResult>
 {
     #region Implementations
 
-    public async Task<GetPapersResult> Handle(GetPapersQuery request, CancellationToken cancellationToken)
+    public async Task<GetPaperBanksResult> Handle(GetPaperBanksQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<PaperEntity>().AsQueryable();
+        var query = session.Query<PaperBankEntity>().AsQueryable();
 
         #region Query Filters
 
@@ -108,7 +108,7 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
         var papers = result.ToList();
         var items = mapper.Map<List<PaperDto>>(papers);
 
-        var reponse = new GetPapersResult(items, totalCount, paging);
+        var reponse = new GetPaperBanksResult(items, totalCount, paging);
 
         return reponse;
     }

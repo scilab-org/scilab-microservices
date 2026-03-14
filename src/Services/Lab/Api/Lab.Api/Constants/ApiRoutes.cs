@@ -1,5 +1,3 @@
-using Lab.Api.Endpoints;
-
 namespace Lab.Api.Constants;
 
 public sealed class ApiRoutes
@@ -17,6 +15,27 @@ public sealed class ApiRoutes
         #endregion
     }
 
+    public static class PaperBank
+    {
+        #region Constants
+
+        public const string Tags = "Paper Bank";
+        private const string Base = "/paper-bank";
+        private const string BaseAdmin = "/admin/paper-bank";
+
+        #endregion
+
+        #region Enpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetPaperBanks = $"{Base}";
+        public const string GetPaperBankById = $"{Base}/{{id}}";
+
+        #endregion
+    }
+
     public static class Paper
     {
         #region Constants
@@ -29,11 +48,7 @@ public sealed class ApiRoutes
 
         #region Enpoints
 
-        public const string Create = $"{BaseAdmin}";
-        public const string Update = $"{BaseAdmin}/{{id}}";
-        public const string Delete = $"{BaseAdmin}/{{id}}";
-        public const string GetPapers = $"{Base}";
-        public const string GetPaperById = $"{Base}/{{id}}";
+        public const string Create = $"{Base}";
         public const string GetPaperSamples = $"{Base}/sample";
         public const string Initialize = $"{BaseAdmin}/initialize";
         public const string GetAssignedPaperSections = $"{Base}/{{id}}/assigned-sections";

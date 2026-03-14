@@ -1,28 +1,27 @@
 ﻿using AutoMapper;
-using Lab.Application.Dtos.Papers;
+using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
-using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
 
-namespace Lab.Application.Features.Paper.Queries.GetPapers;
+namespace Lab.Application.Features.PaperBank.Queries.GetPaperBanks;
 
-public record GetPaperSamplesQuery(GetPaperSamplesFilter Filter, PaginationRequest Paging) : IQuery<GetPapersResult>;
+public record GetPaperSamplesQuery(GetPaperSamplesFilter Filter, PaginationRequest Paging) : IQuery<GetPaperBanksResult>;
 
 
 public class GetPaperSamplesQueryHandler(IDocumentSession session, IMapper mapper)
-    : IQueryHandler<GetPaperSamplesQuery, GetPapersResult>
+    : IQueryHandler<GetPaperSamplesQuery, GetPaperBanksResult>
 {
     #region Implementations
 
-    public async Task<GetPapersResult> Handle(GetPaperSamplesQuery request, CancellationToken cancellationToken)
+    public async Task<GetPaperBanksResult> Handle(GetPaperSamplesQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<PaperEntity>().AsQueryable();
+        var query = session.Query<PaperBankEntity>().AsQueryable();
 
         #region Query Filters
 
@@ -36,7 +35,7 @@ public class GetPaperSamplesQueryHandler(IDocumentSession session, IMapper mappe
         {
             query = query.Where(x => x.Status == filter.Status.Value);
         }
-        
+
         // Exclude Draft and Processing papers by default
         query = query.Where(x => x.Status != PaperStatus.Draft && x.Status != PaperStatus.Processing);
 
@@ -50,7 +49,7 @@ public class GetPaperSamplesQueryHandler(IDocumentSession session, IMapper mappe
         var papers = result.ToList();
         var items = mapper.Map<List<PaperDto>>(papers);
 
-        var reponse = new GetPapersResult(items, totalCount, paging);
+        var reponse = new GetPaperBanksResult(items, totalCount, paging);
 
         return reponse;
     }
