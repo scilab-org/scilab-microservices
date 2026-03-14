@@ -18,20 +18,20 @@ public interface ILabServiceApi
     /// <summary>
     /// GET /papers/{paperId} — returns a single paper by id.
     /// </summary>
-    [Get("/papers/{paperId}")]
-    Task<HttpResponseMessage> GetPaperByIdAsync([AliasAs("paperId")] Guid paperId);
+    [Get("/paper-bank/{id}")]
+    Task<HttpResponseMessage> GetPaperByIdAsync([AliasAs("id")] Guid paperId);
 
     /// <summary>
-    /// DELETE /admin/papers/{paperId} — deletes a paper by id.
+    /// DELETE /admin/paper-bank/{id} — deletes a paper by id.
     /// </summary>
-    [Delete("/admin/papers/{paperId}")]
-    Task<HttpResponseMessage> DeletePaperAsync([AliasAs("paperId")] Guid paperId);
+    [Delete("/admin/paper-bank/{id}")]
+    Task<HttpResponseMessage> DeletePaperAsync([AliasAs("id")] Guid paperId);
 
     /// <summary>
-    /// GET /papers/{paperId}/sections — returns all sections for a paper.
+    /// GET /papers/{id}/sections — returns all sections for a paper.
     /// </summary>
-    [Get("/papers/{paperId}/sections")]
-    Task<HttpResponseMessage> GetSectionsByPaperIdAsync([AliasAs("paperId")] Guid paperId);
+    [Get("/papers/{id}/sections")]
+    Task<HttpResponseMessage> GetSectionsByPaperIdAsync([AliasAs("id")] Guid paperId);
 
     #endregion
 

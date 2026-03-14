@@ -11,10 +11,12 @@ file enum PaperStatus
     Draft = 1,
     Processing = 2,
     Submited = 3,
-    Released = 4
+    Released = 4,
+    Sampled = 5
 }
 
-// Internal shapes matching Lab service response
+// Internal shapes matching Lab service JSON response
+// Lab returns PaperDto which extends PaperInfoDto
 file sealed class LabPaperItem
 {
     public Guid Id { get; set; }
@@ -23,13 +25,16 @@ file sealed class LabPaperItem
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public int? Status { get; set; }
+    public bool? IsIngested { get; set; }
+    public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
+    public List<string> TagNames { get; set; } = new();
 }
 
-// GET /papers  =>  { "result": { "items": [...], "paging": {...} } }
+// GET /papers/sample  =>  { "result": { "items": [...], "paging": {...} } }
 file sealed class LabGetPapersResult
 {
     public List<LabPaperItem> Items { get; set; } = new();
@@ -40,7 +45,7 @@ file sealed class LabGetPapersResponse
     public LabGetPapersResult? Result { get; set; }
 }
 
-// GET /papers/{id}  =>  { "result": { "paper": { ... } } }
+// GET /paper-bank/{id}  =>  { "result": { "paper": { ... } } }
 file sealed class LabGetPaperByIdResult
 {
     public LabPaperItem? Paper { get; set; }
@@ -49,6 +54,27 @@ file sealed class LabGetPaperByIdResult
 file sealed class LabGetPaperByIdResponse
 {
     public LabGetPaperByIdResult? Result { get; set; }
+}
+
+// GET /papers/{id}/sections  =>  { "result": { "items": [...] } }
+file sealed class LabSectionItem
+{
+    public Guid Id { get; set; }
+    public string? Title { get; set; }
+    public float DisplayOrder { get; set; }
+    public Guid? ParentSectionId { get; set; }
+    public Guid PaperId { get; set; }
+    public string? SectionRole { get; set; }
+}
+
+file sealed class LabGetSectionsResult
+{
+    public List<LabSectionItem>? Items { get; set; }
+}
+
+file sealed class LabGetSectionsResponse
+{
+    public LabGetSectionsResult? Result { get; set; }
 }
 
 public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
@@ -77,19 +103,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
 
         return allPapers
             .Where(p => !existingSet.Contains(p.Id))
-            .Select(p => new PaperInfoDto
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Abstract = p.Abstract,
-                Doi = p.Doi,
-                FilePath = p.FilePath,
-                Status = p.Status.HasValue ? Enum.GetName(typeof(PaperStatus), p.Status.Value) : null,
-                PublicationDate = p.PublicationDate,
-                PaperType = p.PaperType,
-                JournalName = p.JournalName,
-                ConferenceName = p.ConferenceName
-            })
+            .Select(p => p.MapToDto())
             .ToList();
     }
 
@@ -113,19 +127,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
                     cancellationToken: cancellationToken);
 
                 if (body?.Result?.Paper is { } p)
-                    result.Add(new PaperInfoDto
-                    {
-                        Id = p.Id,
-                        Title = p.Title,
-                        Abstract = p.Abstract,
-                        Doi = p.Doi,
-                        FilePath = p.FilePath,
-                        Status = p.Status.HasValue ? Enum.GetName(typeof(PaperStatus), p.Status.Value) : null,
-                        PublicationDate = p.PublicationDate,
-                        PaperType = p.PaperType,
-                        JournalName = p.JournalName,
-                        ConferenceName = p.ConferenceName
-                    });
+                    result.Add(p.MapToDto());
             }
             catch
             {
@@ -137,22 +139,22 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     }
 
     public async Task<List<Guid>> GetExistingPaperIdsAsync(
-        IEnumerable<Guid> paperIds,
+        IEnumerable<Guid> ids,
         CancellationToken cancellationToken = default)
     {
         var validIds = new List<Guid>();
 
-        foreach (var paperId in paperIds)
+        foreach (var id in ids)
         {
             try
             {
-                var response = await labServiceApi.GetPaperByIdAsync(paperId);
+                var response = await labServiceApi.GetPaperByIdAsync(id);
                 if (response.IsSuccessStatusCode)
-                    validIds.Add(paperId);
+                    validIds.Add(id);
             }
             catch
             {
-                // If user service is unreachable or returns an error, skip this userId
+                // If Lab service is unreachable or returns an error, skip this id
             }
         }
 
@@ -252,11 +254,11 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             return body?.Result?.Items?
                 .Select(s => new LabSectionDto
                 {
-                    Id             = s.Id,
-                    Title          = s.Title,
-                    DisplayOrder   = s.DisplayOrder,
+                    Id              = s.Id,
+                    Title           = s.Title,
+                    DisplayOrder    = s.DisplayOrder,
                     ParentSectionId = s.ParentSectionId,
-                    PaperId        = s.PaperId
+                    PaperId         = s.PaperId
                 })
                 .ToList() ?? new List<LabSectionDto>();
         }
@@ -269,23 +271,19 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     #endregion
 }
 
-// Internal shapes for GET /papers/{paperId}/sections response
-file sealed class LabSectionItem
+file static class LabPaperItemMapper
 {
-    public Guid Id { get; set; }
-    public string? Title { get; set; }
-    public float DisplayOrder { get; set; }
-    public Guid? ParentSectionId { get; set; }
-    public Guid PaperId { get; set; }
+    internal static PaperInfoDto MapToDto(this LabPaperItem p) => new()
+    {
+        Id              = p.Id,
+        Title           = p.Title,
+        Abstract        = p.Abstract,
+        Doi             = p.Doi,
+        FilePath        = p.FilePath,
+        Status          = p.Status ?? 0,
+        PublicationDate = p.PublicationDate,
+        PaperType       = p.PaperType,
+        JournalName     = p.JournalName,
+        ConferenceName  = p.ConferenceName
+    };
 }
-
-file sealed class LabGetSectionsResult
-{
-    public List<LabSectionItem>? Items { get; set; }
-}
-
-file sealed class LabGetSectionsResponse
-{
-    public LabGetSectionsResult? Result { get; set; }
-}
-

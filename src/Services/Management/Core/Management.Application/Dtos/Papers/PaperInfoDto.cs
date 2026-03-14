@@ -10,7 +10,7 @@ public sealed class PaperInfoDto
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
-    public string? Status { get; set; }
+    public int Status { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }

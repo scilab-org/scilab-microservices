@@ -44,7 +44,7 @@ public class CreateProjectPaperCommandHandler(
         session.Store(project);
         await session.SaveChangesAsync(cancellationToken);
 
-        return project.PaperIds;
+        return validPaperIds;
     }
     #endregion
 }
