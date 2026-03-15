@@ -1,5 +1,7 @@
+using Common.Models;
 using Management.Api.Constants;
 using Management.Application.Features.Project.Queries;
+using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,9 +27,11 @@ public sealed class GetProjectPapers : ICarterModule
 
     private async Task<IResult> HandleAsync(
         ISender sender,
-        [FromRoute] Guid projectId)
+        [FromRoute] Guid projectId,
+        [AsParameters] GetPaperBanksFilter req,
+        [AsParameters] PaginationRequest paging)
     {
-        var query = new GetProjectPapersQuery(ProjectId: projectId);
+        var query = new GetProjectPapersQuery(projectId, paging, req);
         var result = await sender.Send(query);
 
         return TypedResults.Ok(new ApiGetResponse<GetProjectPapersResult>(result));

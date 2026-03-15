@@ -42,17 +42,19 @@ public sealed class ApiRoutes
 
         public const string Tags = "Papers";
         private const string Base = "/papers";
-        private const string BaseAdmin = "/admin/papers";
+        private const string BaseManager = "/manager/papers";
 
         #endregion
 
         #region Enpoints
 
         public const string Create = $"{Base}";
+        public const string Delete = $"{BaseManager}/{{id}}";
         public const string GetPaperSamples = $"{Base}/sample";
-        public const string Initialize = $"{BaseAdmin}/initialize";
+        public const string Initialize = $"{BaseManager}/initialize";
         public const string GetAssignedPaperSections = $"{Base}/{{id}}/assigned-sections";
         public const string GetSectionsByPaperId = $"{Base}/{{id}}/sections";
+        public const string GetPaperById = $"{Base}/{{id}}";
 
         #endregion
     }

@@ -16,7 +16,7 @@ file enum PaperStatus
 }
 
 // Internal shapes matching Lab service JSON response
-// Lab returns PaperDto which extends PaperInfoDto
+// Internal deserialization shapes — LabPaperItem (bank/list) and LabPaperFull (single paper with Template + ParsedText)
 file sealed class LabPaperItem
 {
     public Guid Id { get; set; }
@@ -45,15 +45,46 @@ file sealed class LabGetPapersResponse
     public LabGetPapersResult? Result { get; set; }
 }
 
-// GET /paper-bank/{id}  =>  { "result": { "paper": { ... } } }
+// GET /papers/{id}  =>  { "result": { "paper": { ...PaperDto... } } }
+// PaperDto adds Template + ParsedText over PaperBankInfoDto
+file sealed class LabPaperFull
+{
+    public Guid Id { get; set; }
+    public string? Title { get; set; }
+    public string? Template { get; set; }
+    public string? Abstract { get; set; }
+    public string? Doi { get; set; }
+    public string? FilePath { get; set; }
+    public int? Status { get; set; }
+    public string? ParsedText { get; set; }
+    public bool? IsIngested { get; set; }
+    public bool? IsAutoTagged { get; set; }
+    public DateTimeOffset? PublicationDate { get; set; }
+    public string? PaperType { get; set; }
+    public string? JournalName { get; set; }
+    public string? ConferenceName { get; set; }
+    public List<string> TagNames { get; set; } = new();
+}
+
 file sealed class LabGetPaperByIdResult
 {
-    public LabPaperItem? Paper { get; set; }
+    public LabPaperFull? Paper { get; set; }
 }
 
 file sealed class LabGetPaperByIdResponse
 {
     public LabGetPaperByIdResult? Result { get; set; }
+}
+
+// GET /paper-bank/{id}  =>  { "result": { "paperBank": { ... } } }
+file sealed class LabGetPaperBankByIdResult
+{
+    public LabPaperItem? PaperBank { get; set; }
+}
+
+file sealed class LabGetPaperBankByIdResponse
+{
+    public LabGetPaperBankByIdResult? Result { get; set; }
 }
 
 // GET /papers/{id}/sections  =>  { "result": { "items": [...] } }
@@ -81,7 +112,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
 {
     #region Implementations
 
-    public async Task<List<PaperInfoDto>> GetAvailablePapersAsync(
+    public async Task<List<PaperBankInfoDto>> GetAvailablePapersAsync(
         IEnumerable<Guid> existingPaperIds,
         string? searchText = null,
         CancellationToken cancellationToken = default)
@@ -94,7 +125,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             title: searchText);
 
         if (!response.IsSuccessStatusCode)
-            return new List<PaperInfoDto>();
+            return new List<PaperBankInfoDto>();
 
         var body = await response.Content.ReadFromJsonAsync<LabGetPapersResponse>(
             cancellationToken: cancellationToken);
@@ -107,6 +138,45 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             .ToList();
     }
 
+    public async Task<PaperInfoDto?> GetPaperByIdAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetPaperByIdAsync(paperId);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var body = await response.Content.ReadFromJsonAsync<LabGetPaperByIdResponse>(
+                cancellationToken: cancellationToken);
+
+            return body?.Result?.Paper?.MapToPaperDto();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<PaperBankInfoDto?> GetPaperBankByIdAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetPaperBankByIdAsync(paperId);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var body = await response.Content.ReadFromJsonAsync<LabGetPaperBankByIdResponse>(
+                cancellationToken: cancellationToken);
+
+            return body?.Result?.PaperBank?.MapToDto();
+        }
+        catch
+        {
+            return null;
+        }
+    }
     public async Task<List<PaperInfoDto>> GetPapersByIdsAsync(
         IEnumerable<Guid> paperIds,
         CancellationToken cancellationToken = default)
@@ -127,6 +197,37 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
                     cancellationToken: cancellationToken);
 
                 if (body?.Result?.Paper is { } p)
+                    result.Add(p.MapToPaperDto());
+            }
+            catch
+            {
+                // skip unreachable / deleted papers
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<List<PaperBankInfoDto>> GetPaperBanksByIdsAsync(
+        IEnumerable<Guid> paperIds,
+        CancellationToken cancellationToken = default)
+    {
+        var idSet = paperIds.ToHashSet();
+        if (idSet.Count == 0) return new List<PaperBankInfoDto>();
+
+        var result = new List<PaperBankInfoDto>();
+
+        foreach (var paperId in idSet)
+        {
+            try
+            {
+                var response = await labServiceApi.GetPaperBankByIdAsync(paperId);
+                if (!response.IsSuccessStatusCode) continue;
+
+                var body = await response.Content.ReadFromJsonAsync<LabGetPaperBankByIdResponse>(
+                    cancellationToken: cancellationToken);
+
+                if (body?.Result?.PaperBank is { } p)
                     result.Add(p.MapToDto());
             }
             catch
@@ -138,7 +239,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         return result;
     }
 
-    public async Task<List<Guid>> GetExistingPaperIdsAsync(
+    public async Task<List<Guid>> GetExistingPaperBankIdsAsync(
         IEnumerable<Guid> ids,
         CancellationToken cancellationToken = default)
     {
@@ -148,7 +249,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         {
             try
             {
-                var response = await labServiceApi.GetPaperByIdAsync(id);
+                var response = await labServiceApi.GetPaperBankByIdAsync(id);
                 if (response.IsSuccessStatusCode)
                     validIds.Add(id);
             }
@@ -159,6 +260,59 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
 
         return validIds;
+    }
+
+    public async Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetPaperBanksByIdsPagedAsync(
+        IEnumerable<Guid> paperIds,
+        string? title = null,
+        string[]? tags = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var idSet = paperIds.ToHashSet();
+        if (idSet.Count == 0)
+            return (new List<PaperBankInfoDto>(), 0);
+
+        // Fetch all paper-banks for the given IDs
+        var allPapers = await GetPaperBanksByIdsAsync(idSet, cancellationToken);
+
+        // Apply optional title filter (client-side, case-insensitive Contains)
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            var search = title.Trim();
+            allPapers = allPapers
+                .Where(p => p.Title != null && p.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Apply optional tags filter — AND semantics: paper must contain ALL requested tags
+        if (tags is { Length: > 0 })
+        {
+            var normalizedTags = tags
+                .Select(t => t.Trim().ToLowerInvariant())
+                .Where(t => t.Length > 0)
+                .ToList();
+
+            foreach (var tag in normalizedTags)
+            {
+                var local = tag;
+                allPapers = allPapers
+                    .Where(p => p.TagNames.Any(t => t.ToLowerInvariant().Contains(local)))
+                    .ToList();
+            }
+        }
+
+        var totalCount = allPapers.Count;
+
+        var skip = (pageNumber - 1) * pageSize;
+
+        var items = allPapers
+            .Skip(skip)
+            .Take(pageSize)
+            .ToList();
+
+        return (items, totalCount);
     }
 
     public async Task<(List<PaperInfoDto> Items, long TotalCount)> GetPapersByIdsPagedAsync(
@@ -196,6 +350,21 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         return (items, totalCount);
     }
 
+    public async Task<bool> DeletePaperBankAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.DeletePaperBankAsync(paperId);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            // If Lab service is unreachable or returns an error, return false
+            return false;
+        }
+    }
     public async Task<bool> DeletePaperAsync(
         Guid paperId,
         CancellationToken cancellationToken = default)
@@ -211,7 +380,6 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             return false;
         }
     }
-
     public async Task<bool> CreatePaperContributorAsync(
         string sectionRole,
         Guid paperId,
@@ -273,7 +441,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
 
 file static class LabPaperItemMapper
 {
-    internal static PaperInfoDto MapToDto(this LabPaperItem p) => new()
+    internal static PaperBankInfoDto MapToDto(this LabPaperItem p) => new()
     {
         Id              = p.Id,
         Title           = p.Title,
@@ -284,6 +452,24 @@ file static class LabPaperItemMapper
         PublicationDate = p.PublicationDate,
         PaperType       = p.PaperType,
         JournalName     = p.JournalName,
-        ConferenceName  = p.ConferenceName
+        ConferenceName  = p.ConferenceName,
+        TagNames        = p.TagNames
+    };
+
+    internal static PaperInfoDto MapToPaperDto(this LabPaperFull p) => new()
+    {
+        Id              = p.Id,
+        Title           = p.Title,
+        Template        = p.Template,
+        Abstract        = p.Abstract,
+        Doi             = p.Doi,
+        FilePath        = p.FilePath,
+        Status          = p.Status ?? 0,
+        ParsedText      = p.ParsedText,
+        PublicationDate = p.PublicationDate,
+        PaperType       = p.PaperType,
+        JournalName     = p.JournalName,
+        ConferenceName  = p.ConferenceName,
+        TagNames        = p.TagNames
     };
 }

@@ -16,17 +16,29 @@ public interface ILabServiceApi
         [AliasAs("title")] string? title = null);
 
     /// <summary>
-    /// GET /papers/{paperId} — returns a single paper by id.
+    /// GET /papers/{id} — returns a single paper (PaperEntity) by id.
     /// </summary>
-    [Get("/paper-bank/{id}")]
+    [Get("/papers/{id}")]
     Task<HttpResponseMessage> GetPaperByIdAsync([AliasAs("id")] Guid paperId);
 
     /// <summary>
-    /// DELETE /admin/paper-bank/{id} — deletes a paper by id.
+    /// GET /paper-bank/{id} — returns a single paper-bank entry by id.
+    /// </summary>
+    [Get("/paper-bank/{id}")]
+    Task<HttpResponseMessage> GetPaperBankByIdAsync([AliasAs("id")] Guid paperId);
+
+    /// <summary>
+    /// DELETE /admin/paper-bank/{id} — deletes a paper bank by id.
     /// </summary>
     [Delete("/admin/paper-bank/{id}")]
+    Task<HttpResponseMessage> DeletePaperBankAsync([AliasAs("id")] Guid paperId);
+    
+    /// <summary>
+    /// DELETE /manager/papers/{id} — deletes a paper by id.
+    /// </summary>
+    [Delete("/manager/papers/{id}")]
     Task<HttpResponseMessage> DeletePaperAsync([AliasAs("id")] Guid paperId);
-
+    
     /// <summary>
     /// GET /papers/{id}/sections — returns all sections for a paper.
     /// </summary>

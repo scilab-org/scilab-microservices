@@ -106,7 +106,7 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             .ToPagedListAsync(paging.PageNumber, paging.PageSize, cancellationToken);
 
         var papers = result.ToList();
-        var items = mapper.Map<List<PaperDto>>(papers);
+        var items = mapper.Map<List<PaperBankDto>>(papers);
 
         var reponse = new GetPaperBanksResult(items, totalCount, paging);
 

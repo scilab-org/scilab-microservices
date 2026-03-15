@@ -1,20 +1,19 @@
-﻿namespace Management.Application.Dtos.Papers;
+namespace Management.Application.Dtos.Papers;
 
-public sealed class PaperInfoDto
+/// <summary>
+/// Full paper DTO — mirrors Lab.Application.Dtos.Papers.PaperDto (GET /papers/{id}).
+/// Contains Paper-entity-specific fields (Template, ParsedText) in addition to the
+/// shared fields present on PaperBankInfoDto.
+/// </summary>
+public sealed class PaperInfoDto : PaperBankInfoDto
 {
     #region Fields, Properties and Indexers
 
-    public Guid Id { get; set; }
-    public Guid? SubProjectId { get; set; }
-    public string? Title { get; set; }
-    public string? Abstract { get; set; }
-    public string? Doi { get; set; }
-    public string? FilePath { get; set; }
-    public int Status { get; set; }
-    public DateTimeOffset? PublicationDate { get; set; }
-    public string? PaperType { get; set; }
-    public string? JournalName { get; set; }
-    public string? ConferenceName { get; set; }
+    /// <summary>Template code/name used for the paper structure.</summary>
+    public string? Template { get; set; }
+
+    /// <summary>Extracted plain-text content from the paper file.</summary>
+    public string? ParsedText { get; set; }
 
     #endregion
 }

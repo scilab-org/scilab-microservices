@@ -6,14 +6,14 @@ public class GetPaperBankByIdResult
 {
     #region Fields, Properties and Indexers
 
-    public PaperDto Paper { get; init; }
+    public PaperBankDto PaperBank { get; init; }
 
     #endregion
 
     #region Ctors
-    public GetPaperBankByIdResult(PaperDto paper)
+    public GetPaperBankByIdResult(PaperBankDto paperBank)
     {
-        Paper = paper;
+        PaperBank = paperBank;
     }
 
     #endregion

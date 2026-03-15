@@ -1,6 +1,6 @@
 ﻿using Lab.Application.Dtos.Abstractions;
 
-namespace Lab.Application.Dtos.PaperBanks;
+namespace Lab.Application.Dtos.Papers;
 
 public class PaperDto : PaperInfoDto, IAuditableDto
 {

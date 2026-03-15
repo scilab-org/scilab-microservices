@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Lab.Application.Dtos.PaperBanks;
+using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Dtos.Tags;
 using Lab.Application.Dtos.Template;
@@ -34,7 +35,7 @@ public sealed class LabMappingProfile : Profile
         CreateMap<PaperEntity, PaperDto>();
 
         CreateMap<PaperEntity, GetPaperBankByIdResult>()
-            .ForMember(dest => dest.Paper, opt => opt.MapFrom(src => src));
+            .ForMember(dest => dest.PaperBank, opt => opt.MapFrom(src => src));
     }
 
     #endregion
@@ -43,7 +44,7 @@ public sealed class LabMappingProfile : Profile
 
     private void CreatePaperBankMappings()
     {
-        CreateMap<PaperBankEntity, PaperDto>();
+        CreateMap<PaperBankEntity, PaperBankDto>();
     }
 
     #endregion

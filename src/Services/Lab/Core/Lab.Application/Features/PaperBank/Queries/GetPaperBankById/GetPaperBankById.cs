@@ -29,7 +29,7 @@ public class GetPaperBankByIdQueryHandler(IDocumentSession session, IMapper mapp
         if (paper == null)
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
-        var response = mapper.Map<PaperDto>(paper);
+        var response = mapper.Map<PaperBankDto>(paper);
 
         return new GetPaperBankByIdResult(response);
     }

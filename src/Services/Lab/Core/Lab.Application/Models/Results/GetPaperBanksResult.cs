@@ -6,7 +6,7 @@ public sealed class GetPaperBanksResult
 {
     #region Fields, Properties and Indexers
 
-    public List<PaperDto> Items { get; init; }
+    public List<PaperBankDto> Items { get; init; }
 
     public PagingResult Paging { get; init; }
 
@@ -15,7 +15,7 @@ public sealed class GetPaperBanksResult
     #region Ctors
 
     public GetPaperBanksResult(
-        List<PaperDto> items,
+        List<PaperBankDto> items,
         long totalCount,
         PaginationRequest pagination)
     {
