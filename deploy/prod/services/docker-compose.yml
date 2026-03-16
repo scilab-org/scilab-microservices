@@ -160,6 +160,9 @@ services:
       - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
       - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
+      - RedisCache__EndPoint=${REDIS_ENDPOINT}
+      - RedisCache__Password=${REDIS_PASSWORD}
+      - RedisCache__InstanceName="HDL:"
     networks:
       - scilab_network
 

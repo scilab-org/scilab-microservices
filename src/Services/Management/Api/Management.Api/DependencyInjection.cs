@@ -1,4 +1,4 @@
-﻿#region using
+#region using
 
 using System.Reflection;
 using BuildingBlocks.Authentication.Extensions;
@@ -47,6 +47,22 @@ public static class DependencyInjection
                     throw new Exception("Unsupported database type");
             }
         }
+
+        // Redis Health Check
+        services.AddHealthChecks()
+            .AddRedis(cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.EndPoint}"]!);
+
+        // Redis Distributed Cache
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+            {
+                EndPoints = { cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.EndPoint}"]! },
+                Password = cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.Password}"],
+                AbortOnConnectFail = false
+            };
+            options.InstanceName = cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.InstanceName}"];
+        });
 
         services.AddHttpContextAccessor();
         services.AddAuthenticationAndAuthorization(cfg);
