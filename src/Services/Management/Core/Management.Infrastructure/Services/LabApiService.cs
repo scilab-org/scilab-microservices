@@ -45,6 +45,23 @@ file sealed class LabGetPapersResponse
     public LabGetPapersResult? Result { get; set; }
 }
 
+// GET /paper-bank  =>  { "result": { "items": [...], "paging": { "totalCount": ... } } }
+file sealed class LabGetPaperBanksPaging
+{
+    public long TotalCount { get; set; }
+}
+
+file sealed class LabGetPaperBanksResult
+{
+    public List<LabPaperItem> Items { get; set; } = new();
+    public LabGetPaperBanksPaging? Paging { get; set; }
+}
+
+file sealed class LabGetPaperBanksResponse
+{
+    public LabGetPaperBanksResult? Result { get; set; }
+}
+
 // GET /papers/{id}  =>  { "result": { "paper": { ...PaperDto... } } }
 // PaperDto adds Template + ParsedText over PaperBankInfoDto
 file sealed class LabPaperFull
@@ -112,30 +129,54 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
 {
     #region Implementations
 
-    public async Task<List<PaperBankInfoDto>> GetAvailablePapersAsync(
+    public async Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetAvailablePapersAsync(
         IEnumerable<Guid> existingPaperIds,
-        string? searchText = null,
+        string? title = null,
+        string? @abstract = null,
+        string? doi = null,
+        int? status = null,
+        DateTimeOffset? fromPublicationDate = null,
+        DateTimeOffset? toPublicationDate = null,
+        string? paperType = null,
+        string? journalName = null,
+        string? conferenceName = null,
+        string[]? tag = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
         CancellationToken cancellationToken = default)
     {
         var existingSet = existingPaperIds.ToHashSet();
 
-        var response = await labServiceApi.GetPapersSampleAsync(
-            pageNumber: 1,
-            pageSize: 1000,
-            title: searchText);
+        var response = await labServiceApi.GetPaperBanksAsync(
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            title: title,
+            @abstract: @abstract,
+            doi: doi,
+            status: status,
+            fromPublicationDate: fromPublicationDate,
+            toPublicationDate: toPublicationDate,
+            paperType: paperType,
+            journalName: journalName,
+            conferenceName: conferenceName,
+            tag: tag);
 
         if (!response.IsSuccessStatusCode)
-            return new List<PaperBankInfoDto>();
+            return (new List<PaperBankInfoDto>(), 0);
 
-        var body = await response.Content.ReadFromJsonAsync<LabGetPapersResponse>(
+        var body = await response.Content.ReadFromJsonAsync<LabGetPaperBanksResponse>(
             cancellationToken: cancellationToken);
 
-        var allPapers = body?.Result?.Items ?? new List<LabPaperItem>();
+        var allItems = body?.Result?.Items ?? new List<LabPaperItem>();
 
-        return allPapers
+        var filtered = allItems
             .Where(p => !existingSet.Contains(p.Id))
             .Select(p => p.MapToDto())
             .ToList();
+
+        var totalCount = body?.Result?.Paging?.TotalCount ?? filtered.Count;
+
+        return (filtered, totalCount);
     }
 
     public async Task<PaperInfoDto?> GetPaperByIdAsync(

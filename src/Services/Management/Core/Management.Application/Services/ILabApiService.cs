@@ -7,12 +7,23 @@ public interface ILabApiService
     #region Methods
 
     /// <summary>
-    /// Returns all papers from Lab service that are NOT already added to the project,
-    /// with optional title search text.
+    /// Returns all paper-banks from Lab service that are NOT already added to the project,
+    /// with optional filters matching the GetPaperBanks endpoint (minus IsDeleted).
     /// </summary>
-    Task<List<PaperBankInfoDto>> GetAvailablePapersAsync(
+    Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetAvailablePapersAsync(
         IEnumerable<Guid> existingPaperIds,
-        string? searchText = null,
+        string? title = null,
+        string? @abstract = null,
+        string? doi = null,
+        int? status = null,
+        DateTimeOffset? fromPublicationDate = null,
+        DateTimeOffset? toPublicationDate = null,
+        string? paperType = null,
+        string? journalName = null,
+        string? conferenceName = null,
+        string[]? tag = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
         CancellationToken cancellationToken = default);
 
     /// <summary>

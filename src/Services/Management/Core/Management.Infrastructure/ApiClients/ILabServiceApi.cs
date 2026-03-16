@@ -16,6 +16,24 @@ public interface ILabServiceApi
         [AliasAs("title")] string? title = null);
 
     /// <summary>
+    /// GET /paper-bank — returns paper banks with filters and paging.
+    /// </summary>
+    [Get("/paper-bank")]
+    Task<HttpResponseMessage> GetPaperBanksAsync(
+        [AliasAs("pageNumber")] int pageNumber = 1,
+        [AliasAs("pageSize")] int pageSize = 1000,
+        [AliasAs("title")] string? title = null,
+        [AliasAs("abstract")] string? @abstract = null,
+        [AliasAs("doi")] string? doi = null,
+        [AliasAs("status")] int? status = null,
+        [AliasAs("fromPublicationDate")] DateTimeOffset? fromPublicationDate = null,
+        [AliasAs("toPublicationDate")] DateTimeOffset? toPublicationDate = null,
+        [AliasAs("paperType")] string? paperType = null,
+        [AliasAs("journalName")] string? journalName = null,
+        [AliasAs("conferenceName")] string? conferenceName = null,
+        [AliasAs("tag")] string[]? tag = null);
+
+    /// <summary>
     /// GET /papers/{id} — returns a single paper (PaperEntity) by id.
     /// </summary>
     [Get("/papers/{id}")]

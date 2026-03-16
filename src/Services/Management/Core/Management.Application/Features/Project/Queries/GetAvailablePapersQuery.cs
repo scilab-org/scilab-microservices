@@ -1,3 +1,4 @@
+using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
 using Management.Application.Services;
 using Management.Domain.Entities;
@@ -6,8 +7,7 @@ using Marten;
 namespace Management.Application.Features.Project.Queries;
 
 public sealed record GetAvailablePapersQuery(
-    Guid ProjectId,
-    string? SearchText = null) : IQuery<GetAvailablePapersResult>;
+    Guid ProjectId, GetPaperBanksFilter Filter, PaginationRequest Paging) : IQuery<GetAvailablePapersResult>;
 
 public class GetAvailablePapersValidator : AbstractValidator<GetAvailablePapersQuery>
 {
@@ -36,14 +36,27 @@ public class GetAvailablePapersQueryHandler(
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
 
         var existingPaperIds = project.PaperIds.Distinct();
+        var filter = query.Filter;
+        var paging = query.Paging;
 
-        // Fetch papers from Lab service excluding already-added ones
-        var papers = await labApiService.GetAvailablePapersAsync(
+        // Fetch papers from Lab service via GET /paper-bank, excluding already-added ones
+        var (items, totalCount) = await labApiService.GetAvailablePapersAsync(
             existingPaperIds: existingPaperIds,
-            searchText: query.SearchText,
+            title: filter.Title,
+            @abstract: filter.Abstract,
+            doi: filter.Doi,
+            status: filter.Status,
+            fromPublicationDate: filter.FromPublicationDate,
+            toPublicationDate: filter.ToPublicationDate,
+            paperType: filter.PaperType,
+            journalName: filter.JournalName,
+            conferenceName: filter.ConferenceName,
+            tag: filter.Tag,
+            pageNumber: paging.PageNumber,
+            pageSize: paging.PageSize,
             cancellationToken: cancellationToken);
 
-        return new GetAvailablePapersResult(papers);
+        return new GetAvailablePapersResult(items, totalCount, paging);
     }
 
     #endregion
