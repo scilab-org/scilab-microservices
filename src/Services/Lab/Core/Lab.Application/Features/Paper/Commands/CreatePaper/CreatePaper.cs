@@ -22,6 +22,11 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .WithMessage(MessageCode.PaperTitleIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperTitleIsRequired);
+                RuleFor(x => x.Dto.Context)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.PaperContextIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperContextIsRequired);
             });
     }
 }
@@ -40,8 +45,7 @@ public class CreatePaperCommandHandler(
             id: Guid.NewGuid(),
             title: dto.Title,
             template: dto.Template,
-            abstractText: dto.Abstract,
-            doi: dto.Doi,
+            context: dto.Context,
             status: dto.Status ?? PaperStatus.Processing,
             paperType: dto.PaperType
         );

@@ -1,5 +1,4 @@
 ﻿using Lab.Domain.Enums;
-using Lab.Domain.Models;
 
 namespace Lab.Api.Models.PaperBank;
 
@@ -12,7 +11,7 @@ public class CreatePaperBankRequest
     public string? Doi { get; set; }
     public IFormFile? File { get; set; }
     public PaperStatus? Status { get; set; }
-    public ParsedText? ParsedText { get; set; }
+    public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }

@@ -1,6 +1,5 @@
 ﻿using Lab.Domain.Abstractions;
 using Lab.Domain.Enums;
-using Lab.Domain.Models;
 
 namespace Lab.Domain.Entities;
 
@@ -13,7 +12,7 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public PaperStatus? Status { get; set; }
-    public ParsedText? ParsedText { get; set; }
+    public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; } = false;
     public bool? IsAutoTagged { get; set; } = false;
     public DateTimeOffset? PublicationDate { get; set; }
@@ -31,7 +30,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? abstractText,
         string? doi,
         PaperStatus? status,
-        ParsedText? parsedText,
+        string? parsedText,
         bool? isIngested,
         bool? isAutoTagged,
         DateTimeOffset? publicationDate,
@@ -47,7 +46,7 @@ public sealed class PaperBankEntity : Entity<Guid>
             Abstract = abstractText,
             Doi = doi,
             Status = status ?? PaperStatus.Draft,
-            ParsedText = parsedText ?? new ParsedText(),
+            ParsedText = parsedText ?? string.Empty,
             IsIngested = isIngested ?? false,
             IsAutoTagged = isAutoTagged ?? false,
             PublicationDate = publicationDate,

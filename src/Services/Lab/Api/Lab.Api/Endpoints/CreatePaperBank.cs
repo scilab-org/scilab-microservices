@@ -7,9 +7,7 @@ using Lab.Api.Constants;
 using Lab.Api.Models.PaperBank;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Features.PaperBank.Commands.CreatePaperBank;
-using Lab.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Lab.Api.Endpoints;
 
@@ -41,10 +39,7 @@ public sealed class CreatePaperBank : ICarterModule
     {
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
 
-        var parsedText = await ResolveParsedTextAsync(httpRequest, req.ParsedText);
-
         var dto = mapper.Map<CreatePaperBankDto>(req);
-        dto.ParsedText = parsedText;
 
         if (req.File != null)
         {
@@ -62,42 +57,6 @@ public sealed class CreatePaperBank : ICarterModule
         var result = await sender.Send(command);
 
         return TypedResults.Created($"{ApiRoutes.PaperBank.Create}/{result}", new ApiCreatedResponse<Guid>(result));
-    }
-
-    #endregion
-
-    #region Helpers
-
-    private static async Task<ParsedText?> ResolveParsedTextAsync(HttpRequest httpRequest, ParsedText? parsedText)
-    {
-        if (parsedText is not null) return parsedText;
-        if (!httpRequest.HasFormContentType) return null;
-
-        var form = await httpRequest.ReadFormAsync();
-        if (!form.TryGetValue("parsedText", out var parsedTextValues)) return null;
-
-        var rawParsedText = parsedTextValues.ToString();
-        if (string.IsNullOrWhiteSpace(rawParsedText)) return null;
-
-        try
-        {
-            return JsonSerializer.Deserialize<ParsedText>(
-                rawParsedText,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-        }
-        catch (JsonException)
-        {
-            throw new ClientValidationException(
-                MessageCode.BadRequest,
-                new
-                {
-                    Field = "parsedText",
-                    Error = "INVALID_JSON"
-                });
-        }
     }
 
     #endregion

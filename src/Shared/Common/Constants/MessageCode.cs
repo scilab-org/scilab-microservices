@@ -119,6 +119,8 @@ public sealed class MessageCode
 
     public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
+    public const string PaperContextIsRequired = "PAPER_CONTEXT_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes

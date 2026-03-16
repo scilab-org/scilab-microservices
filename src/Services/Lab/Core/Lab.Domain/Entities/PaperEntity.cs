@@ -9,17 +9,10 @@ public sealed class PaperEntity : Entity<Guid>
 
     public string Title { get; set; } = null!;
     public string? Template { get; set; }
-    public string? Abstract { get; set; }
-    public string? Doi { get; set; }
     public string? FilePath { get; set; }
+    public string? Context { get; set; }
     public PaperStatus? Status { get; set; }
-    public string? ParsedText { get; set; }
-    public bool? IsIngested { get; set; } = false;
-    public bool? IsAutoTagged { get; set; } = false;
-    public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
-    public string? JournalName { get; set; }
-    public string? ConferenceName { get; set; }
     public List<string> TagNames { get; set; } = new();
 
     #endregion
@@ -29,16 +22,9 @@ public sealed class PaperEntity : Entity<Guid>
     public static PaperEntity Create(Guid id,
         string title,
         string? template = null,
-        string? abstractText = null,
-        string? doi = null,
+        string? context = null,
         PaperStatus? status = null,
-        string? parsedText = null,
-        bool? isIngested = null,
-        bool? isAutoTagged = null,
-        DateTimeOffset? publicationDate = null,
         string? paperType = null,
-        string? journalName = null,
-        string? conferenceName = null,
         List<string>? tagNames = null)
     {
         return new PaperEntity()
@@ -46,16 +32,9 @@ public sealed class PaperEntity : Entity<Guid>
             Id = id,
             Title = title,
             Template = template,
-            Abstract = abstractText,
-            Doi = doi,
+            Context = context,
             Status = status ?? PaperStatus.Processing,
-            ParsedText = parsedText ?? string.Empty,
-            IsIngested = isIngested ?? false,
-            IsAutoTagged = isAutoTagged ?? false,
-            PublicationDate = publicationDate,
             PaperType = paperType,
-            JournalName = journalName,
-            ConferenceName = conferenceName,
             TagNames = tagNames ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -68,28 +47,16 @@ public sealed class PaperEntity : Entity<Guid>
 
     public void Update(string? title = null,
         string? template = null,
-        string? abstractText = null,
-        string? doi = null,
+        string? context = null,
         PaperStatus? status = null,
-        bool? isIngested = null,
-        bool? isAutoTagged = null,
-        DateTimeOffset? publicationDate = null,
         string? paperType = null,
-        string? journalName = null,
-        string? conferenceName = null,
         List<string>? tagNames = null)
     {
         Title = title ?? Title;
         Template = template ?? Template;
-        Abstract = abstractText ?? Abstract;
-        Doi = doi  ?? Doi;
+        Context = context ?? Context;
         Status = status ?? Status;
-        IsIngested = isIngested ?? IsIngested;
-        IsAutoTagged = isAutoTagged ?? IsAutoTagged;
-        PublicationDate = publicationDate  ?? PublicationDate;
         PaperType = paperType  ?? PaperType;
-        JournalName = journalName  ?? JournalName;
-        ConferenceName = conferenceName  ?? ConferenceName;
         TagNames = tagNames ?? TagNames;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }

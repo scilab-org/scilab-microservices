@@ -1,5 +1,4 @@
 ﻿using Lab.Domain.Enums;
-using Lab.Domain.Models;
 
 namespace Lab.Application.Dtos.PaperBanks;
 
@@ -12,7 +11,7 @@ public class CreatePaperBankDto
     public string? Doi { get; init; }
     public UploadFileBytes UploadFile { get; set; } = null!;
     public PaperStatus? Status { get; init; }
-    public ParsedText? ParsedText { get; set; }
+    public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
