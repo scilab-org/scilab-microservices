@@ -7,6 +7,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Paper.Queries.GetPaperById;
 
+
 public record GetPaperByIdQuery(Guid Id) : ICommand<GetPaperByIdResult>;
 
 public class GetPaperByIdQueryValidator : AbstractValidator<GetPaperByIdQuery>
@@ -19,7 +20,8 @@ public class GetPaperByIdQueryValidator : AbstractValidator<GetPaperByIdQuery>
     }
 }
 
-public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper) : IRequestHandler<GetPaperByIdQuery, GetPaperByIdResult>
+public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper)
+    : IRequestHandler<GetPaperByIdQuery, GetPaperByIdResult>
 {
     public async Task<GetPaperByIdResult> Handle(GetPaperByIdQuery request, CancellationToken cancellationToken)
     {

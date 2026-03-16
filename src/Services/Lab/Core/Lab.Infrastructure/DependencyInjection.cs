@@ -29,6 +29,9 @@ public static class DependencyInjection
             opts.Schema.For<PaperEntity>()
                 .SoftDeleted()
                 .Index(p => p.TagNames);
+            opts.Schema.For<PaperBankEntity>()
+                .SoftDeleted()
+                .Index(pb => pb.TagNames);
             opts.Schema.For<TagEntity>()
                 .SoftDeleted()
                 .Index(t => t.Name, idx => { idx.IsUnique = true; });

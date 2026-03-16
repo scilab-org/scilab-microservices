@@ -1,8 +1,8 @@
 #region using
 
 using AutoMapper;
-using Lab.Api.Models.Papers;
-using Lab.Application.Dtos.Papers;
+using Lab.Api.Models.PaperBank;
+using Lab.Application.Dtos.PaperBanks;
 
 #endregion
 
@@ -14,7 +14,7 @@ public sealed class LabApiMappingProfile : Profile
 
     public LabApiMappingProfile()
     {
-        CreatePaperMapping();
+        CreatePaperBankMapping();
         UploadSectionMapping();
     }
 
@@ -23,11 +23,11 @@ public sealed class LabApiMappingProfile : Profile
 
     #region Paper Mappings
 
-    private void CreatePaperMapping()
+    private void CreatePaperBankMapping()
     {
-        CreateMap<CreatePaperRequest, CreatePaperDto>();
+        CreateMap<CreatePaperBankRequest, CreatePaperBankDto>();
 
-        CreateMap<UpdatePaperRequest, UpdatePaperDto>();
+        CreateMap<UpdatePaperBankRequest, UpdatePaperBankDto>();
     }
 
     #endregion

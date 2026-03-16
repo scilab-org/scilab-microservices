@@ -20,10 +20,10 @@ public class DeletePaperCommandHandler(IDocumentSession session) : IRequestHandl
 {
     public async Task<Unit> Handle(DeletePaperCommand request, CancellationToken cancellationToken)
     {
-        var dataset = await session.LoadAsync<PaperEntity>(request.Id, cancellationToken)
-                      ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id.ToString());
+        var paper = await session.LoadAsync<PaperEntity>(request.Id, cancellationToken)
+                    ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
-        session.Delete(dataset);
+        session.Delete(paper);
         await session.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

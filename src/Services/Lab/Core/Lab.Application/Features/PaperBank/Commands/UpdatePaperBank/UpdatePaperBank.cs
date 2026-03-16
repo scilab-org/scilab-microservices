@@ -1,61 +1,60 @@
-﻿using Lab.Application.Dtos.Papers;
-using Lab.Application.Services;
+﻿using Lab.Application.Dtos.PaperBanks;
 using Lab.Domain.Entities;
 using Marten;
 using MediatR;
 
-namespace Lab.Application.Features.Paper.Commands.UpdatePaper;
+namespace Lab.Application.Features.PaperBank.Commands.UpdatePaperBank;
 
-public record UpdatePaperCommand(Guid Id, UpdatePaperDto Dto) : ICommand<Guid>;
+public record UpdatePaperBankCommand(Guid Id, UpdatePaperBankDto BankDto) : ICommand<Guid>;
 
-public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
+public class UpdatePaperCommandVaBanklidator : AbstractValidator<UpdatePaperBankCommand>
 {
-    public UpdatePaperCommandValidator()
+    public UpdatePaperCommandVaBanklidator()
     {
         RuleFor(x => x.Id)
             .NotEmpty()
             .WithMessage(MessageCode.PaperIdIsRequired);
 
-        RuleFor(x => x.Dto)
+        RuleFor(x => x.BankDto)
             .NotNull()
             .WithMessage(MessageCode.BadRequest)
             .DependentRules(() =>
             {
-                RuleFor(x => x.Dto)
+                RuleFor(x => x.BankDto)
                     .NotNull()
                     .WithMessage(MessageCode.BadRequest)
                     .DependentRules(() =>
                     {
-                        RuleFor(x => x.Dto.Title)
+                        RuleFor(x => x.BankDto.Title)
                             .NotEmpty()
                             .WithMessage(MessageCode.PaperTitleIsRequired)
                             .NotNull()
                             .WithMessage(MessageCode.PaperTitleIsRequired);
 
-                        RuleFor(x => x.Dto.PublicationDate)
+                        RuleFor(x => x.BankDto.PublicationDate)
                             .LessThanOrEqualTo(DateTimeOffset.UtcNow)
-                            .When(x => x.Dto.PublicationDate.HasValue)
+                            .When(x => x.BankDto.PublicationDate.HasValue)
                             .WithMessage(MessageCode.PaperPublicationDateInvalid);
                     });
-                RuleFor(x => x.Dto.PublicationDate)
+                RuleFor(x => x.BankDto.PublicationDate)
                     .LessThanOrEqualTo(DateTimeOffset.UtcNow)
-                    .When(x => x.Dto.PublicationDate.HasValue)
+                    .When(x => x.BankDto.PublicationDate.HasValue)
                     .WithMessage(MessageCode.PaperPublicationDateInvalid);
             });
     }
 }
 
-public class UpdatePaperCommandHandler(IDocumentSession session)
-    : IRequestHandler<UpdatePaperCommand, Guid>
+public class UpdatePaperCommandBankHandler(IDocumentSession session)
+    : IRequestHandler<UpdatePaperBankCommand, Guid>
 {
-    public async Task<Guid> Handle(UpdatePaperCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdatePaperBankCommand request, CancellationToken cancellationToken)
     {
-        var dto = request.Dto;
+        var dto = request.BankDto;
         var tagNames = NomalizeTagNames(dto.TagNames);
 
         await session.BeginTransactionAsync(cancellationToken);
 
-        var entity = await session.LoadAsync<PaperEntity>(request.Id, cancellationToken)
+        var entity = await session.LoadAsync<PaperBankEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id);
 
         await EnsureTagsExistAsync(tagNames, cancellationToken);

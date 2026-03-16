@@ -6,17 +6,20 @@ public sealed class GetAvailablePapersResult
 {
     #region Fields, Properties and Indexers
 
-    public List<PaperInfoDto> Items { get; init; }
-    public int TotalCount { get; init; }
+    public List<PaperBankInfoDto> Items { get; init; }
+    public PagingResult Paging { get; init; }
 
     #endregion
 
     #region Ctors
 
-    public GetAvailablePapersResult(List<PaperInfoDto> items)
+    public GetAvailablePapersResult(
+        List<PaperBankInfoDto> items,
+        long totalCount,
+        PaginationRequest pagination)
     {
         Items = items;
-        TotalCount = items.Count;
+        Paging = PagingResult.Of(totalCount, pagination);
     }
 
     #endregion

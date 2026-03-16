@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Common.Constants;
+﻿using Lab.Application.Dtos.Abstractions;
 using Lab.Domain.Enums;
 
-namespace Lab.Api.Models.Papers;
+namespace Lab.Application.Dtos.PaperBanks;
 
-public class CreatePaperRequest
+public class PaperBankInfoDto : DtoId<Guid>
 {
     #region Fields, Properties and Indexers
 
-    public string Title { get; set; } = null!;
+    public string? Title { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
-    public IFormFile? File { get; set; }
+    public string? FilePath { get; set; }
     public PaperStatus? Status { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
@@ -20,7 +19,7 @@ public class CreatePaperRequest
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
-    public List<string>? TagNames { get; set; }
+    public List<string> TagNames { get; set; } = new();
 
     #endregion
 }

@@ -1,24 +1,23 @@
-﻿using Lab.Api.Constants;
-using Lab.Application.Features.Paper.Queries.GetPaperById;
+﻿using Lab.Application.Features.Paper.Queries.GetPaperById;
+
+namespace Lab.Api.Endpoints;
+using Lab.Api.Constants;
 using Lab.Application.Models.Results;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Lab.Api.Endpoints;
-
-public class GetPaperById : ICarterModule
+public class GetPaperById: ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet(ApiRoutes.Paper.GetPaperById, HandleGetPaperByIdAsync)
+        app.MapGet(ApiRoutes.Paper.GetPaperById, HandleGetPaperBankByIdAsync)
             .WithTags(ApiRoutes.Paper.Tags)
             .WithName(nameof(GetPaperById))
-            .Produces<ApiGetResponse<GetPaperByIdResult>>(StatusCodes.Status200OK)
+            .Produces<ApiGetResponse<GetPaperByIdResult>>()
             .ProducesProblem(StatusCodes.Status400BadRequest);
-        // .Produces(StatusCodes.Status403Forbidden)
-        // .ProducesProblem(StatusCodes.Status404NotFound)
         // .RequireAuthorization();
     }
-    private async Task<ApiGetResponse<GetPaperByIdResult>> HandleGetPaperByIdAsync(
+
+    private async Task<ApiGetResponse<GetPaperByIdResult>> HandleGetPaperBankByIdAsync(
         ISender sender,
         [FromRoute] Guid id)
     {
@@ -27,4 +26,5 @@ public class GetPaperById : ICarterModule
 
         return new ApiGetResponse<GetPaperByIdResult>(result);
     }
+    
 }

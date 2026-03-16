@@ -1,17 +1,19 @@
 ﻿using Lab.Domain.Enums;
 
-namespace Lab.Application.Dtos.Papers;
+namespace Lab.Application.Dtos.PaperBanks;
 
-public class UpdatePaperDto
+public class CreatePaperBankDto
 {
     #region Fields, Properties and Indexers
 
-    public string? Title { get; init; } = null!;
+    public string Title { get; init; } = null!;
     public string? Abstract { get; init; }
     public string? Doi { get; init; }
+    public UploadFileBytes UploadFile { get; set; } = null!;
     public PaperStatus? Status { get; init; }
-    public bool? IsIngested { get; init; }
-    public bool? IsAutoTagged { get; init; }
+    public string? ParsedText { get; set; }
+    public bool? IsIngested { get; set; }
+    public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; init; }
     public string? JournalName { get; init; }

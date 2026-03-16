@@ -1,4 +1,5 @@
 using Management.Application.Dtos.Papers;
+using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
 using Management.Application.Services;
 using Management.Domain.Entities;
@@ -6,7 +7,10 @@ using Marten;
 
 namespace Management.Application.Features.Project.Queries;
 
-public sealed record GetProjectPapersQuery(Guid ProjectId) : IQuery<GetProjectPapersResult>;
+public sealed record GetProjectPapersQuery(
+    Guid ProjectId,
+    PaginationRequest Paging,
+    GetPaperBanksFilter Filter) : IQuery<GetProjectPapersResult>;
 
 public class GetProjectPapersValidator : AbstractValidator<GetProjectPapersQuery>
 {
@@ -36,14 +40,18 @@ public class GetProjectPapersQueryHandler(
 
         var paperIds = project.PaperIds.Distinct().ToList();
         if (!paperIds.Any())
-            return new GetProjectPapersResult(new List<PaperInfoDto>());
+            return new GetProjectPapersResult(new List<PaperBankInfoDto>(), 0, query.Paging);
 
-        // Fetch full paper details from Lab service
-        var papers = await labApiService.GetPapersByIdsAsync(
+        // Fetch paper details from Lab service with title/tags filter and paging
+        var (items, totalCount) = await labApiService.GetPaperBanksByIdsPagedAsync(
             paperIds: paperIds,
+            title: query.Filter.Title,
+            tags: query.Filter.Tag,
+            pageNumber: query.Paging.PageNumber,
+            pageSize: query.Paging.PageSize,
             cancellationToken: cancellationToken);
 
-        return new GetProjectPapersResult(papers);
+        return new GetProjectPapersResult(items, totalCount, query.Paging);
     }
 
     #endregion

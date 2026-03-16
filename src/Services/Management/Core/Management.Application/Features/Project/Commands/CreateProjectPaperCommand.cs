@@ -35,7 +35,7 @@ public class CreateProjectPaperCommandHandler(
         if(project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
         
-        var validPaperIds = await labApiService.GetExistingPaperIdsAsync(dto.PaperIds, cancellationToken);
+        var validPaperIds = await labApiService.GetExistingPaperBankIdsAsync(dto.PaperIds, cancellationToken);
         if (validPaperIds.Count == 0)
             throw new NotFoundException(MessageCode.PaperIsNotExists);
         
@@ -44,7 +44,7 @@ public class CreateProjectPaperCommandHandler(
         session.Store(project);
         await session.SaveChangesAsync(cancellationToken);
 
-        return project.PaperIds;
+        return validPaperIds;
     }
     #endregion
 }

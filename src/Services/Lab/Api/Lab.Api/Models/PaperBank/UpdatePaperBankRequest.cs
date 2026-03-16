@@ -1,8 +1,8 @@
 ﻿using Lab.Domain.Enums;
 
-namespace Lab.Api.Models.Papers;
+namespace Lab.Api.Models.PaperBank;
 
-public class UpdatePaperRequest
+public class UpdatePaperBankRequest
 {
     #region Fields, Properties and Indexers
 

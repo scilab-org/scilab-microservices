@@ -2,7 +2,7 @@
 
 namespace Lab.Application.Models.Filters;
 
-public record class GetPapersFilter
+public record class GetPaperBanksFilter
 {
     public string? Title { get; set; } = null!;
     public string? Abstract { get; set; }
