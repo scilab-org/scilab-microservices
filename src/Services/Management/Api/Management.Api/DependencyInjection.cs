@@ -55,7 +55,6 @@ public static class DependencyInjection
         // Redis Distributed Cache
         services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.EndPoint}"];
             options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
             {
                 EndPoints = { cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.EndPoint}"]! },
