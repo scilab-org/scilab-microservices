@@ -162,7 +162,7 @@ services:
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
       - RedisCache__EndPoint=${REDIS_ENDPOINT}
       - RedisCache__Password=${REDIS_PASSWORD}
-      - RedisCache__InstanceName="HDL:"
+      - RedisCache__InstanceName=${REDIS_INSTANCE_NAME}
     networks:
       - scilab_network
 

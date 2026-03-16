@@ -147,7 +147,16 @@ services:
       TZ: ${TZ}
     ports:
       - 6379:6379
-    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory-policy allkeys-lru
+      --loglevel warning
     volumes:
       - ./docker-volumes/redis:/data
     networks:
