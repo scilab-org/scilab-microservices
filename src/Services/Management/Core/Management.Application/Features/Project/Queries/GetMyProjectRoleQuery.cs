@@ -30,7 +30,7 @@ public sealed class GetMyProjectRoleQueryHandler(
 
     public async Task<string> Handle(GetMyProjectRoleQuery req, CancellationToken cancellationToken)
     {
-        var cacheKey = $"{ProjectRolesKey}{UserIdentifierKey(req.UserId)}{req.ProjectId}";
+        var cacheKey = $"{UserIdentifierKey(req.UserId)}{ProjectRolesKey}{req.ProjectId}";
 
         var role = await redisService.GetOrSetCacheAsync(
             cacheKey,
