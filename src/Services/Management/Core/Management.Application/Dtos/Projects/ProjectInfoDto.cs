@@ -13,6 +13,8 @@ public class ProjectInfoDto : DtoId<Guid>
     public ProjectStatus? Status { get; set; }
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
-
+    public string? Context { get; set; }
+    public string? Domain { get; set; }
+    public string? Keypoint { get; set; }
     #endregion
 }

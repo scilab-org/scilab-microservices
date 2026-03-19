@@ -51,7 +51,10 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
             code: dto.Code,
             status: dto.Status,
             startDate: dto.StartDate,
-            endDate: dto.EndDate);
+            endDate: dto.EndDate,
+            context: dto.Context,
+            domain: dto.Domain,
+            keypoint: dto.Keypoint);    
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
