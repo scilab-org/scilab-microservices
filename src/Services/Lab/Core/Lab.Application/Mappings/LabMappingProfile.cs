@@ -1,6 +1,7 @@
 #region using
 
 using AutoMapper;
+using Lab.Application.Dtos.Journals;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Sections;
@@ -24,6 +25,7 @@ public sealed class LabMappingProfile : Profile
         CreateTagMappings();
         CreateTemplateMappings();
         CreateSectionMappings();
+        CreateJournalMappings();
     }
 
     #endregion
@@ -75,6 +77,18 @@ public sealed class LabMappingProfile : Profile
     private void CreateSectionMappings()
     {
         CreateMap<SectionEntity, SectionDto>();
+    }
+
+    #endregion
+
+    #region Journal Mappings
+
+    private void CreateJournalMappings()
+    {
+        CreateMap<JournalEntity, JournalDto>();
+
+        CreateMap<JournalEntity, GetJournalByIdResult>()
+            .ForMember(dest => dest.Journal, opt => opt.MapFrom(src => src));
     }
 
     #endregion

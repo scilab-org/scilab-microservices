@@ -63,6 +63,10 @@ public class CreatePaperCommandHandler(
             researchGap: dto.ResearchGap,
             mainContribution: dto.MainContribution,
             gapType: dto.GapType,
+            journal: dto.Journal.Name,
+            styleName: dto.Journal.StyleName,
+            styleDescription: dto.Journal.StyleDescription,
+            styleRule: dto.Journal.StyleRule,
             rule: Rules.Paper,
             status: dto.Status ?? PaperStatus.Processing
         );
@@ -191,7 +195,7 @@ public class CreatePaperCommandHandler(
             contentBuilder.AppendLine(paperDto.ResearchGap);
         contentBuilder.AppendLine();
 
-        contentBuilder.AppendLine("## GapType");
+        contentBuilder.AppendLine("## Gap Type");
         if (!string.IsNullOrEmpty(paperDto.GapType))
             contentBuilder.AppendLine(paperDto.GapType);
         contentBuilder.AppendLine();
@@ -206,7 +210,7 @@ public class CreatePaperCommandHandler(
         contentBuilder.AppendLine();
 
         // Section
-        contentBuilder.AppendLine("# Section: **Level 1 (Critical)**");
+        contentBuilder.AppendLine($"# Section {section.Title}: **Level 1 (Critical)**");
         contentBuilder.AppendLine();
 
         contentBuilder.AppendLine("## Rule");

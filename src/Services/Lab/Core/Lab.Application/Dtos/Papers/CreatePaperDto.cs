@@ -14,7 +14,7 @@ public class CreatePaperDto
     public string Abstract { get; init; } = null!;
     public string ResearchGap { get; init; } = null!;
     public string GapType { get; init; } = null!;
-    public string MainContribution { get; init; } = null!;
+    public string? MainContribution { get; init; } = null!;
     public PaperStatus? Status { get; init; } = PaperStatus.Draft;
     public CreateJournalDto Journal { get; init; } = null!;
     public List<CreateSectionDto>? Sections { get; init; }

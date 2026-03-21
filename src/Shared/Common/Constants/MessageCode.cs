@@ -179,4 +179,16 @@ public sealed class MessageCode
     public const string SectionIsNotExists = "SECTION_IS_NOT_EXISTS";
 
     #endregion
+
+    #region Journal Message Codes
+
+    public const string JournalNameIsRequired = "JOURNAL_NAME_IS_REQUIRED";
+
+    public const string JournalIsNotExists = "JOURNAL_IS_NOT_EXISTS";
+
+    public const string JournalIdIsRequired = "JOURNAL_ID_IS_REQUIRED";
+
+    public const string JournalNameAlreadyExists = "JOURNAL_NAME_ALREADY_EXISTS";
+
+    #endregion
 }

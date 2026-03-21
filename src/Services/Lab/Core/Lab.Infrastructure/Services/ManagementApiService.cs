@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Common.Models.Reponses;
 using Lab.Application.Services;
 using Lab.Infrastructure.ApiClients;
@@ -28,7 +29,7 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
             project.Name,
             project.Code,
             project.Description,
-            project.Status,
+            NormalizeStatus(project.Status),
             project.StartDate,
             project.EndDate,
             project.Context,
@@ -122,6 +123,20 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
             .Where(m => memberIdSet.Contains(m.MemberId))
             .ToDictionary(m => m.MemberId, m => m.UserId);
     }
+
+    private static string? NormalizeStatus(JsonElement status)
+    {
+        return status.ValueKind switch
+        {
+            JsonValueKind.String => status.GetString(),
+            JsonValueKind.Number => status.GetRawText(),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Null => null,
+            JsonValueKind.Undefined => null,
+            _ => status.GetRawText()
+        };
+    }
 }
 
 /// <summary>Minimal shape to extract SubProjectId + MemberId from the combined member-by-paper response.</summary>
@@ -142,7 +157,7 @@ file sealed class ProjectApiDto
     public string? Name { get; init; }
     public string? Code { get; init; }
     public string? Description { get; init; }
-    public string? Status { get; init; }
+    public JsonElement Status { get; init; }
     public DateTimeOffset? StartDate { get; init; }
     public DateTimeOffset? EndDate { get; init; }
     public string? Context { get; init; }

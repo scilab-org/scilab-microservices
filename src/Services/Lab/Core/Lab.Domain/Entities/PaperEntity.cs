@@ -16,6 +16,10 @@ public sealed class PaperEntity : Entity<Guid>
     public string? MainContribution { get; set; }
     public string? Rule { get; set; }
     public string? GapType { get; set; }
+    public string? Journal { get; set; }
+    public string? StyleName { get; set; }
+    public string? StyleDescription { get; set; }
+    public string? StyleRule { get; set; }
     public PaperStatus? Status { get; set; }
     public List<string> TagNames { get; set; } = new();
 
@@ -32,6 +36,10 @@ public sealed class PaperEntity : Entity<Guid>
         string? mainContribution = null,
         string? rule = null,
         string? gapType = null,
+        string? journal = null,
+        string? styleName = null,
+        string? styleDescription = null,
+        string? styleRule = null,
         PaperStatus? status = null,
         List<string>? tagNames = null)
     {
@@ -46,6 +54,10 @@ public sealed class PaperEntity : Entity<Guid>
             MainContribution = mainContribution,
             Rule = rule,
             GapType = gapType,
+            Journal = journal,
+            StyleName = styleName,
+            StyleDescription = styleDescription,
+            StyleRule = styleRule,
             Status = status ?? PaperStatus.Processing,
             TagNames = tagNames ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
@@ -64,6 +76,10 @@ public sealed class PaperEntity : Entity<Guid>
         string? researchGap = null,
         string? mainContribution = null,
         string? rule = null,
+        string? journal = null,
+        string? styleName = null,
+        string? styleDescription = null,
+        string? styleRule = null,
         PaperStatus? status = null,
         string? gapType = null,
         List<string>? tagNames = null)
