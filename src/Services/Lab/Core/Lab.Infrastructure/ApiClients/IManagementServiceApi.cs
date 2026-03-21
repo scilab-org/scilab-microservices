@@ -13,6 +13,14 @@ public interface IManagementServiceApi
         [Body] CreateSubProjectRequest body);
 
     /// <summary>
+    /// POST /sub-projects/{subProjectId}/members — adds members to a sub-project.
+    /// </summary>
+    [Post("/sub-projects/{subProjectId}/members")]
+    Task<HttpResponseMessage> AddSubProjectMembersAsync(
+        [AliasAs("subProjectId")] Guid subProjectId,
+        [Body] AddSubProjectMembersRequest body);
+
+    /// <summary>
     /// GET /sub-projects/papers/{paperId}/member?userId= — single call that resolves
     /// subProjectId from paperId and returns the member record in one round-trip.
     /// </summary>
@@ -38,4 +46,15 @@ public class CreateSubProjectRequest
 {
     public Guid PaperId { get; set; }
     public string? Name { get; set; }
+}
+
+public sealed class AddSubProjectMembersRequest
+{
+    public List<AddSubProjectMemberEntry> Members { get; set; } = [];
+}
+
+public sealed class AddSubProjectMemberEntry
+{
+    public Guid UserId { get; set; }
+    public string GroupName { get; set; } = Common.Constants.AuthorizeConstants.ProjectAuthor;
 }

@@ -31,11 +31,11 @@ public class AddSubProjectMembers: ICarterModule
         [FromRoute] Guid subProjectId,
         [FromBody] AddProjectMembersDto req)
     {
-        var currentUser = httpContext.GetCurrentUser();
-        if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
-            return Results.Unauthorized();
-        
-        var command = new AddSubProjectMembersCommand(subProjectId, req, userId);
+        // var currentUser = httpContext.GetCurrentUser();
+        // if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
+        //     return Results.Unauthorized();
+        //
+        var command = new AddSubProjectMembersCommand(subProjectId, req);
 
         var result = await sender.Send(command);
 

@@ -1,12 +1,13 @@
-﻿using Lab.Application.Dtos.Papers;
+using Lab.Application.Dtos.Papers;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
+using Common.Constants;
 
 namespace Lab.Application.Features.Paper.Commands.CreatePaper;
 
-public record CreatePaperCommand(CreatePaperDto Dto) : ICommand<Guid>;
+public record CreatePaperCommand(CreatePaperDto Dto, Guid UserId) : ICommand<Guid>;
 
 public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
 {
@@ -39,6 +40,10 @@ public class CreatePaperCommandHandler(
     {
         var dto = request.Dto;
 
+        var isAtuhor = await managementApiService.GetMyProjectRoleAsync(dto.ProjectId, cancellationToken);
+        if (dto.ProjectId != Guid.Empty && isAtuhor != AuthorizeConstants.ProjectAuthor)
+            throw new UnauthorizedAccessException(MessageCode.AccessDenied);
+        
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = PaperEntity.Create(
@@ -72,8 +77,16 @@ public class CreatePaperCommandHandler(
 
         if (dto.ProjectId != Guid.Empty)
         {
-            await managementApiService.CreateSubProjectAsync(
+            var subProjectId = await managementApiService.CreateSubProjectAsync(
                 dto.ProjectId, entity.Id, dto.Title, cancellationToken);
+
+            if (subProjectId.HasValue)
+            {
+                await managementApiService.AddSubProjectMembersAsync(
+                    subProjectId.Value,
+                    new[] { (request.UserId, AuthorizeConstants.ProjectAuthor) },
+                    cancellationToken);
+            }
         }
 
         return entity.Id;
