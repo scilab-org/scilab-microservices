@@ -147,4 +147,23 @@ public sealed class ApiRoutes
         #endregion
 
     }
+    
+    public static class Comment
+    {
+        #region Constants
+
+        public const string Tags = "Comments";
+        private const string Base = "/comments";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
+        public const string Delete = $"{Base}/{{id}}";
+        public const string GetCommentsBySectionId = $"{Base}/section/{{sectionId}}";
+
+        #endregion
+    }
 }
