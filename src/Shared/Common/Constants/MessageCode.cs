@@ -177,4 +177,11 @@ public sealed class MessageCode
     public const string SectionIsNotExists = "SECTION_IS_NOT_EXISTS";
 
     #endregion
+
+    #region Comment Management
+
+    public const string CommentContentIsRequired = "CONTENT_IS_REQUIRED";
+    public const string CommentNotFound = "COMMENT_NOT_FOUND";
+
+    #endregion
 }

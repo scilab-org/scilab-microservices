@@ -6,7 +6,7 @@ using Marten;
 
 namespace Management.Application.Features.Project.Queries;
 
-public sealed record GetProjectByIdQuery(Guid ProjectId) : IQuery<GetProjectByIdResult>;
+public sealed record GetProjectByIdQuery(Guid ProjectId, Guid UserId, List<string> Groups) : IQuery<GetProjectByIdResult>;
 
 public sealed class GetProjectByIdQueryHandler(IDocumentSession session, IMapper mapper)
     : IQueryHandler<GetProjectByIdQuery, GetProjectByIdResult>
@@ -15,10 +15,18 @@ public sealed class GetProjectByIdQueryHandler(IDocumentSession session, IMapper
 
     public async Task<GetProjectByIdResult> Handle(GetProjectByIdQuery query, CancellationToken cancellationToken)
     {
-        var result = await session.LoadAsync<ProjectEntity>(query.ProjectId)
-            ?? throw new NotFoundException(MessageCode.ProjectIsNotExists, query.ProjectId);
-
-        var response = mapper.Map<ProjectDto>(result);
+        var project = await session.LoadAsync<ProjectEntity>(query.ProjectId)
+                      ?? throw new NotFoundException(MessageCode.ProjectIsNotExists, query.ProjectId);
+        
+        if (!query.Groups.Contains(AuthorizeConstants.SystemAdmin))
+        {
+            var isMember = await session.Query<MemberEntity>()
+                .AnyAsync(x => x.ProjectId == query.ProjectId && x.UserId == query.UserId, cancellationToken);
+            if (!isMember)
+                throw new NotFoundException(MessageCode.ProjectIsNotExists, query.ProjectId);
+        }
+    
+        var response = mapper.Map<ProjectDto>(project);
         return new GetProjectByIdResult(response);
     }
 
