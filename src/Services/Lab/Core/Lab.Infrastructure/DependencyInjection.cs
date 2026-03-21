@@ -4,6 +4,7 @@ using Lab.Domain.Entities;
 using Lab.Infrastructure.ApiClients;
 using Marten;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
@@ -57,7 +58,10 @@ public static class DependencyInjection
                     .WithSSL(cfg.GetValue<bool>($"{MinIoCfg.Section}:{MinIoCfg.Secure}"))
                     .Build());
 
+        services.AddTransient<ManagementAuthHeaderHandler>();
+
         services.AddRefitClient<IManagementServiceApi>()
+            .AddHttpMessageHandler<ManagementAuthHeaderHandler>()
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.ManagementService.Section}:{ApiClientCfg.ManagementService.BaseUrl}"]!);

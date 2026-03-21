@@ -1,4 +1,5 @@
-﻿using Lab.Api.Constants;
+﻿using BuildingBlocks.Authentication.Extensions;
+using Lab.Api.Constants;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Features.Paper.Commands.CreatePaper;
 using Microsoft.AspNetCore.Mvc;
@@ -16,8 +17,8 @@ public class CreatePaper : ICarterModule
             .WithName(nameof(CreatePaper))
             .Produces<ApiCreatedResponse<Guid>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .DisableAntiforgery();
-        // .RequireAuthorization();
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     #endregion
@@ -26,9 +27,14 @@ public class CreatePaper : ICarterModule
 
     private async Task<IResult> HandleCreatePaperAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromBody] CreatePaperDto dto)
     {
-        var command = new CreatePaperCommand(dto);
+        var currentUser = httpContext.GetCurrentUser();
+        if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
+            return Results.Unauthorized();
+        
+        var command = new CreatePaperCommand(dto, userId);
         var result = await sender.Send(command);
 
         return TypedResults.Created($"{ApiRoutes.Paper.Create}/{result}", new ApiCreatedResponse<Guid>(result));
