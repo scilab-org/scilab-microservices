@@ -13,6 +13,9 @@ public sealed class ProjectEntity : Entity<Guid>
     public ProjectStatus? Status { get; set; }
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
+    public string? Context { get; set; }
+    public string? Domain { get; set; }
+    public string? Keypoint { get; set; }
     public Guid? ParentProjectId { get; set; }
     public List<Guid> DatasetIds { get; set; } = new();
     public List<Guid> PaperIds { get; set; } = new();
@@ -28,6 +31,9 @@ public sealed class ProjectEntity : Entity<Guid>
         DateTimeOffset? startDate = null,
         DateTimeOffset? endDate = null,
         Guid? parentProjectId = null,
+        string? context = null,
+        string? domain = null,
+        string? keypoint = null,
         List<Guid>? paperIds = null)
     {
         return new ProjectEntity()
@@ -42,6 +48,9 @@ public sealed class ProjectEntity : Entity<Guid>
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
             ParentProjectId = parentProjectId,
+            Context = context,
+            Domain = domain,
+            Keypoint = keypoint,
             PaperIds = paperIds?.Distinct().ToList() ?? new List<Guid>()
         };
     }
@@ -53,6 +62,9 @@ public sealed class ProjectEntity : Entity<Guid>
     public void Update(string name,
         string? description,
         string? code,
+        string? context,
+        string? domain,
+        string? keypoint,
         ProjectStatus? status,
         DateTimeOffset? startDate,
         DateTimeOffset? endDate)
@@ -60,6 +72,9 @@ public sealed class ProjectEntity : Entity<Guid>
         Name = name;
         Description = description;
         Code = code;
+        Context = context;
+        Domain = domain;
+        Keypoint = keypoint;
         StartDate = startDate;
         Status = status;
         EndDate = endDate;

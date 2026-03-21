@@ -48,7 +48,11 @@ public class UpdateProjectCommandHandler(IDocumentSession session) : ICommandHan
 
         var entity = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken)
             ?? throw new ClientValidationException(MessageCode.ProjectIsNotExists, command.ProjectId);
+        
+        if (entity.PaperIds.Any() || entity.DatasetIds.Any())
+            throw new InvalidOperationException("Cannot change domain after adding papers or datasets.");
 
+        
         var dto = command.Dto;
         
         entity.Update(
@@ -57,7 +61,10 @@ public class UpdateProjectCommandHandler(IDocumentSession session) : ICommandHan
             description: dto.Description,
             status: dto.Status,
             startDate: dto.StartDate,
-            endDate: dto.EndDate);
+            endDate: dto.EndDate,
+            context: dto.Context,
+            domain: dto.Domain,
+            keypoint: dto.Keypoint);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
