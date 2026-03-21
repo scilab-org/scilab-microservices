@@ -9,6 +9,8 @@ public class SectionEntity : Entity<Guid>
     public string? Content { get; set; } = null!;
     public string? Title { get; set; }
     public string? SectionSumary { get; set; }
+    public string? Description { get; set; }
+    public string? Rule { get; set; }
     public float DisplayOrder { get; set; }
     public bool? Numbered { get; set; } = true;
     public bool? IsMainSection { get; set; } = false;
@@ -30,6 +32,8 @@ public class SectionEntity : Entity<Guid>
         bool? isMainSection = false,
         string? title = null,
         string? sectionSumary = null,
+        string? description = null,
+        string? rule = null,
         Guid? parentSectionId = null,
         Guid? previousVersionSectionId = null,
         Guid? nextVersionSectionId = null
@@ -42,6 +46,8 @@ public class SectionEntity : Entity<Guid>
             PaperId = paperId,
             Title = title,
             SectionSumary = sectionSumary,
+            Description = description,
+            Rule = rule,
             DisplayOrder = displayOrder,
             Numbered = numbered,
             IsMainSection = isMainSection,
@@ -61,6 +67,8 @@ public class SectionEntity : Entity<Guid>
         string? title = null,
         float? displayOrder = null,
         string? sectionSumary = null,
+        string? description = null,
+        string? rule = null,
         bool? numbered = true,
         bool? isMainSection = null,
         Guid? parentSectionId = null,
@@ -71,6 +79,8 @@ public class SectionEntity : Entity<Guid>
         Title = title ?? Title;
         DisplayOrder = displayOrder ?? DisplayOrder;
         SectionSumary = sectionSumary ?? SectionSumary;
+        Description = description ?? Description;
+        Rule = rule ?? Rule;
         Numbered = numbered ?? Numbered;
         IsMainSection = isMainSection ?? IsMainSection;
         ParentSectionId = parentSectionId ?? ParentSectionId;

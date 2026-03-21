@@ -3,6 +3,14 @@ namespace Lab.Application.Services;
 public interface IManagementApiService
 {
     /// <summary>
+    /// Calls the Management service to fetch a project by Id.
+    /// Returns null when project cannot be resolved.
+    /// </summary>
+    Task<ManagementProjectInfo?> GetProjectByIdAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Calls the Management service to create a sub-project under the given project,
     /// linking it to the specified paper.
     /// Returns the newly created sub-project Id.
@@ -56,3 +64,15 @@ public sealed record SubProjectMemberInfo(
     string? Email = null,
     string? FirstName = null,
     string? LastName = null);
+
+public sealed record ManagementProjectInfo(
+    Guid Id,
+    string? Name,
+    string? Code,
+    string? Description,
+    string? Status,
+    DateTimeOffset? StartDate,
+    DateTimeOffset? EndDate,
+    string? Context,
+    string? Domain,
+    string? Keypoint);

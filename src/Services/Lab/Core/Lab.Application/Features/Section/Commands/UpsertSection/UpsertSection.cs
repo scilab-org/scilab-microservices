@@ -83,6 +83,8 @@ public class UpsertSectionCommandHandler(
                 isMainSection: false,
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
+                description: section.Description,
+                rule: section.Rule,
                 parentSectionId: dto.ParentSectionId,
                 //Mark new section as new version of main section
                 previousVersionSectionId: section.Id

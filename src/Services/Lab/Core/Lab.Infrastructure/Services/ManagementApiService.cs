@@ -7,6 +7,35 @@ namespace Lab.Infrastructure.Services;
 
 public sealed class ManagementApiService(IManagementServiceApi managementServiceApi) : IManagementApiService
 {
+    public async Task<ManagementProjectInfo?> GetProjectByIdAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await managementServiceApi.GetProjectByIdAsync(projectId);
+
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<GetProjectByIdApiResult>>(
+            cancellationToken: cancellationToken);
+
+        var project = body?.Result?.Project;
+        if (project is null)
+            return null;
+
+        return new ManagementProjectInfo(
+            project.Id,
+            project.Name,
+            project.Code,
+            project.Description,
+            project.Status,
+            project.StartDate,
+            project.EndDate,
+            project.Context,
+            project.Domain,
+            project.Keypoint);
+    }
+
     public async Task<Guid?> CreateSubProjectAsync(
         Guid projectId,
         Guid paperId,
@@ -100,6 +129,25 @@ file sealed class MemberByPaperDto
 {
     public Guid SubProjectId { get; init; }
     public Guid MemberId { get; init; }
+}
+
+file sealed class GetProjectByIdApiResult
+{
+    public ProjectApiDto? Project { get; init; }
+}
+
+file sealed class ProjectApiDto
+{
+    public Guid Id { get; init; }
+    public string? Name { get; init; }
+    public string? Code { get; init; }
+    public string? Description { get; init; }
+    public string? Status { get; init; }
+    public DateTimeOffset? StartDate { get; init; }
+    public DateTimeOffset? EndDate { get; init; }
+    public string? Context { get; init; }
+    public string? Domain { get; init; }
+    public string? Keypoint { get; init; }
 }
 
 // Internal DTOs for parsing Management service responses

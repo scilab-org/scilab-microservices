@@ -121,6 +121,8 @@ public sealed class MessageCode
 
     public const string PaperContextIsRequired = "PAPER_CONTEXT_IS_REQUIRED";
 
+    public const string PaperJournalIsRequired = "PAPER_JOURNAL_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes

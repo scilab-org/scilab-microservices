@@ -11,8 +11,12 @@ public sealed class PaperEntity : Entity<Guid>
     public string? Template { get; set; }
     public string? FilePath { get; set; }
     public string? Context { get; set; }
+    public string? Abstract { get; set; }
+    public string? ResearchGap { get; set; }
+    public string? MainContribution { get; set; }
+    public string? Rule { get; set; }
+    public string? GapType { get; set; }
     public PaperStatus? Status { get; set; }
-    public string? PaperType { get; set; }
     public List<string> TagNames { get; set; } = new();
 
     #endregion
@@ -23,8 +27,12 @@ public sealed class PaperEntity : Entity<Guid>
         string title,
         string? template = null,
         string? context = null,
+        string? abstractText = null,
+        string? researchGap = null,
+        string? mainContribution = null,
+        string? rule = null,
+        string? gapType = null,
         PaperStatus? status = null,
-        string? paperType = null,
         List<string>? tagNames = null)
     {
         return new PaperEntity()
@@ -33,8 +41,12 @@ public sealed class PaperEntity : Entity<Guid>
             Title = title,
             Template = template,
             Context = context,
+            Abstract = abstractText,
+            ResearchGap = researchGap,
+            MainContribution = mainContribution,
+            Rule = rule,
+            GapType = gapType,
             Status = status ?? PaperStatus.Processing,
-            PaperType = paperType,
             TagNames = tagNames ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -48,15 +60,23 @@ public sealed class PaperEntity : Entity<Guid>
     public void Update(string? title = null,
         string? template = null,
         string? context = null,
+        string? abstractText = null,
+        string? researchGap = null,
+        string? mainContribution = null,
+        string? rule = null,
         PaperStatus? status = null,
-        string? paperType = null,
+        string? gapType = null,
         List<string>? tagNames = null)
     {
         Title = title ?? Title;
         Template = template ?? Template;
         Context = context ?? Context;
+        Abstract = abstractText ?? Abstract;
+        ResearchGap = researchGap ?? ResearchGap;
+        MainContribution = mainContribution ?? MainContribution;
+        Rule = rule ?? Rule;
+        GapType = gapType  ?? GapType;
         Status = status ?? Status;
-        PaperType = paperType  ?? PaperType;
         TagNames = tagNames ?? TagNames;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }

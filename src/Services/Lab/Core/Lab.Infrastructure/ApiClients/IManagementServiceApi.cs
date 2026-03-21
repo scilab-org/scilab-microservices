@@ -5,6 +5,13 @@ namespace Lab.Infrastructure.ApiClients;
 public interface IManagementServiceApi
 {
     /// <summary>
+    /// GET /projects/{projectId} — fetches project details by id.
+    /// </summary>
+    [Get("/projects/{projectId}")]
+    Task<HttpResponseMessage> GetProjectByIdAsync(
+        [AliasAs("projectId")] Guid projectId);
+
+    /// <summary>
     /// POST /projects/{projectId}/sub-projects — creates a sub-project with a paper.
     /// </summary>
     [Post("/projects/{projectId}/sub-projects")]
