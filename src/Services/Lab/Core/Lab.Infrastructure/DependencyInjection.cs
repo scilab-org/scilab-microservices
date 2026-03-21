@@ -36,6 +36,8 @@ public static class DependencyInjection
             opts.Schema.For<TagEntity>()
                 .SoftDeleted()
                 .Index(t => t.Name, idx => { idx.IsUnique = true; });
+            opts.Schema.For<JournalEntity>()
+                .SoftDeleted();
         }).UseLightweightSessions();
 
         services.Scan(s => s

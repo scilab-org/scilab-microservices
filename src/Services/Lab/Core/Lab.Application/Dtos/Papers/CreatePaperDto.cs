@@ -11,8 +11,12 @@ public class CreatePaperDto
     public string Title { get; init; } = null!;
     public string? Template { get; init; }
     public string Context { get; init; } = null!;
+    public string Abstract { get; init; } = null!;
+    public string ResearchGap { get; init; } = null!;
+    public string GapType { get; init; } = null!;
+    public string? MainContribution { get; init; } = null!;
     public PaperStatus? Status { get; init; } = PaperStatus.Draft;
-    public string? PaperType { get; init; }
+    public CreateJournalDto Journal { get; init; } = null!;
     public List<CreateSectionDto>? Sections { get; init; }
 
     #endregion

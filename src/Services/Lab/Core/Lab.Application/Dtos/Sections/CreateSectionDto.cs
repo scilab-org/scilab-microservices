@@ -10,6 +10,8 @@ public class CreateSectionDto
     public bool? Numbered { get; init; } = true;
     public float DisplayOrder { get; init; }
     public string? SectionSumary { get; init; }
+    public string? Description { get; init; }
+    public string? Rule { get; init; }
     public Guid? ParentSectionId { get; init; }
 
     #endregion

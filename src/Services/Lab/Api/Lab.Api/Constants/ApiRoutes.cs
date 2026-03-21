@@ -147,6 +147,27 @@ public sealed class ApiRoutes
         #endregion
 
     }
+
+    public static class Journal
+    {
+        #region Constants
+
+        public const string Tags = "Journals";
+        private const string Base = "/journals";
+        private const string BaseAdmin = "/admin/journals";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetJournals = $"{Base}";
+        public const string GetJournalById = $"{Base}/{{id}}";
+
+        #endregion
+    }
     
     public static class Comment
     {

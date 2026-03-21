@@ -121,6 +121,8 @@ public sealed class MessageCode
 
     public const string PaperContextIsRequired = "PAPER_CONTEXT_IS_REQUIRED";
 
+    public const string PaperJournalIsRequired = "PAPER_JOURNAL_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
@@ -182,6 +184,18 @@ public sealed class MessageCode
 
     public const string CommentContentIsRequired = "CONTENT_IS_REQUIRED";
     public const string CommentNotFound = "COMMENT_NOT_FOUND";
+
+    #endregion
+
+    #region Journal Message Codes
+
+    public const string JournalNameIsRequired = "JOURNAL_NAME_IS_REQUIRED";
+
+    public const string JournalIsNotExists = "JOURNAL_IS_NOT_EXISTS";
+
+    public const string JournalIdIsRequired = "JOURNAL_ID_IS_REQUIRED";
+
+    public const string JournalNameAlreadyExists = "JOURNAL_NAME_ALREADY_EXISTS";
 
     #endregion
 }
