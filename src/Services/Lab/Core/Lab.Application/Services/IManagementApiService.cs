@@ -22,6 +22,14 @@ public interface IManagementApiService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Adds members to an existing sub-project.
+    /// </summary>
+    Task<bool> AddSubProjectMembersAsync(
+        Guid subProjectId,
+        IEnumerable<(Guid UserId, string GroupName)> members,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Single call that resolves the sub-project from paperId and returns the
     /// memberId + subProjectId for the given user — replaces the two separate calls.
     /// </summary>

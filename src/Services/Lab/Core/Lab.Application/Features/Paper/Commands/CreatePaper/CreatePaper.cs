@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Services;
@@ -9,7 +9,7 @@ using Marten;
 
 namespace Lab.Application.Features.Paper.Commands.CreatePaper;
 
-public record CreatePaperCommand(CreatePaperDto Dto) : ICommand<Guid>;
+public record CreatePaperCommand(CreatePaperDto Dto, Guid UserId) : ICommand<Guid>;
 
 public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
 {
@@ -48,6 +48,10 @@ public class CreatePaperCommandHandler(
     public async Task<Guid> Handle(CreatePaperCommand request, CancellationToken cancellationToken)
     {
         var dto = request.Dto;
+
+        var isAtuhor = await managementApiService.GetMyProjectRoleAsync(dto.ProjectId, cancellationToken);
+        if (dto.ProjectId != Guid.Empty && isAtuhor != AuthorizeConstants.ProjectAuthor)
+            throw new UnauthorizedAccessException(MessageCode.AccessDenied);
 
         await session.BeginTransactionAsync(cancellationToken);
 
@@ -98,8 +102,16 @@ public class CreatePaperCommandHandler(
 
         if (dto.ProjectId != Guid.Empty)
         {
-            await managementApiService.CreateSubProjectAsync(
+            var subProjectId = await managementApiService.CreateSubProjectAsync(
                 dto.ProjectId, entity.Id, dto.Title, cancellationToken);
+
+            if (subProjectId.HasValue)
+            {
+                await managementApiService.AddSubProjectMembersAsync(
+                    subProjectId.Value,
+                    new[] { (request.UserId, AuthorizeConstants.ProjectAuthor) },
+                    cancellationToken);
+            }
         }
 
         return entity.Id;

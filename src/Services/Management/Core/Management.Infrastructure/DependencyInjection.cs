@@ -26,7 +26,6 @@ public static class DependencyInjection
             opts.UseSystemTextJsonForSerialization();
             
             opts.Schema.For<ProjectEntity>().SoftDeleted();
-            opts.Schema.For<DatasetEntity>().SoftDeleted();
             opts.Schema.For<MemberEntity>().SoftDeleted();
         }).UseLightweightSessions();
 

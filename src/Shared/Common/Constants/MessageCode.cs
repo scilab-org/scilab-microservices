@@ -180,6 +180,13 @@ public sealed class MessageCode
 
     #endregion
 
+    #region Comment Management
+
+    public const string CommentContentIsRequired = "CONTENT_IS_REQUIRED";
+    public const string CommentNotFound = "COMMENT_NOT_FOUND";
+
+    #endregion
+
     #region Journal Message Codes
 
     public const string JournalNameIsRequired = "JOURNAL_NAME_IS_REQUIRED";

@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Common.Models.Reponses;
+using Common.Constants;
 using Lab.Application.Services;
 using Lab.Infrastructure.ApiClients;
 
@@ -54,6 +55,33 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
             cancellationToken: cancellationToken);
 
         return body?.Value;
+    }
+
+    public async Task<bool> AddSubProjectMembersAsync(
+        Guid subProjectId,
+        IEnumerable<(Guid UserId, string GroupName)> members,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new AddSubProjectMembersRequest
+        {
+            Members = members
+                .Where(x => x.UserId != Guid.Empty)
+                .Select(x => new AddSubProjectMemberEntry
+                {
+                    UserId = x.UserId,
+                    GroupName = string.IsNullOrWhiteSpace(x.GroupName)
+                        ? AuthorizeConstants.ProjectAuthor
+                        : x.GroupName
+                })
+                .ToList()
+        };
+
+        if (request.Members.Count == 0)
+            return false;
+
+        var response = await managementServiceApi.AddSubProjectMembersAsync(subProjectId, request);
+
+        return response.IsSuccessStatusCode;
     }
 
     public async Task<string?> GetMyProjectRoleAsync(

@@ -1,6 +1,7 @@
 #region using
 
 using AutoMapper;
+using Lab.Application.Dtos.Comments;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.Papers;
@@ -25,6 +26,7 @@ public sealed class LabMappingProfile : Profile
         CreateTagMappings();
         CreateTemplateMappings();
         CreateSectionMappings();
+        CreateCommentMappings();
         CreateJournalMappings();
     }
 
@@ -77,6 +79,15 @@ public sealed class LabMappingProfile : Profile
     private void CreateSectionMappings()
     {
         CreateMap<SectionEntity, SectionDto>();
+    }
+
+    #endregion
+    
+    #region Comment Mappings
+
+    private void CreateCommentMappings()
+    {
+        CreateMap<CommentEntity, CommentDto>();
     }
 
     #endregion

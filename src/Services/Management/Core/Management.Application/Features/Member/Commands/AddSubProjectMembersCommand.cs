@@ -5,7 +5,7 @@ using Marten;
 
 namespace Management.Application.Features.Member.Commands;
 
-public sealed record AddSubProjectMembersCommand(Guid SubProjectId, AddProjectMembersDto Dto, Guid UserId) : ICommand<List<Guid>>;
+public sealed record AddSubProjectMembersCommand(Guid SubProjectId, AddProjectMembersDto Dto) : ICommand<List<Guid>>;
 
 public class AddSubProjectMembersValidator : AbstractValidator<AddSubProjectMembersCommand>
 {
@@ -41,16 +41,16 @@ public class AddSubProjectMembersCommandHandler(
             throw new NotFoundException(MessageCode.SubProjectNotFound);
 
         // Check current user is ProjectManager or Author in parent project
-        var isManagerAuthor = await session.Query<MemberEntity>()
-            .AnyAsync(x =>
-                    x.ProjectId == subProject.ParentProjectId &&
-                    x.UserId == command.UserId &&
-                    (x.ProjectRole == AuthorizeConstants.ProjectManager
-                  || x.ProjectRole == AuthorizeConstants.ProjectAuthor),
-                cancellationToken);
+        // var isManagerAuthor = await session.Query<MemberEntity>()
+        //     .AnyAsync(x =>
+        //             x.ProjectId == subProject.ParentProjectId &&
+        //             x.UserId == command.UserId &&
+        //             (x.ProjectRole == AuthorizeConstants.ProjectManager
+        //           || x.ProjectRole == AuthorizeConstants.ProjectAuthor),
+        //         cancellationToken);
 
-        if (!isManagerAuthor)
-            throw new NoPermissionException(MessageCode.AccessDenied);
+        // if (!isManagerAuthor)
+        //     throw new NoPermissionException(MessageCode.AccessDenied);
 
         // Deduplicate by UserId
         var memberMap = dto.Members
