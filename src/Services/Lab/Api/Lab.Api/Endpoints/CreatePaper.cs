@@ -34,7 +34,7 @@ public class CreatePaper : ICarterModule
         if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
             return Results.Unauthorized();
         
-        var command = new CreatePaperCommand(dto, userId);
+        var command = new CreatePaperCommand(dto, userId, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Created($"{ApiRoutes.Paper.Create}/{result}", new ApiCreatedResponse<Guid>(result));

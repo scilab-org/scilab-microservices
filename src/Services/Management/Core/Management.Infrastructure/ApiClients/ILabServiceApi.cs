@@ -63,6 +63,18 @@ public interface ILabServiceApi
     [Get("/papers/{id}/sections")]
     Task<HttpResponseMessage> GetSectionsByPaperIdAsync([AliasAs("id")] Guid paperId);
 
+    /// <summary>
+    /// GET /paper-contributors/papers/{paperId}/contributors — returns contributors for a paper.
+    /// </summary>
+    [Get("/paper-contributors/papers/{paperId}/contributors")]
+    Task<HttpResponseMessage> GetPaperContributorsAsync([AliasAs("paperId")] Guid paperId);
+
+    /// <summary>
+    /// DELETE /paper-contributors/{id} — deletes a contributor by id.
+    /// </summary>
+    [Delete("/author/paper-contributors/{id}")]
+    Task<HttpResponseMessage> DeletePaperContributorAsync([AliasAs("id")] Guid id);
+
     #endregion
 
     #region Paper Contributors

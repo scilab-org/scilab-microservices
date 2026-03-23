@@ -1,4 +1,6 @@
 ﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
 using Lab.Api.Constants;
 using Lab.Application.Features.Comment.Commands.DeleteComment;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +33,7 @@ public class DeleteComment: ICarterModule
     {
         var currentUser = httpContext.GetCurrentUser();
         if (string.IsNullOrWhiteSpace(currentUser.Id))
-            throw new UnauthorizedAccessException();
+            throw new NoPermissionException(MessageCode.AccessDenied);
         
         var command = new DeleteCommentCommand(id, currentUser.UserName);
         await sender.Send(command);

@@ -1,4 +1,7 @@
-﻿using Management.Api.Constants;
+﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
+using Management.Api.Constants;
 using Management.Application.Dtos.Projects;
 using Management.Application.Features.Project.Commands;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +17,8 @@ public class CreateSubProject: ICarterModule
             .WithTags(ApiRoutes.ProjectPaper.Tags)
             .WithName(nameof(CreateSubProject))
             .Produces<ApiCreatedResponse<Guid>>(StatusCodes.Status201Created)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization();
     }
     
     #endregion
@@ -24,10 +27,15 @@ public class CreateSubProject: ICarterModule
     
     private async Task<ApiCreatedResponse<Guid>> HandleCreateSubProjectAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromRoute] Guid projectId,
         [FromBody] CreateSubProjectDto req)
     {
-        var command = new CreateSubProjectCommand(projectId, req);
+        var currentUser = httpContext.GetCurrentUser();
+        if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
+            throw new NoPermissionException(MessageCode.AccessDenied);
+        
+        var command = new CreateSubProjectCommand(projectId, req, currentUser.UserName);
 
         var result = await sender.Send(command);
 

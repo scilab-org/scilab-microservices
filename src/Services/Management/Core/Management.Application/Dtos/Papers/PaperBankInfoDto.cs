@@ -16,6 +16,6 @@ public class PaperBankInfoDto
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
     public List<string> TagNames { get; set; } = new();
-
+    public string? CreatedBy { get; set; }
     #endregion
 }

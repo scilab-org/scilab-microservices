@@ -1,21 +1,20 @@
 ﻿{
-"templateCode": "GENERAL",
   "sections": [
     {
       "key": "abstract",
-      "rule": "## Abstract\n- Provide a clear and concise summary of the entire paper.\n- Include purpose, scope, and key findings.\n- Mention methodology if relevant.\n- Ensure the abstract is self-contained and easy to read.\n- Highlight main contributions without unnecessary detail",
+      "rule": "## Abstract\n- Provide a clear and concise summary of the entire paper.\n- Include purpose, scope, and key findings.\n- Mention methodology if relevant.\n- Ensure the abstract is self-contained and easy to read.\n- Highlight main contributions without unnecessary detail.",
       "latex": "\\section{\\textbf{Abstract}}",
       "title": "Abstract",
       "numbered": false,
       "required": true,
-      "description": "- Provide a clear and concise summary of the entire paper.\n- Include purpose, scope, and key findings.\n- Mention methodology if relevant.\n- Ensure the abstract is self-contained and easy to read.\n- Highlight main contributions without unnecessary detail",
+      "description": "- Provide a clear and concise summary of the entire paper.\n- Include purpose, scope, and key findings.\n- Mention methodology if relevant.\n- Ensure the abstract is self-contained and easy to read.\n- Highlight main contributions without unnecessary detail.",
       "displayOrder": 1,
       "allowSubsections": false
     },
     {
       "key": "introduction",
       "rule": "## Introduction\n- Introduce the research topic with necessary background.\n- Explain the importance and relevance of the topic.\n- Identify the research problem or gap.\n- State the objectives of the paper clearly.\n- Outline the structure of the paper.",
-      "latex": "\\section{\\textbf{Background \\& Summary}}",
+      "latex": "\\section{\\textbf{Introduction}}",
       "title": "Introduction",
       "numbered": true,
       "required": true,
@@ -26,7 +25,7 @@
     {
       "key": "taxonomy",
       "rule": "## Taxonomy\n- Present a clear classification of existing approaches.\n- Define classification criteria logically.\n- Organize content into coherent categories.\n- Show relationships and differences between approaches.\n- Ensure the structure is easy to follow.",
-      "latex": "\\section{\\textbf{Data Records}}",
+      "latex": "\\section{\\textbf{Taxonomy}}",
       "title": "Taxonomy",
       "numbered": true,
       "required": true,
@@ -37,7 +36,7 @@
     {
       "key": "comparison",
       "rule": "## Comparison\n- Compare different approaches critically.\n- Highlight strengths and weaknesses of each method.\n- Identify key differences and similarities.\n- Focus on insights rather than simple descriptions.\n- Use structured representations if necessary.",
-      "latex": "\\section{\\textbf{Technical Validation}}",
+      "latex": "\\section{\\textbf{Comparison}}",
       "title": "Comparison",
       "numbered": true,
       "required": true,
@@ -48,7 +47,7 @@
     {
       "key": "challenges",
       "rule": "## Challenges\n- Identify limitations in existing research.\n- Highlight unresolved problems.\n- Point out weaknesses in current methods.\n- Explain research gaps clearly.\n- Show why these challenges matter.",
-      "latex": "\\section{\\textbf{Usage Notes}}",
+      "latex": "\\section{\\textbf{Challenges}}",
       "title": "Challenges",
       "numbered": true,
       "required": false,
@@ -59,7 +58,7 @@
     {
       "key": "future_directions",
       "rule": "## Future Directions\n- Suggest future research directions.\n- Propose improvements or new approaches.\n- Address identified challenges.\n- Explain potential impact of future work.\n- Link ideas to existing gaps.",
-      "latex": "\\section{\\textbf{Code Availability}}",
+      "latex": "\\section{\\textbf{Future Directions}}",
       "title": "Future Directions",
       "numbered": true,
       "required": false,
@@ -69,24 +68,26 @@
     },
     {
       "key": "conclusion",
-      "rule": "## Conclusion\n- Summarize key findings and insights.\n- Highlight main contributions of the paper.\n- Reinforce the importance of the work.\n- Provide a clear final message.\n- Avoid introducing new information",
-      "latex": "\\section{\\textbf{References}}",
+      "rule": "## Conclusion\n- Summarize key findings and insights.\n- Highlight main contributions of the paper.\n- Reinforce the importance of the work.\n- Provide a clear final message.\n- Avoid introducing new information.",
+      "latex": "\\section{\\textbf{Conclusion}}",
       "title": "Conclusion",
       "numbered": true,
-      "required": true,
-      "description": "- Summarize key findings and insights.\n- Highlight main contributions of the paper.\n- Reinforce the importance of the work.\n- Provide a clear final message.\n- Avoid introducing new information",
+      "required": false,
+      "description": "- Summarize key findings and insights.\n- Highlight main contributions of the paper.\n- Reinforce the importance of the work.\n- Provide a clear final message.\n- Avoid introducing new information.",
       "displayOrder": 7,
       "allowSubsections": false
     },
     {
       "key": "references",
-      "rule": "## References\n- Include all cited works.\n- Ensure references are accurate.\n- Follow a consistent citation format.\n- Match references with in-text citations\n- Keep only relevant sources",
+      "rule": "## References\n- Include all cited works.\n- Ensure references are accurate.\n- Follow a consistent citation format.\n- Match references with in-text citations.\n- Keep only relevant sources.",
+      "latex": "\\section{\\textbf{References}}",
       "title": "References",
       "numbered": false,
       "required": true,
-      "description": "- Include all cited works.\n- Ensure references are accurate.\n- Follow a consistent citation format.\n- Match references with in-text citations\n- Keep only relevant sources",
+      "description": "- Include all cited works.\n- Ensure references are accurate.\n- Follow a consistent citation format.\n- Match references with in-text citations.\n- Keep only relevant sources.",
       "displayOrder": 8,
       "allowSubsections": false
     }
-  ]
+  ],
+  "templateCode": "GENERAL"
 }

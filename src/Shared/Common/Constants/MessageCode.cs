@@ -28,6 +28,8 @@ public sealed class MessageCode
     public const string AllPapersAlreadyExist = "ALL_PAPERS_ALREADY_EXIST";
 
     public const string SubProjectNotFound = "SUB_PROJECT_NOT_FOUND";
+    
+    public const string ProjectHasPaper = "PROJECT_HAS_PAPER";
 
     #endregion
 

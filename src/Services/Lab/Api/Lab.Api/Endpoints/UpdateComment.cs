@@ -1,4 +1,6 @@
 ﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
 using Lab.Api.Constants;
 using Lab.Application.Features.Comment.Commands.UpdateComment;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +28,7 @@ public class UpdateComment: ICarterModule
     {
         var currentUser = httpContext.GetCurrentUser();
         if (string.IsNullOrWhiteSpace(currentUser.Id))
-            throw new UnauthorizedAccessException();
+            throw new NoPermissionException(MessageCode.AccessDenied);
         
         var command = new UpdateCommentCommand(id, content, currentUser.UserName);
         var result = await sender.Send(command);

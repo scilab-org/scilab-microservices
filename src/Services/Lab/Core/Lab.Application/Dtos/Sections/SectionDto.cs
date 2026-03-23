@@ -7,6 +7,7 @@ public class SectionDto : DtoId<Guid>
     public string? Title { get; set; }
     public string? Content { get; set; }
     public string? SectionSumary { get; set; }
+    public string? Description { get; set; }
     public float DisplayOrder { get; set; }
     public bool? Numbered { get; set; }
     public string? FilePath { get; set; }

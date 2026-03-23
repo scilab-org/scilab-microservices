@@ -1,4 +1,5 @@
-﻿using Management.Application.Dtos.Members;
+using Management.Application.Dtos.Members;
+using Management.Application.Services;
 using Management.Domain.Entities;
 using Marten;
 
@@ -21,7 +22,8 @@ public class DeleteProjectMembersValidator : AbstractValidator<DeleteProjectMemb
 }
 
 public class DeleteProjectMembersCommandHandler(
-    IDocumentSession session)
+    IDocumentSession session,
+    ILabApiService labApiService)
     : ICommandHandler<DeleteProjectMembersCommand, List<Guid>>
 {
     #region Implementations
@@ -96,6 +98,24 @@ public class DeleteProjectMembersCommandHandler(
         }
 
         await session.SaveChangesAsync(cancellationToken);
+
+        // Remove Lab paper contributors that belong to deleted members
+        var deletedMemberIds = deletedIds.ToHashSet();
+        var paperIds = project.PaperIds
+            .Concat(subProjects.SelectMany(x => x.PaperIds))
+            .Distinct()
+            .ToList();
+
+        foreach (var paperId in paperIds)
+        {
+            var contributors = await labApiService.GetPaperContributorsAsync(paperId, cancellationToken);
+            var contributorsToDelete = contributors
+                .Where(c => deletedMemberIds.Contains(c.MemberId))
+                .ToList();
+
+            foreach (var contributor in contributorsToDelete)
+                await labApiService.DeletePaperContributorAsync(contributor.Id, cancellationToken);
+        }
 
         return deletedIds;
     }

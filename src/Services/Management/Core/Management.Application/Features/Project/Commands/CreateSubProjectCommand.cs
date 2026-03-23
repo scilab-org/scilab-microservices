@@ -5,7 +5,7 @@ using Marten;
 
 namespace Management.Application.Features.Project.Commands;
 
-public sealed record CreateSubProjectCommand(Guid ProjectId, CreateSubProjectDto Dto) : ICommand<Guid>;
+public sealed record CreateSubProjectCommand(Guid ProjectId, CreateSubProjectDto Dto, string UserName) : ICommand<Guid>;
 
 public class CreateSubProjectValidator : AbstractValidator<CreateSubProjectCommand>
 {
@@ -35,7 +35,8 @@ public class CreateSubProjectCommandHandler(
         var subProject = ProjectEntity.Create(
             id: Guid.NewGuid(),
             parentProjectId: command.ProjectId,
-            name: command.Dto.Name);
+            name: command.Dto.Name,
+            createdBy: command.UserName);
 
         subProject.AddPapers(new List<Guid> { command.Dto.PaperId });
 
