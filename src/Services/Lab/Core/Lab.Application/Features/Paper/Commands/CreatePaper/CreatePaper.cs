@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Services;
@@ -9,7 +9,7 @@ using Marten;
 
 namespace Lab.Application.Features.Paper.Commands.CreatePaper;
 
-public record CreatePaperCommand(CreatePaperDto Dto, Guid UserId) : ICommand<Guid>;
+public record CreatePaperCommand(CreatePaperDto Dto, Guid UserId, string UserName) : ICommand<Guid>;
 
 public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
 {
@@ -51,7 +51,7 @@ public class CreatePaperCommandHandler(
 
         var isAtuhor = await managementApiService.GetMyProjectRoleAsync(dto.ProjectId, cancellationToken);
         if (dto.ProjectId != Guid.Empty && isAtuhor != AuthorizeConstants.ProjectAuthor)
-            throw new UnauthorizedAccessException(MessageCode.AccessDenied);
+            throw new NoPermissionException(MessageCode.AccessDenied);
 
         await session.BeginTransactionAsync(cancellationToken);
 
@@ -72,7 +72,8 @@ public class CreatePaperCommandHandler(
             styleDescription: dto.Journal.StyleDescription,
             styleRule: dto.Journal.StyleRule,
             rule: Rules.Paper,
-            status: dto.Status ?? PaperStatus.Processing
+            status: dto.Status ?? PaperStatus.Processing,
+            createdBy: request.UserName
         );
 
         if (dto.Sections != null && dto.Sections.Count != 0)

@@ -34,7 +34,8 @@ public sealed class ProjectEntity : Entity<Guid>
         string? context = null,
         string? domain = null,
         string? keypoint = null,
-        List<Guid>? paperIds = null)
+        List<Guid>? paperIds = null,
+        string? createdBy = null)
     {
         return new ProjectEntity()
         {
@@ -51,7 +52,8 @@ public sealed class ProjectEntity : Entity<Guid>
             Context = context,
             Domain = domain,
             Keypoint = keypoint,
-            PaperIds = paperIds?.Distinct().ToList() ?? new List<Guid>()
+            PaperIds = paperIds?.Distinct().ToList() ?? new List<Guid>(),
+            CreatedBy = createdBy
         };
     }
 

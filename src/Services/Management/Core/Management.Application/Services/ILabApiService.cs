@@ -98,6 +98,16 @@ public interface ILabApiService
         Guid paperId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns all paper contributors for a given paperId from the Lab service.</summary>
+    Task<List<LabPaperContributorDto>> GetPaperContributorsAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Deletes a paper contributor by its id from the Lab service.</summary>
+    Task<bool> DeletePaperContributorAsync(
+        Guid contributorId,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Creates a paper contributor record in the Lab service.</summary>
     Task<bool> CreatePaperContributorAsync(
         string sectionRole,

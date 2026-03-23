@@ -1,4 +1,4 @@
-namespace Management.Application.Dtos.Papers;
+﻿namespace Management.Application.Dtos.Papers;
 
 /// <summary>
 /// Full paper DTO — mirrors Lab.Application.Dtos.Papers.PaperDto (GET /papers/{id}).

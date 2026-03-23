@@ -1,4 +1,7 @@
-﻿using Management.Api.Constants;
+﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
+using Management.Api.Constants;
 using Management.Application.Features.Project.Commands;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,8 +17,8 @@ public class DeleteSubProjectPaper: ICarterModule
             .WithTags(ApiRoutes.SubProject.Tags)
             .WithName(nameof(DeleteSubProjectPaper))
             .Produces<ApiDeletedResponse<Guid>>()
-            .ProducesProblem(StatusCodes.Status400BadRequest);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization();
     }
 
     #endregion
@@ -24,9 +27,14 @@ public class DeleteSubProjectPaper: ICarterModule
 
     private async Task<ApiDeletedResponse<Guid>> HandleDeleteSubProjectAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromRoute] Guid subProjectId)
     {
-        var command = new DeleteSubProjectCommand(subProjectId);
+        var currentUser = httpContext.GetCurrentUser();
+        if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
+            throw new NoPermissionException(MessageCode.AccessDenied);
+        
+        var command = new DeleteSubProjectCommand(subProjectId, userId, currentUser.UserName);
 
         await sender.Send(command);
 

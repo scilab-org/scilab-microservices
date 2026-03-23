@@ -1,4 +1,6 @@
 ﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
 using Management.Api.Constants;
 using Management.Application.Features.Project.Queries;
 using Management.Application.Models.Results;
@@ -26,9 +28,7 @@ public class GetProjectById : ICarterModule
     {
         var currentUser = httpContext.GetCurrentUser();
         if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
-            throw new UnauthorizedAccessException();
-        
-        
+            throw new NoPermissionException(MessageCode.AccessDenied);
         
         var query = new GetProjectByIdQuery(projectId, userId, currentUser.Groups!);
         var result = await sender.Send(query);

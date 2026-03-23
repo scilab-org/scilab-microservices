@@ -81,6 +81,7 @@ file sealed class LabPaperFull
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
     public List<string> TagNames { get; set; } = new();
+    public string? CreatedBy { get; set; }
 }
 
 file sealed class LabGetPaperByIdResult
@@ -123,6 +124,27 @@ file sealed class LabGetSectionsResult
 file sealed class LabGetSectionsResponse
 {
     public LabGetSectionsResult? Result { get; set; }
+}
+
+file sealed class LabPaperContributorItem
+{
+    public Guid Id { get; set; }
+    public Guid PaperId { get; set; }
+    public Guid MemberId { get; set; }
+    public Guid MarkSectionId { get; set; }
+    public Guid? SectionId { get; set; }
+    public string? SectionRole { get; set; }
+    public Guid UserId { get; set; }
+}
+
+file sealed class LabGetPaperContributorsResult
+{
+    public List<LabPaperContributorItem> Items { get; set; } = new();
+}
+
+file sealed class LabGetPaperContributorsResponse
+{
+    public LabGetPaperContributorsResult? Result { get; set; }
 }
 
 public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
@@ -447,6 +469,53 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<List<LabPaperContributorDto>> GetPaperContributorsAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetPaperContributorsAsync(paperId);
+            if (!response.IsSuccessStatusCode)
+                return new List<LabPaperContributorDto>();
+
+            var body = await response.Content.ReadFromJsonAsync<LabGetPaperContributorsResponse>(
+                cancellationToken: cancellationToken);
+
+            return body?.Result?.Items?
+                .Select(x => new LabPaperContributorDto
+                {
+                    Id            = x.Id,
+                    PaperId       = x.PaperId,
+                    MemberId      = x.MemberId,
+                    MarkSectionId = x.MarkSectionId,
+                    SectionId     = x.SectionId,
+                    SectionRole   = x.SectionRole,
+                    UserId        = x.UserId
+                })
+                .ToList() ?? new List<LabPaperContributorDto>();
+        }
+        catch
+        {
+            return new List<LabPaperContributorDto>();
+        }
+    }
+
+    public async Task<bool> DeletePaperContributorAsync(
+        Guid contributorId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.DeletePaperContributorAsync(contributorId);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public async Task<List<LabSectionDto>> GetSectionsByPaperIdAsync(
         Guid paperId,
         CancellationToken cancellationToken = default)
@@ -511,6 +580,7 @@ file static class LabPaperItemMapper
         PaperType       = p.PaperType,
         JournalName     = p.JournalName,
         ConferenceName  = p.ConferenceName,
-        TagNames        = p.TagNames
+        TagNames        = p.TagNames,
+        CreatedBy       = p.CreatedBy
     };
 }

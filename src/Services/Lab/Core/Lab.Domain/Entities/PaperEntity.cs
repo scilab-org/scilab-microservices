@@ -41,7 +41,8 @@ public sealed class PaperEntity : Entity<Guid>
         string? styleDescription = null,
         string? styleRule = null,
         PaperStatus? status = null,
-        List<string>? tagNames = null)
+        List<string>? tagNames = null,
+        string? createdBy = null)
     {
         return new PaperEntity()
         {
@@ -62,6 +63,7 @@ public sealed class PaperEntity : Entity<Guid>
             TagNames = tagNames ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
+            CreatedBy = createdBy
         };
     }
 

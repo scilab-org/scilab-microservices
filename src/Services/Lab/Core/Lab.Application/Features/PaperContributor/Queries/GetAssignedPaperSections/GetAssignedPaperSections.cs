@@ -68,6 +68,7 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     PaperId            = s.PaperId,
                     Title              = s.Title,
                     Content            = s.Content,
+                    Description        = s.Description,
                     SectionSumary      = s.SectionSumary,
                     DisplayOrder       = s.DisplayOrder,
                     Numbered           = s.Numbered,

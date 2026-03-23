@@ -29,6 +29,11 @@ public class DeleteProjectCommandHandler(IDocumentSession session) : ICommandHan
         var project = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken)
             ?? throw new ClientValidationException(MessageCode.ProjectIsNotExists, command.ProjectId.ToString());
 
+        var hasSubProjects = await session.Query<ProjectEntity>()
+            .AnyAsync(p => p.ParentProjectId == command.ProjectId, cancellationToken);
+        if (hasSubProjects) 
+            throw new ClientValidationException(MessageCode.ProjectHasPaper, command.ProjectId.ToString());
+        
         session.Delete(project);
         await session.SaveChangesAsync(cancellationToken);
 
