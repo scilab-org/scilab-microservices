@@ -1,5 +1,7 @@
 #region using
 
+using BuildingBlocks.Authentication.Extensions;
+using Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 using User.Api.Constants;
 using User.Application.Dtos.Roles;
@@ -19,8 +21,8 @@ public sealed class GetGroupRoles : ICarterModule
             .WithTags(ApiRoutes.Groups.Tags)
             .WithName(nameof(GetGroupRoles))
             .Produces<ApiGetResponse<List<RoleDto>>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
     }
 
     #endregion
@@ -29,8 +31,15 @@ public sealed class GetGroupRoles : ICarterModule
 
     private async Task<ApiGetResponse<List<RoleDto>>> HandleGetGroupRolesAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromRoute] string groupId)
     {
+        var currentUser = httpContext.GetCurrentUser();
+        if (!currentUser.HasGroups(AuthorizeConstants.SystemAdmin))
+        {
+            throw new UnauthorizedAccessException();
+        }
+
         var query = new GetGroupRolesQuery(groupId);
 
         var result = await sender.Send(query);

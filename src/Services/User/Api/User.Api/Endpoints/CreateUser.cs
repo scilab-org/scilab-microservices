@@ -1,8 +1,12 @@
 #region using
 
 using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Swagger.Extensions;
+using Common.Constants;
+using Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using User.Api.Constants;
+using User.Api.Models;
 using User.Application.Dtos.Users;
 using User.Application.Features.Users;
 
@@ -19,10 +23,12 @@ public sealed class CreateUser : ICarterModule
         app.MapPost(ApiRoutes.Users.Create, HandleCreateUserAsync)
             .WithTags(ApiRoutes.Users.Tags)
             .WithName(nameof(CreateUser))
+            .WithMultipartForm<CreateUserRequest>()
             .Produces<ApiCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status409Conflict);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     #endregion
@@ -32,11 +38,40 @@ public sealed class CreateUser : ICarterModule
     private async Task<ApiCreatedResponse<string>> HandleCreateUserAsync(
         ISender sender,
         IHttpContextAccessor httpContext,
-        [FromBody] CreateUserDto dto)
+        [FromForm] CreateUserRequest req)
     {
         var currentUser = httpContext.GetCurrentUser();
-        var command = new CreateUserCommand(dto, Actor.User(currentUser.Email));
+        if (!currentUser.HasGroups(AuthorizeConstants.SystemAdmin))
+        {
+            throw new UnauthorizedAccessException();
+        }
+        
+        var dto = new CreateUserDto
+        {
+            Username = req.Username,
+            Email = req.Email,
+            FirstName = req.FirstName,
+            LastName = req.LastName,
+            InitialPassword = req.InitialPassword,
+            TemporaryPassword = req.TemporaryPassword,
+            GroupNames = string.IsNullOrWhiteSpace(req.GroupNames)
+                ? null
+                : req.GroupNames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+        };
 
+        if (req.AvatarImage is { Length: > 0 })
+        {
+            using var ms = new MemoryStream();
+            await req.AvatarImage.CopyToAsync(ms);
+            dto.AvatarImage = new UploadFileBytes
+            {
+                FileName = req.AvatarImage.FileName,
+                ContentType = req.AvatarImage.ContentType,
+                Bytes = ms.ToArray()
+            };
+        }
+
+        var command = new CreateUserCommand(dto, Actor.User(currentUser.Email));
         var result = await sender.Send(command);
 
         return new ApiCreatedResponse<string>(result);

@@ -1,6 +1,6 @@
-namespace User.Application.Dtos.Users;
+namespace User.Api.Models;
 
-public sealed class CreateUserDto
+public class CreateUserRequest
 {
     #region Fields, Properties and Indexers
 
@@ -16,9 +16,9 @@ public sealed class CreateUserDto
 
     public bool TemporaryPassword { get; set; } = true;
 
-    public UploadFileBytes? AvatarImage { get; set; }
+    public string? GroupNames { get; set; }
 
-    public List<string>? GroupNames { get; set; }
+    public IFormFile? AvatarImage { get; set; }
 
     #endregion
 }

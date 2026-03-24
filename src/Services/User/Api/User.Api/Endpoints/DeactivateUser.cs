@@ -1,6 +1,7 @@
 #region using
 
 using BuildingBlocks.Authentication.Extensions;
+using Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 using User.Api.Constants;
 using User.Application.Features.Users;
@@ -19,8 +20,8 @@ public sealed class DeactivateUser : ICarterModule
             .WithTags(ApiRoutes.Users.Tags)
             .WithName(nameof(DeactivateUser))
             .Produces<ApiDeletedResponse<bool>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
     }
 
     #endregion
@@ -33,6 +34,11 @@ public sealed class DeactivateUser : ICarterModule
         [FromRoute] string userId)
     {
         var currentUser = httpContext.GetCurrentUser();
+        if (!currentUser.HasGroups(AuthorizeConstants.SystemAdmin))
+        {
+            throw new UnauthorizedAccessException();
+        }
+        
         var command = new DeactivateUserCommand(userId, Actor.User(currentUser.Email));
 
         var result = await sender.Send(command);

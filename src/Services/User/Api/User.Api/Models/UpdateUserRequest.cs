@@ -1,6 +1,6 @@
-namespace User.Application.Dtos.Users;
+namespace User.Api.Models;
 
-public sealed class UpdateUserDto
+public class UpdateUserRequest
 {
     #region Fields, Properties and Indexers
 
@@ -10,9 +10,9 @@ public sealed class UpdateUserDto
 
     public bool Enabled { get; set; } = true;
 
-    public UploadFileBytes? AvatarImage { get; set; }
+    public string? GroupNames { get; set; }
 
-    public List<string>? GroupNames { get; set; }
+    public IFormFile? AvatarImage { get; set; }
 
     #endregion
 }

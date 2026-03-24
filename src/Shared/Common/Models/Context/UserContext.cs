@@ -26,6 +26,11 @@ public sealed class UserContext
 
     #region Methods
 
+    public bool HasGroups(string groupName)
+    {
+        return Groups != null && Groups.Any(group => group == groupName);
+    }
+    
     public bool HasRoles(string roleName)
     {
         return Roles != null && Roles.Any(role => role == roleName);

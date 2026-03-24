@@ -62,6 +62,7 @@ public sealed class KeycloakService : IKeycloakService
         string initialPassword,
         bool temporaryPassword = true,
         List<string>? groupNames = null,
+        string? avatarUrl = null,
         CancellationToken cancellationToken = default)
     {
         string? createdUserId = null;
@@ -89,8 +90,17 @@ public sealed class KeycloakService : IKeycloakService
                         Value = initialPassword,
                         Temporary = temporaryPassword
                     }
-                ]
+                ],
+                RequiredActions = ["CONFIGURE_TOTP"]
             };
+
+            if (!string.IsNullOrWhiteSpace(avatarUrl))
+            {
+                createUserRequest.Attributes = new Dictionary<string, List<string>>
+                {
+                    { "avatarUrl", [avatarUrl] }
+                };
+            }
 
             var response = await _keycloakApi.CreateUserAsync(_realm, createUserRequest, accessToken);
 
@@ -149,6 +159,7 @@ public sealed class KeycloakService : IKeycloakService
         string? lastName,
         bool? enabled,
         List<string>? groupNames,
+        string? avatarUrl = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -161,6 +172,14 @@ public sealed class KeycloakService : IKeycloakService
                 LastName = lastName,
                 Enabled = enabled
             };
+
+            if (avatarUrl is not null)
+            {
+                request.Attributes = new Dictionary<string, List<string>>
+                {
+                    { "avatarUrl", [avatarUrl] }
+                };
+            }
 
             await _keycloakApi.UpdateUserAsync(_realm, userId, request, accessToken);
 
@@ -187,6 +206,7 @@ public sealed class KeycloakService : IKeycloakService
     public async Task<(List<UserDto> Users, int TotalCount)> GetUsersAsync(
         string? searchText,
         string? groupName,
+        bool? enabled,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
@@ -195,16 +215,16 @@ public sealed class KeycloakService : IKeycloakService
         {
             var accessToken = await GetAccessTokenAsync();
 
-            var totalCount = await _keycloakApi.GetUsersCountAsync(_realm, searchText, accessToken);
+            var totalCount = await _keycloakApi.GetUsersCountAsync(_realm, searchText, accessToken, enabled);
 
             var first = (pageNumber - 1) * pageSize;
-            var users = await _keycloakApi.SearchUsersAsync(_realm, searchText, first, pageSize, accessToken);
+            var users = await _keycloakApi.SearchUsersAsync(_realm, searchText, first, pageSize, accessToken, enabled, briefRepresentation: false);
 
             // Enrich each user with groups and realm roles
             var enrichedUsers = new List<UserDto>();
             foreach (var user in users)
             {
-                var userGroups = await _keycloakApi.GetUserGroupsAsync(_realm, user.Id, accessToken);   
+                var userGroups = await _keycloakApi.GetUserGroupsAsync(_realm, user.Id, accessToken);
 
                 enrichedUsers.Add(MapToUserDto(user, userGroups));
             }
@@ -216,11 +236,7 @@ public sealed class KeycloakService : IKeycloakService
                     .Where(u => u.Groups.Any(g =>
                         g.Name != null && g.Name.Contains(groupName, StringComparison.OrdinalIgnoreCase)))
                     .ToList();
-            }
 
-            // Adjust total count if client-side filters were applied
-            if (!string.IsNullOrWhiteSpace(groupName))
-            {
                 totalCount = enrichedUsers.Count;
             }
 
@@ -284,6 +300,34 @@ public sealed class KeycloakService : IKeycloakService
         {
             _logger.LogError(ex, "Failed to deactivate user '{UserId}' in Keycloak", userId);
             throw new InfrastructureException(MessageCode.FailedToDeactivateUser);
+        }
+    }
+
+    public async Task ActivateUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var accessToken = await GetAccessTokenAsync();
+
+            var request = new KeycloakUpdateUserRequest
+            {
+                Enabled = true
+            };
+
+            await _keycloakApi.UpdateUserAsync(_realm, userId, request, accessToken);
+            _logger.LogInformation("Successfully activated user '{UserId}' in Keycloak", userId);
+        }
+        catch (Refit.ApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            _logger.LogError("User '{UserId}' not found in Keycloak", userId);
+            throw new InfrastructureException(MessageCode.UserNotFound);
+        }
+        catch (Exception ex) when (ex is not InfrastructureException)
+        {
+            _logger.LogError(ex, "Failed to activate user '{UserId}' in Keycloak", userId);
+            throw new InfrastructureException(MessageCode.FailedToActivateUser);
         }
     }
 
@@ -537,6 +581,9 @@ public sealed class KeycloakService : IKeycloakService
         Enabled = user.Enabled,
         EmailVerified = user.EmailVerified,
         CreatedTimestamp = user.CreatedTimestamp,
+        AvatarUrl = user.Attributes?.TryGetValue("avatarUrl", out var avatarValues) == true
+            ? avatarValues.FirstOrDefault()
+            : null,
         Groups = groups?.Select(MapToGroupDto).ToList() ?? [],
     };
 
@@ -544,8 +591,7 @@ public sealed class KeycloakService : IKeycloakService
     {
         Id = group.Id,
         Name = group.Name,
-        Path = group.Path,
-        SubGroups = group.SubGroups?.Select(MapToGroupDto).ToList()
+        Path = group.Path
     };
 
     private static RoleDto MapToRoleDto(KeycloakRoleResponse role) => new()

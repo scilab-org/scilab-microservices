@@ -81,6 +81,8 @@ public sealed class MessageCode
 
     public const string FailedToDeactivateUser = "FAILED_TO_DEACTIVATE_USER";
 
+    public const string FailedToActivateUser = "FAILED_TO_ACTIVATE_USER";
+
     public const string FailedToGetUsers = "FAILED_TO_GET_USERS";
 
     public const string FailedToGetGroups = "FAILED_TO_GET_GROUPS";

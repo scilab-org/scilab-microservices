@@ -33,6 +33,8 @@ public sealed class ApiRoutes
 
         public const string Deactivate = $"{Base}/{{userId}}/deactivate";
 
+        public const string Activate = $"{Base}/{{userId}}/activate";
+
         #endregion
     }
 

@@ -22,5 +22,9 @@ public sealed class KeycloakUpdateUserRequest
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Enabled { get; set; }
 
+    [JsonPropertyName("attributes")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, List<string>>? Attributes { get; set; }
+
     #endregion
 }

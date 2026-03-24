@@ -37,13 +37,16 @@ public interface IKeycloakApi
         [AliasAs("search")] string? search,
         [AliasAs("first")] int first,
         [AliasAs("max")] int max,
-        [Authorize("Bearer")] string token);
+        [Authorize("Bearer")] string token,
+        [AliasAs("enabled")] bool? enabled = null,
+        [AliasAs("briefRepresentation")] bool briefRepresentation = false);
 
     [Get("/admin/realms/{realm}/users/count")]
     Task<int> GetUsersCountAsync(
         [AliasAs("realm")] string realm,
         [AliasAs("search")] string? search,
-        [Authorize("Bearer")] string token);
+        [Authorize("Bearer")] string token,
+        [AliasAs("enabled")] bool? enabled = null);
 
     [Get("/admin/realms/{realm}/users/{userId}")]
     Task<KeycloakUserResponse> GetUserByIdAsync(

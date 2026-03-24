@@ -17,6 +17,10 @@ public sealed class AppConstants
         public const string Papers = "papers";
 
         public const string Sections = "sections";
+
+        public const string UserAvatars = "user-avatars";
+
+        public const string DefaultAvatar = "user-avatars/default.png";
     }
 
     #endregion

@@ -1,5 +1,7 @@
 #region using
 
+using BuildingBlocks.Authentication.Extensions;
+using Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 using User.Api.Constants;
 using User.Application.Features.Users.Queries;
@@ -19,8 +21,8 @@ public sealed class GetUserById : ICarterModule
             .WithTags(ApiRoutes.Users.Tags)
             .WithName(nameof(GetUserById))
             .Produces<ApiGetResponse<GetUserByIdResult>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
     }
 
     #endregion
@@ -29,8 +31,11 @@ public sealed class GetUserById : ICarterModule
 
     private async Task<ApiGetResponse<GetUserByIdResult>> HandleGetUserByIdAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromRoute] string userId)
     {
+        var currentUser = httpContext.GetCurrentUser();
+
         var query = new GetUserByIdQuery(userId);
 
         var result = await sender.Send(query);

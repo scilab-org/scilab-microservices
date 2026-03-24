@@ -20,6 +20,7 @@ public interface IKeycloakService
         string initialPassword,
         bool temporaryPassword = true,
         List<string>? groupNames = null,
+        string? avatarUrl = null,
         CancellationToken cancellationToken = default);
 
     Task UpdateUserAsync(
@@ -28,11 +29,13 @@ public interface IKeycloakService
         string? lastName,
         bool? enabled,
         List<string>? groupNames,
+        string? avatarUrl = null,
         CancellationToken cancellationToken = default);
 
     Task<(List<UserDto> Users, int TotalCount)> GetUsersAsync(
         string? searchText,
         string? groupName,
+        bool? enabled,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default);
@@ -42,6 +45,10 @@ public interface IKeycloakService
         CancellationToken cancellationToken = default);
 
     Task DeactivateUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default);
+
+    Task ActivateUserAsync(
         string userId,
         CancellationToken cancellationToken = default);
 

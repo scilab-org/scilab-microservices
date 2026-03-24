@@ -1,5 +1,6 @@
 #region using
 
+using Microsoft.Extensions.Logging;
 using User.Application.Dtos.Users;
 using User.Application.Services;
 
@@ -46,7 +47,9 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 }
 
 public sealed class CreateUserCommandHandler(
-    IKeycloakService keycloakService) : ICommandHandler<CreateUserCommand, string>
+    IKeycloakService keycloakService,
+    IMinIoCloudService minIoCloudService,
+    ILogger<CreateUserCommandHandler> logger) : ICommandHandler<CreateUserCommand, string>
 {
     #region Implementations
 
@@ -54,6 +57,10 @@ public sealed class CreateUserCommandHandler(
     {
         var dto = command.Dto;
 
+        // Step 1: Upload avatar first using username as filename
+        var avatarUrl = await UploadAvatarAsync(dto.Username, dto.AvatarImage, cancellationToken);
+
+        // Step 2: Create user in Keycloak with avatar URL already set
         var keycloakUserId = await keycloakService.CreateUserAsync(
             username: dto.Username,
             email: dto.Email,
@@ -62,9 +69,43 @@ public sealed class CreateUserCommandHandler(
             initialPassword: dto.InitialPassword,
             temporaryPassword: dto.TemporaryPassword,
             groupNames: dto.GroupNames,
+            avatarUrl: avatarUrl,
             cancellationToken: cancellationToken);
 
         return keycloakUserId;
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task<string> UploadAvatarAsync(
+        string username,
+        UploadFileBytes? avatarImage,
+        CancellationToken cancellationToken)
+    {
+        if (avatarImage is null)
+            return AppConstants.Bucket.DefaultAvatar;
+
+        try
+        {
+            var ext = Path.GetExtension(avatarImage.FileName);
+            var objectName = $"{username}{ext}";
+
+            var uploaded = await minIoCloudService.UploadFileAsync(
+                avatarImage,
+                AppConstants.Bucket.UserAvatars,
+                objectName,
+                isPublicBucket: true,
+                cancellationToken);
+
+            return uploaded.PublicURL ?? AppConstants.Bucket.DefaultAvatar;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to upload avatar for user '{Username}', using default avatar", username);
+            return AppConstants.Bucket.DefaultAvatar;
+        }
     }
 
     #endregion
