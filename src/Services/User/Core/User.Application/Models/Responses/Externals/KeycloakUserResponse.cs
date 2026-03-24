@@ -34,5 +34,8 @@ public sealed class KeycloakUserResponse
     [JsonPropertyName("createdTimestamp")]
     public long CreatedTimestamp { get; set; }
 
+    [JsonPropertyName("attributes")]
+    public Dictionary<string, List<string>>? Attributes { get; set; }
+
     #endregion
 }

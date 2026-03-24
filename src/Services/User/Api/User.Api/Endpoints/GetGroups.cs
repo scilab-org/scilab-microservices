@@ -1,5 +1,7 @@
 #region using
 
+using BuildingBlocks.Authentication.Extensions;
+using Common.Constants;
 using User.Api.Constants;
 using User.Application.Dtos.Groups;
 using User.Application.Features.Groups.Queries;
@@ -17,8 +19,8 @@ public sealed class GetGroups : ICarterModule
         app.MapGet(ApiRoutes.Groups.GetAll, HandleGetGroupsAsync)
             .WithTags(ApiRoutes.Groups.Tags)
             .WithName(nameof(GetGroups))
-            .Produces<ApiGetResponse<List<GroupDto>>>(StatusCodes.Status200OK);
-        // .RequireAuthorization();
+            .Produces<ApiGetResponse<List<GroupDto>>>(StatusCodes.Status200OK)
+            .RequireAuthorization();
     }
 
     #endregion
@@ -26,8 +28,11 @@ public sealed class GetGroups : ICarterModule
     #region Methods
 
     private async Task<ApiGetResponse<List<GroupDto>>> HandleGetGroupsAsync(
-        ISender sender)
+        ISender sender,
+        IHttpContextAccessor httpContext)
     {
+        var currentUser = httpContext.GetCurrentUser();
+
         var query = new GetGroupsQuery();
 
         var result = await sender.Send(query);

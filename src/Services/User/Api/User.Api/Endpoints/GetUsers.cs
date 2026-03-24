@@ -1,5 +1,7 @@
 #region using
 
+using BuildingBlocks.Authentication.Extensions;
+using Common.Constants;
 using Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using User.Api.Constants;
@@ -21,8 +23,8 @@ public sealed class GetUsers : ICarterModule
             .WithTags(ApiRoutes.Users.Tags)
             .WithName(nameof(GetUsers))
             .Produces<ApiGetResponse<GetUsersResult>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .RequireAuthorization("admin");
     }
 
     #endregion
@@ -31,12 +33,16 @@ public sealed class GetUsers : ICarterModule
 
     private async Task<ApiGetResponse<GetUsersResult>> HandleGetUsersAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromQuery] string? searchText,
         [FromQuery] string? groupName,
+        [FromQuery] bool? enabled,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 1000)
     {
-        var filter = new GetUsersFilter(searchText, groupName);
+        var currentUser = httpContext.GetCurrentUser();
+
+        var filter = new GetUsersFilter(searchText, groupName, enabled);
         var paging = new PaginationRequest(pageNumber, pageSize);
         var query = new GetUsersQuery(filter, paging);
 

@@ -37,6 +37,9 @@ public sealed class KeycloakCreateUserRequest
     [JsonPropertyName("attributes")]
     public Dictionary<string, List<string>>? Attributes { get; set; }
 
+    [JsonPropertyName("requiredActions")]
+    public List<string>? RequiredActions { get; set; }
+
     #endregion
 }
 

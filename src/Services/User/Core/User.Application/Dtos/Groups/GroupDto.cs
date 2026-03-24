@@ -10,7 +10,5 @@ public sealed class GroupDto
 
     public string? Path { get; set; }
 
-    public List<GroupDto>? SubGroups { get; set; }
-
     #endregion
 }

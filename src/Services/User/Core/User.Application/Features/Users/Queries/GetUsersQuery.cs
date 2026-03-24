@@ -25,6 +25,7 @@ public sealed class GetUsersQueryHandler(
         var (users, totalCount) = await keycloakService.GetUsersAsync(
             searchText: filter.SearchText,
             groupName: filter.GroupName,
+            enabled: filter.Enabled,
             pageNumber: paging.PageNumber,
             pageSize: paging.PageSize,
             cancellationToken: cancellationToken);

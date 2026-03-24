@@ -82,6 +82,45 @@ public sealed class MinIoCloudService : IMinIoCloudService
         }
     }
 
+    public async Task<UploadFileResult> UploadFileAsync(
+        UploadFileBytes file,
+        string bucketName,
+        string objectName,
+        bool isPublicBucket = false,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            await EnsureBucketAsync(bucketName, isPublicBucket, ct);
+
+            using var stream = new MemoryStream(file.Bytes, 0, file.Bytes.Length, writable: false, publiclyVisible: true);
+
+            var putArgs = new PutObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(objectName)
+                .WithStreamData(stream)
+                .WithObjectSize(stream.Length)
+                .WithContentType(file.ContentType);
+
+            await _minioClient.PutObjectAsync(putArgs, ct);
+
+            return new UploadFileResult
+            {
+                FileId = objectName,
+                FolderName = bucketName,
+                OriginalFileName = file.FileName,
+                FileName = objectName,
+                FileSize = file.Bytes.LongLength,
+                ContentType = file.ContentType,
+                PublicURL = isPublicBucket ? $"{_endPoint}/{bucketName}/{objectName}" : string.Empty,
+            };
+        }
+        catch (MinioException e)
+        {
+            throw new InfrastructureException(e.Message);
+        }
+    }
+
     public async Task<string> GetShareLinkAsync(string bucketName, string objectName, int expireTimeMinutes)
     {
         try
