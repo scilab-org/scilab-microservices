@@ -21,7 +21,7 @@ public sealed class DeactivateUser : ICarterModule
             .WithName(nameof(DeactivateUser))
             .Produces<ApiDeletedResponse<bool>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion

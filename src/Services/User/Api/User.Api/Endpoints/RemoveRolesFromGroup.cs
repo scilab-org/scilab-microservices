@@ -22,7 +22,7 @@ public sealed class RemoveRolesFromGroup : ICarterModule
             .Produces<ApiDeletedResponse<bool>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion

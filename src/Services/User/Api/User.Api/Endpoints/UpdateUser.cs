@@ -28,7 +28,7 @@ public sealed class UpdateUser : ICarterModule
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .DisableAntiforgery()
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion

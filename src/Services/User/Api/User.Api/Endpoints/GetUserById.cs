@@ -22,7 +22,7 @@ public sealed class GetUserById : ICarterModule
             .WithName(nameof(GetUserById))
             .Produces<ApiGetResponse<GetUserByIdResult>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion

@@ -21,7 +21,7 @@ public sealed class ActivateUser : ICarterModule
             .WithName(nameof(ActivateUser))
             .Produces<ApiUpdatedResponse<bool>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion

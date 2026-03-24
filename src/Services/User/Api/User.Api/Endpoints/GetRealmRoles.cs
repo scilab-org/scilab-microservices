@@ -20,7 +20,7 @@ public sealed class GetRealmRoles : ICarterModule
             .WithTags(ApiRoutes.Roles.Tags)
             .WithName(nameof(GetRealmRoles))
             .Produces<ApiGetResponse<List<RoleDto>>>(StatusCodes.Status200OK)
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion

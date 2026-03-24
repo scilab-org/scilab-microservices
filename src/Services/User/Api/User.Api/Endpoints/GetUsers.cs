@@ -24,7 +24,7 @@ public sealed class GetUsers : ICarterModule
             .WithName(nameof(GetUsers))
             .Produces<ApiGetResponse<GetUsersResult>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .RequireAuthorization("admin");
+            .RequireAuthorization();
     }
 
     #endregion
