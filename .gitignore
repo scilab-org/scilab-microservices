@@ -60,6 +60,7 @@ yarn-error.log*
 
 # App settings (keep base template, ignore environment-specific overrides)
 appsettings.*.json
+appsettings.Development.json
 
 # local data
 /local-data
