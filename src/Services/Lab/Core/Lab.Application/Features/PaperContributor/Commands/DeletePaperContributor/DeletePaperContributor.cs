@@ -14,11 +14,11 @@ public class DeletePaperContributorCommandHandler(IDocumentSession session)
 
     public async Task<Unit> Handle(DeletePaperContributorCommand command, CancellationToken cancellationToken)
     {
-        var template = await session.LoadAsync<PaperContributorEntity>(command.Id, cancellationToken);
-        if (template is null)
+        var current = await session.LoadAsync<PaperContributorEntity>(command.Id, cancellationToken);
+        if (current is null)
             throw new NotFoundException($"Template with id {command.Id} not found.");
 
-        session.Delete(template);
+        session.Delete(current);
         await session.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

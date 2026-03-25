@@ -118,15 +118,13 @@ public sealed class MessageCode
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
     public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
-
-    public const string PaperContributorIdIsRequired = "PAPER_CONTRIBUTOR_ID_IS_REQUIRED";
-
+    
     public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
     public const string PaperContextIsRequired = "PAPER_CONTEXT_IS_REQUIRED";
 
     public const string PaperJournalIsRequired = "PAPER_JOURNAL_IS_REQUIRED";
-
+    
     #endregion
 
     #region Tag Message Codes
@@ -200,6 +198,20 @@ public sealed class MessageCode
     public const string JournalIdIsRequired = "JOURNAL_ID_IS_REQUIRED";
 
     public const string JournalNameAlreadyExists = "JOURNAL_NAME_ALREADY_EXISTS";
+
+    #endregion
+
+    #region Task Management
+    public const string TaskNameIsRequired = "TASK_NAME_IS_REQUIRED";
+    public const string TaskIdIsRequired = "TASK_ID_IS_REQUIRED";
+    public const string TaskIsNotExists = "TASK_IS_NOT_EXISTS";
+    #endregion
+
+    #region PaperContributor Management
+    
+    public const string PaperContributorIdIsRequired = "PAPER_CONTRIBUTOR_ID_IS_REQUIRED";
+    
+    public const string PaperContributorNotFound = "PAPER_CONTRIBUTOR_NOT_FOUND";
 
     #endregion
 }

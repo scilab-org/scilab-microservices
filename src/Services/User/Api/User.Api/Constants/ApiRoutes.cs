@@ -31,6 +31,8 @@ public sealed class ApiRoutes
 
         public const string Update = $"{Base}/{{userId}}";
 
+        public const string UpdateGroups = $"{Base}/{{userId}}/groups";
+
         public const string Deactivate = $"{Base}/{{userId}}/deactivate";
 
         public const string Activate = $"{Base}/{{userId}}/activate";

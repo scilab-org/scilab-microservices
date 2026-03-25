@@ -103,6 +103,22 @@ public interface ILabApiService
         Guid paperId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns all papers assigned to the current user across their projects.</summary>
+    Task<(List<PaperInfoDto> Items, long TotalCount)> GetAssignedPapersAsync(
+        string? title = null,
+        string? @abstract = null,
+        string? doi = null,
+        int? status = null,
+        DateTimeOffset? fromPublicationDate = null,
+        DateTimeOffset? toPublicationDate = null,
+        string? paperType = null,
+        string? journalName = null,
+        string? conferenceName = null,
+        string[]? tag = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Deletes a paper contributor by its id from the Lab service.</summary>
     Task<bool> DeletePaperContributorAsync(
         Guid contributorId,
