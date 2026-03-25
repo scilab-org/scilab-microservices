@@ -11,7 +11,10 @@ public static class ApiClientExtension
 
     public static IServiceCollection AddRefitClients(this IServiceCollection services, IConfiguration cfg)
     {
+        services.AddTransient<ManagementAuthHeaderHandler>();
+
         services.AddRefitClient<IUserServiceApi>()
+            .AddHttpMessageHandler<ManagementAuthHeaderHandler>()
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.UserService.Section}:{ApiClientCfg.UserService.BaseUrl}"]!);
@@ -19,6 +22,7 @@ public static class ApiClientExtension
             });
 
         services.AddRefitClient<ILabServiceApi>()
+            .AddHttpMessageHandler<ManagementAuthHeaderHandler>()
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.LabService.Section}:{ApiClientCfg.LabService.BaseUrl}"]!);

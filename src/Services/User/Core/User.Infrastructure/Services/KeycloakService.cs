@@ -203,6 +203,57 @@ public sealed class KeycloakService : IKeycloakService
         }
     }
 
+    public async Task UpdateUserGroupsAsync(
+        string userId,
+        List<string> groupNames,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var accessToken = await GetAccessTokenAsync();
+
+            var currentUser = await _keycloakApi.GetUserByIdAsync(_realm, userId, accessToken);
+            var currentGroups = await _keycloakApi.GetUserGroupsAsync(_realm, userId, accessToken);
+            var allGroups = await _keycloakApi.GetGroupsAsync(_realm, search: null, accessToken);
+
+            var currentGroupNames = currentGroups
+                .Select(g => g.Name)
+                .Where(n => n is not null)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var desiredSet = groupNames.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var currentGroup in currentGroups)
+            {
+                if (currentGroup.Name is not null && !desiredSet.Contains(currentGroup.Name))
+                {
+                    await _keycloakApi.RemoveUserFromGroupAsync(_realm, userId, currentGroup.Id, accessToken);
+                }
+            }
+
+            foreach (var groupName in groupNames)
+            {
+                if (!currentGroupNames.Contains(groupName))
+                {
+                    var group = FindGroupByName(allGroups, groupName);
+                    if (group is null)
+                        throw new InfrastructureException(MessageCode.GroupNotFound);
+
+                    await _keycloakApi.AssignUserToGroupAsync(_realm, userId, group.Id, accessToken);
+                }
+            }
+        }
+        catch (Refit.ApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new InfrastructureException(MessageCode.UserNotFound);
+        }
+        catch (Exception ex) when (ex is not InfrastructureException)
+        {
+            _logger.LogError(ex, "Failed to update groups for user '{UserId}' in Keycloak", userId);
+            throw new InfrastructureException(MessageCode.FailedToAssignGroup);
+        }
+    }
+
     public async Task<(List<UserDto> Users, int TotalCount)> GetUsersAsync(
         string? searchText,
         string? groupName,

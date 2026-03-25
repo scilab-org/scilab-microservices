@@ -23,23 +23,40 @@ public interface IUserServiceApi
     /// <summary>
     /// PUT /users/{userId} — updates user profile including group assignments in Keycloak.
     /// </summary>
+    [Multipart]
     [Put("/users/{userId}")]
     Task<HttpResponseMessage> UpdateUserAsync(
         [AliasAs("userId")] string userId,
-        [Body] UpdateUserGroupRequest request);
+        [AliasAs("FirstName")] string? firstName,
+        [AliasAs("LastName")] string? lastName,
+        [AliasAs("Enabled")] bool enabled,
+        [AliasAs("GroupNames")] string? groupNames);
+
+    /// <summary>
+    /// PUT /users/{userId}/groups — updates only group memberships.
+    /// </summary>
+    [Put("/users/{userId}/groups")]
+    Task<HttpResponseMessage> UpdateUserGroupsAsync(
+        [AliasAs("userId")] string userId,
+        [Body] UpdateUserGroupsRequest request);
 
     #endregion
 }
 
 /// <summary>
-/// Request body matching User service's UpdateUserDto shape.
-/// Only groupNames is required for role assignment; other fields are optional.
+/// <summary>
+/// Multipart update payload for User service.
 /// </summary>
 public sealed class UpdateUserGroupRequest
 {
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public bool Enabled { get; set; } = true;
-    public List<string>? GroupNames { get; set; }
+    public string? GroupNames { get; set; }
+}
+
+public sealed class UpdateUserGroupsRequest
+{
+    public List<string> GroupNames { get; set; } = [];
 }
 

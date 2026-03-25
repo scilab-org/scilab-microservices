@@ -20,7 +20,7 @@ public sealed class InitializeData : ICarterModule
             .WithName(nameof(InitializeData))
             .Produces<ApiUpdatedResponse<bool>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .RequireAuthorization();
+            .RequireAuthorization("admin");
     }
 
     #endregion

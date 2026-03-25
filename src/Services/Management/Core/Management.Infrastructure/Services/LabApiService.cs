@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using Management.Application.Dtos.Papers;
 using Management.Application.Services;
 using Management.Infrastructure.ApiClients;
+using BuildingBlocks.Pagination;
 
 namespace Management.Infrastructure.Services;
 
@@ -145,6 +146,12 @@ file sealed class LabGetPaperContributorsResult
 file sealed class LabGetPaperContributorsResponse
 {
     public LabGetPaperContributorsResult? Result { get; set; }
+}
+
+file sealed class AssignedPapersPagedResult
+{
+    public List<PaperInfoDto>? Items { get; set; }
+    public PagingResult? Paging { get; set; }
 }
 
 public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
@@ -498,6 +505,51 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         catch
         {
             return new List<LabPaperContributorDto>();
+        }
+    }
+
+    public async Task<(List<PaperInfoDto> Items, long TotalCount)> GetAssignedPapersAsync(
+        string? title = null,
+        string? @abstract = null,
+        string? doi = null,
+        int? status = null,
+        DateTimeOffset? fromPublicationDate = null,
+        DateTimeOffset? toPublicationDate = null,
+        string? paperType = null,
+        string? journalName = null,
+        string? conferenceName = null,
+        string[]? tag = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetAssignedPapersAsync(
+                pageNumber,
+                pageSize,
+                title,
+                @abstract,
+                doi,
+                status,
+                fromPublicationDate,
+                toPublicationDate,
+                paperType,
+                journalName,
+                conferenceName,
+                tag);
+
+            if (!response.IsSuccessStatusCode)
+                return ([], 0);
+
+            var body = await response.Content.ReadFromJsonAsync<Common.Models.Reponses.ApiGetResponse<AssignedPapersPagedResult>>(
+                cancellationToken: cancellationToken);
+
+            return (body?.Result?.Items ?? [], body?.Result?.Paging?.TotalCount ?? 0);
+        }
+        catch
+        {
+            return ([], 0);
         }
     }
 

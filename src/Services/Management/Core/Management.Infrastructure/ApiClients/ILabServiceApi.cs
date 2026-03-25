@@ -70,6 +70,24 @@ public interface ILabServiceApi
     Task<HttpResponseMessage> GetPaperContributorsAsync([AliasAs("paperId")] Guid paperId);
 
     /// <summary>
+    /// GET /papers/assigned — returns papers assigned to current user.
+    /// </summary>
+    [Get("/papers/assigned")]
+    Task<HttpResponseMessage> GetAssignedPapersAsync(
+        [AliasAs("pageNumber")] int pageNumber = 1,
+        [AliasAs("pageSize")] int pageSize = 1000,
+        [AliasAs("title")] string? title = null,
+        [AliasAs("abstract")] string? @abstract = null,
+        [AliasAs("doi")] string? doi = null,
+        [AliasAs("status")] int? status = null,
+        [AliasAs("fromPublicationDate")] DateTimeOffset? fromPublicationDate = null,
+        [AliasAs("toPublicationDate")] DateTimeOffset? toPublicationDate = null,
+        [AliasAs("paperType")] string? paperType = null,
+        [AliasAs("journalName")] string? journalName = null,
+        [AliasAs("conferenceName")] string? conferenceName = null,
+        [AliasAs("tag")] string[]? tag = null);
+
+    /// <summary>
     /// DELETE /paper-contributors/{id} — deletes a contributor by id.
     /// </summary>
     [Delete("/author/paper-contributors/{id}")]

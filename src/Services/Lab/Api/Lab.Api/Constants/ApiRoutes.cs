@@ -187,4 +187,24 @@ public sealed class ApiRoutes
 
         #endregion
     }
+
+    public static class Task
+    {
+        #region Constants
+
+        public const string Tags = "Tasks";
+        private const string Base = "/tasks";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
+        public const string Delete = $"{Base}/{{id}}";
+        public const string GetMyTasks = $"{Base}/my-tasks";
+        public const string GetTaskById = $"{Base}/{{id}}";
+        public const string GetTasksByPaperId = $"{Base}/paper/{{paperId}}";
+        #endregion
+    }
 }

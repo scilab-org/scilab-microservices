@@ -183,15 +183,9 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
             currentGroups.Add(roleName);
         }
 
-        var updateRequest = new UpdateUserGroupRequest
-        {
-            FirstName = user?.FirstName,
-            LastName = user?.LastName,
-            Enabled = user?.Enabled ?? true,
-            GroupNames = currentGroups!
-        };
-
-        var updateResponse = await userServiceApi.UpdateUserAsync(userId.ToString(), updateRequest);
+        var updateResponse = await userServiceApi.UpdateUserGroupsAsync(
+            userId.ToString(),
+            new UpdateUserGroupsRequest { GroupNames = currentGroups.OfType<string>().ToList() });
         if (!updateResponse.IsSuccessStatusCode)
             throw new InfrastructureException(MessageCode.FailedToAssignGroup);
     }
