@@ -20,7 +20,8 @@ public static class DependencyInjection
 
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
-        IConfiguration cfg)
+        IConfiguration cfg,
+        bool useHttpAuth = true)
     {
         services.AddMarten(opts =>
         {
@@ -60,15 +61,18 @@ public static class DependencyInjection
                     .WithSSL(cfg.GetValue<bool>($"{MinIoCfg.Section}:{MinIoCfg.Secure}"))
                     .Build());
 
-        services.AddTransient<ManagementAuthHeaderHandler>();
-
-        services.AddRefitClient<IManagementServiceApi>()
-            .AddHttpMessageHandler<ManagementAuthHeaderHandler>()
+        var managementClientBuilder = services.AddRefitClient<IManagementServiceApi>()
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.ManagementService.Section}:{ApiClientCfg.ManagementService.BaseUrl}"]!);
                 c.Timeout = TimeSpan.FromSeconds(30);
             });
+
+        if (useHttpAuth)
+        {
+            services.AddTransient<ManagementAuthHeaderHandler>();
+            managementClientBuilder.AddHttpMessageHandler<ManagementAuthHeaderHandler>();
+        }
 
         services.AddRefitClient<IUserServiceApi>()
             .AddHttpMessageHandler<ManagementAuthHeaderHandler>()

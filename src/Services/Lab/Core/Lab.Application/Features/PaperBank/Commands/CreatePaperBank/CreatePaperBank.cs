@@ -1,9 +1,13 @@
-﻿using Lab.Application.Dtos.PaperBanks;
+﻿using EventSourcing.Events.Lab;
+using Lab.Application.Dtos.PaperBanks;
+using Lab.Application.Repositories;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
 using MediatR;
+using Microsoft.AspNetCore.OutputCaching;
+using Newtonsoft.Json;
 
 namespace Lab.Application.Features.PaperBank.Commands.CreatePaperBank;
 
@@ -36,7 +40,7 @@ public class CreatePaperBankCommandValidator : AbstractValidator<CreatePaperBank
     }
 }
 
-public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloudService minIo)
+public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloudService minIo, IOutboxRepository outboxRepo)
     : IRequestHandler<CreatePaperBankCommand, Guid>
 {
     #region Implementations
@@ -69,8 +73,26 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
 
         session.Store(entity);
 
+        //publish event to outbox (for paper ingestion)
+        var message = new PaperIngestionEvent
+        {
+            PaperId = entity.Id,
+            PaperName = entity.Title,
+            ParsedText = entity.ParsedText ?? string.Empty
+        };
+
+        var outbox = OutboxMessageEntity.Create(
+            id: Guid.NewGuid(),
+            eventType: message.EventType!,
+            content: JsonConvert.SerializeObject(message),
+            occurredOnUtc: DateTimeOffset.UtcNow
+        );
+
+        await outboxRepo.AddMessageAsync(outbox, cancellationToken);
         await session.SaveChangesAsync(cancellationToken);
 
+
+       
         return entity.Id;
     }
 

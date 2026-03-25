@@ -17,6 +17,7 @@ public class UpdatePaperBankDto
     public string? JournalName { get; init; }
     public string? ConferenceName { get; init; }
     public List<string>? TagNames { get; init; }
+    public IngestStatus? IngestStatus { get; init; }
 
     #endregion
 }

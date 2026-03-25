@@ -4,6 +4,7 @@ using BuildingBlocks.Authentication.Extensions;
 using BuildingBlocks.Swagger.Extensions;
 using Common.Configurations;
 using Common.Constants;
+using EventSourcing.MassTransit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Lab.Infrastructure.ApiClients;
@@ -54,6 +55,7 @@ public static class DependencyInjection
         services.AddAuthenticationAndAuthorization(cfg);
         services.AddSwaggerServices(cfg);
 
+        services.AddMessageBroker(cfg, Assembly.GetExecutingAssembly());
         // Register all AutoMapper profiles from the current assembly
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
 

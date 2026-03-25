@@ -33,6 +33,9 @@ public static class Extentions
                     host.Username(cfg[$"{MessageBrokerCfg.Section}:{MessageBrokerCfg.UserName}"]!);
                     host.Password(cfg[$"{MessageBrokerCfg.Section}:{MessageBrokerCfg.Password}"]!);
                 });
+
+                configurator.UseRawJsonDeserializer();
+
                 configurator.ConfigureEndpoints(context);
             });
         });
