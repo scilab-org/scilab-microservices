@@ -57,6 +57,14 @@ public sealed class OutboxMessageEntity : EntityId<Guid>
         NextAttemptOnUtc = null;
     }
 
+    public void MarkForRetry(string? lastErrorMessage, DateTimeOffset? nextAttemptOnUtc)
+    {
+        LastErrorMessage = lastErrorMessage;
+        NextAttemptOnUtc = nextAttemptOnUtc;
+        ClaimedOnUtc = null;      
+        ProcessedOnUtc = null;     
+    }
+
     public void Claim(DateTimeOffset claimedOnUtc)
     {
         ClaimedOnUtc = claimedOnUtc;

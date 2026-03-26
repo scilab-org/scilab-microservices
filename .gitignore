@@ -73,3 +73,5 @@ docker-volumes/
 # SSL certificates & Let's Encrypt
 **/certbot/conf/
 **/certbot/www/
+
+session-*

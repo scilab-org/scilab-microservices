@@ -92,6 +92,13 @@ public sealed class PaperBankEntity : Entity<Guid>
         IngestStatus = ingestStatus ?? IngestStatus;
     }
 
+    public void UpdateIngestionStatus(bool isIngested, IngestStatus ingestStatus)
+    {
+        IsIngested = isIngested;
+        IngestStatus = ingestStatus;
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+
     public void UpdateFilePath(string? url)
     {
         if (string.IsNullOrWhiteSpace(url)) return;

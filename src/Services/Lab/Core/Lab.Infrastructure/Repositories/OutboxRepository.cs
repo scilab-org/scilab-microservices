@@ -45,24 +45,24 @@ public class OutboxRepository(IDocumentSession session, ILogger<OutboxRepository
         var claimTimeout = TimeSpan.FromMinutes(5);
         var expiredTime = now.Subtract(claimTimeout);
 
-        logger.LogDebug("Attempting to claim up to {BatchSize} unprocessed outbox messages", batchSize);
-
-        //await session.BeginTransactionAsync(cancellationToken);
+        logger.LogDebug("Attempting to claim up to {BatchSize} outbox messages", batchSize);
 
         try
         {
-            // Query for unprocessed messages that are not claimed or have expired claims
+            // Single query: new messages (AttemptCount == 0) OR retryable
+            // messages whose NextAttemptOnUtc has elapsed.
             var messagesToClaim = await session.Query<OutboxMessageEntity>()
                 .Where(x => x.ProcessedOnUtc == null
-                    && (x.ClaimedOnUtc == null || x.ClaimedOnUtc < expiredTime))
+                    && x.AttemptCount < x.MaxAttempts
+                    && (x.ClaimedOnUtc == null || x.ClaimedOnUtc < expiredTime)
+                    && (x.NextAttemptOnUtc == null || x.NextAttemptOnUtc <= now))
                 .OrderBy(x => x.OccurredOnUtc)
                 .Take(batchSize)
                 .ToListAsync(cancellationToken);
 
             if (!messagesToClaim.Any())
             {
-                await session.SaveChangesAsync(cancellationToken);
-                logger.LogDebug("No unprocessed messages found to claim");
+                logger.LogDebug("No outbox messages found to claim");
                 return [];
             }
 
@@ -84,59 +84,12 @@ public class OutboxRepository(IDocumentSession session, ILogger<OutboxRepository
             return [];
         }
     }
-
     public async Task<List<OutboxMessageEntity>> GetAndClaimRetryMessagesAsync(int batchSize, CancellationToken cancellationToken = default)
     {
-        var now = DateTimeOffset.UtcNow;
-        var claimTimeout = TimeSpan.FromMinutes(5);
-        var expiredTime = now.Subtract(claimTimeout);
-
-        logger.LogDebug("Attempting to claim up to {BatchSize} retry outbox messages", batchSize);
-
-        //await session.BeginTransactionAsync(cancellationToken);
-
-        try
-        {
-            // Query for retry messages
-            var allRetryMessages = await session.Query<OutboxMessageEntity>()
-                .Where(x => x.ProcessedOnUtc == null
-                    && x.AttemptCount < x.MaxAttempts
-                    && (x.NextAttemptOnUtc == null || x.NextAttemptOnUtc <= now)
-                    && (x.ClaimedOnUtc == null || x.ClaimedOnUtc < expiredTime))
-                .OrderBy(x => x.OccurredOnUtc)
-                .Take(batchSize * 2)
-                .ToListAsync(cancellationToken);
-
-            var retryMessages = allRetryMessages
-                .OrderBy(x => x.NextAttemptOnUtc ?? x.OccurredOnUtc)
-                .ThenBy(x => x.OccurredOnUtc)
-                .Take(batchSize)
-                .ToList();
-
-            if (!retryMessages.Any())
-            {
-                await session.SaveChangesAsync(cancellationToken);
-                logger.LogDebug("No retry messages found to claim");
-                return [];
-            }
-
-            // Claim the messages
-            foreach (var message in retryMessages)
-            {
-                message.Claim(now);
-                session.Store(message);
-            }
-
-            await session.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation("Successfully claimed {Count} retry outbox messages", retryMessages.Count);
-            return retryMessages.ToList();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error occurred while claiming retry outbox messages");
-            return [];
-        }
+        // All retry logic is now handled by GetAndClaimMessagesAsync.
+        // Return empty to avoid duplicate claims.
+        await Task.CompletedTask;
+        return [];
     }
 
     public async Task<bool> ReleaseExpiredClaimsAsync(TimeSpan claimTimeout, CancellationToken cancellationToken = default)

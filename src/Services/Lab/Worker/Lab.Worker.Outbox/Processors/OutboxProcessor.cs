@@ -47,18 +47,13 @@ internal sealed class OutboxProcessor
 
     public async Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
     {
+        var messages = await _outboxRepo.GetAndClaimMessagesAsync(_batchSize, cancellationToken);
 
-        // Process both new messages and retry messages
-        var newMessages = await _outboxRepo.GetAndClaimMessagesAsync(_batchSize, cancellationToken);
-        var retryMessages = await _outboxRepo.GetAndClaimRetryMessagesAsync(_batchSize, cancellationToken);
-
-        var allMessages = newMessages.Concat(retryMessages).ToList();
-
-        if (allMessages.Count == 0) return 0;
+        if (messages.Count == 0) return 0;
 
         var updateQueue = new ConcurrentQueue<OutboxUpdate>();
 
-        var publishTasks = allMessages
+        var publishTasks = messages
             .Select(message => ProcessMessageAsync(message, updateQueue, _publish, _logger, cancellationToken))
             .ToList();
 
@@ -66,13 +61,25 @@ internal sealed class OutboxProcessor
 
         if (!updateQueue.IsEmpty)
         {
-            // Convert OutboxUpdate to OutboxMessageEntity for bulk update
-            var messagesToUpdate = updateQueue.Select(update =>
+            var messagesToUpdate = new List<OutboxMessageEntity>();
+
+            foreach (var update in updateQueue)
             {
-                var message = allMessages.First(m => m.Id == update.Id);
-                message.CompleteProcessing(update.ProcessedOnUtc, update.LastErrorMessage);
-                return message;
-            }).ToList();
+                var message = messages.First(m => m.Id == update.Id);
+
+                if (update.NextAttemptOnUtc is not null)
+                {
+                    // Failed but retryable — release claim, keep unprocessed
+                    message.MarkForRetry(update.LastErrorMessage, update.NextAttemptOnUtc);
+                }
+                else
+                {
+                    // Success or permanently failed — mark as processed
+                    message.CompleteProcessing(update.ProcessedOnUtc, update.LastErrorMessage);
+                }
+
+                messagesToUpdate.Add(message);
+            }
 
             await _outboxRepo.UpdateMessagesAsync(messagesToUpdate, cancellationToken);
         }
@@ -80,15 +87,15 @@ internal sealed class OutboxProcessor
         {
             // If no messages were successfully processed, release the claims
             _logger.LogWarning("No messages were successfully processed, releasing claims");
-            await _outboxRepo.ReleaseClaimsAsync(allMessages, cancellationToken);
+            await _outboxRepo.ReleaseClaimsAsync(messages, cancellationToken);
         }
 
-        if (allMessages.Count > 0)
+        if (messages.Count > 0)
         {
-            _logger.LogInformation("Processed {Count} messages from outbox", allMessages.Count);
+            _logger.LogInformation("Processed {Count} messages from outbox", messages.Count);
         }
 
-        return allMessages.Count;
+        return messages.Count;
     }
 
     private static async Task ProcessMessageAsync(
