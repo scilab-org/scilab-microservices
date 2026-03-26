@@ -143,6 +143,7 @@ public sealed class ApiRoutes
         public const string GetSectionByMarkSectionId = $"{Base}/mark-section/{{id}}";
         public const string Upload = $"{Base}/{{id}}/upload-file";
         public const string GetSectionFileById = $"{Base}/{{id}}/files";
+        public const string MarkMainSection = $"{Base}/{{id}}/mark-main-section";
 
         #endregion
 
@@ -168,7 +169,7 @@ public sealed class ApiRoutes
 
         #endregion
     }
-    
+
     public static class Comment
     {
         #region Constants

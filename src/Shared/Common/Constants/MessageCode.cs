@@ -13,6 +13,7 @@ public sealed class MessageCode
     public const string AccessDenied = "ACCESS_DENIED";
 
     public const string UnknownError = "UNKNOWN_ERROR";
+
     #endregion
 
     #region Project Management
@@ -28,7 +29,7 @@ public sealed class MessageCode
     public const string AllPapersAlreadyExist = "ALL_PAPERS_ALREADY_EXIST";
 
     public const string SubProjectNotFound = "SUB_PROJECT_NOT_FOUND";
-    
+
     public const string ProjectHasPaper = "PROJECT_HAS_PAPER";
 
     #endregion
@@ -40,8 +41,6 @@ public sealed class MessageCode
     public const string DatasetIdIsRequired = "DATASET_ID_IS_REQUIRED";
 
     public const string DatasetIsNotExists = "DATASET_IS_NOT_EXISTS";
-
-
 
     #endregion
 
@@ -182,6 +181,8 @@ public sealed class MessageCode
 
     public const string SectionIsNotExists = "SECTION_IS_NOT_EXISTS";
 
+    public const string SectionIsAlreadyMainSection = "SECTION_IS_ALREADY_MAIN_SECTION";
+
     #endregion
 
     #region Comment Management
@@ -191,7 +192,7 @@ public sealed class MessageCode
 
     #endregion
 
-    #region Journal Message Codes
+    #region Journal Management
 
     public const string JournalNameIsRequired = "JOURNAL_NAME_IS_REQUIRED";
 
@@ -200,6 +201,12 @@ public sealed class MessageCode
     public const string JournalIdIsRequired = "JOURNAL_ID_IS_REQUIRED";
 
     public const string JournalNameAlreadyExists = "JOURNAL_NAME_ALREADY_EXISTS";
+
+    #endregion
+
+    #region Contribution Management
+
+    public const string ContributorIsNotExists = "CONTRIBUTOR_IS_NOT_EXISTS";
 
     #endregion
 }

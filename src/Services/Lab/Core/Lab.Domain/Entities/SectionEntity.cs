@@ -63,7 +63,7 @@ public class SectionEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string? content,
+    public void Update(string? content = null,
         string? title = null,
         float? displayOrder = null,
         string? sectionSumary = null,
