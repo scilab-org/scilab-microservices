@@ -6,6 +6,7 @@ using Common.Configurations;
 using Common.Constants;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Lab.Infrastructure.ApiClients;
 using System.Reflection;
 
 #endregion
@@ -49,6 +50,7 @@ public static class DependencyInjection
         }
 
         services.AddHttpContextAccessor();
+        services.AddTransient<ManagementAuthHeaderHandler>();
         services.AddAuthenticationAndAuthorization(cfg);
         services.AddSwaggerServices(cfg);
 

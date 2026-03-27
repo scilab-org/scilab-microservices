@@ -71,6 +71,7 @@ public static class DependencyInjection
             });
 
         services.AddRefitClient<IUserServiceApi>()
+            .AddHttpMessageHandler<ManagementAuthHeaderHandler>()
             .ConfigureHttpClient(c =>
             {
                 c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.UserService.Section}:{ApiClientCfg.UserService.BaseUrl}"]!);

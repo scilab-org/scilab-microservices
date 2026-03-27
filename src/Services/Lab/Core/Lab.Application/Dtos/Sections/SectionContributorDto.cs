@@ -14,6 +14,10 @@ public class SectionContributorDto
     public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
     public Guid? NextVersionSectionId { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset? LastModifiedOnUtc { get; set; }
+    
     
     //User info
     public string? Name { get; set; }

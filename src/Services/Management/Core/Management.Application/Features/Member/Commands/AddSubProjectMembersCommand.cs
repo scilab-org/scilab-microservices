@@ -79,7 +79,7 @@ public class AddSubProjectMembersCommandHandler(
         {
             if (existingUserIds.Contains(userId)) continue;
 
-            var groupName = memberMap.GetValueOrDefault(userId, AuthorizeConstants.ProjectMember);
+            var groupName = memberMap.GetValueOrDefault(userId, AuthorizeConstants.PaperMember);
 
             var member = MemberEntity.Create(
                 id: Guid.NewGuid(),
@@ -91,7 +91,7 @@ public class AddSubProjectMembersCommandHandler(
             session.Store(member);
             createdIds.Add(member.Id);
 
-            if (string.Equals(groupName, AuthorizeConstants.ProjectAuthor, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(groupName, AuthorizeConstants.PaperAuthor, StringComparison.OrdinalIgnoreCase))
                 authorMembers.Add((member.Id, userId));
         }
 

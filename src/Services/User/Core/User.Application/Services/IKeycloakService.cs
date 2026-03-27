@@ -32,6 +32,11 @@ public interface IKeycloakService
         string? avatarUrl = null,
         CancellationToken cancellationToken = default);
 
+    Task UpdateUserGroupsAsync(
+        string userId,
+        List<string> groupNames,
+        CancellationToken cancellationToken = default);
+
     Task<(List<UserDto> Users, int TotalCount)> GetUsersAsync(
         string? searchText,
         string? groupName,

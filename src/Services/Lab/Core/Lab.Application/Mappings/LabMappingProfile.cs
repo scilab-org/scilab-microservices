@@ -7,6 +7,7 @@ using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Dtos.Tags;
+using Lab.Application.Dtos.Tasks;
 using Lab.Application.Dtos.Template;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
@@ -28,6 +29,7 @@ public sealed class LabMappingProfile : Profile
         CreateSectionMappings();
         CreateCommentMappings();
         CreateJournalMappings();
+        CreateTaskMappings();
     }
 
     #endregion
@@ -100,6 +102,15 @@ public sealed class LabMappingProfile : Profile
 
         CreateMap<JournalEntity, GetJournalByIdResult>()
             .ForMember(dest => dest.Journal, opt => opt.MapFrom(src => src));
+    }
+
+    #endregion
+    
+    #region Task Mappings
+
+    private void CreateTaskMappings()
+    {
+        CreateMap<TaskEntity, TaskDto>();
     }
 
     #endregion
