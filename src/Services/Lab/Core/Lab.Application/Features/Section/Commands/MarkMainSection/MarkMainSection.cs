@@ -1,11 +1,12 @@
 ﻿using JasperFx.Core;
+using Lab.Application.Dtos.Sections;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 
 namespace Lab.Application.Features.Section.Commands.MarkMainSection;
 
-public record MarkMainSectionCommand(Guid ProjectId, Guid Id) : ICommand<Guid>;
+public record MarkMainSectionCommand(MarkMainSectionDto Dto, Guid Id) : ICommand<Guid>;
 
 public class MarkMainSectionCommandValidator : AbstractValidator<MarkMainSectionCommand>
 {
@@ -16,7 +17,7 @@ public class MarkMainSectionCommandValidator : AbstractValidator<MarkMainSection
             .WithMessage(MessageCode.SectionIdIsRequired)
             .NotEmpty()
             .WithMessage(MessageCode.SectionIdIsRequired);
-        RuleFor(c => c.ProjectId)
+        RuleFor(c => c.Dto.ProjectId)
             .NotNull()
             .WithMessage(MessageCode.ProjectIdIsRequired)
             .NotEmpty()
@@ -29,7 +30,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
 {
     public async Task<Guid> Handle(MarkMainSectionCommand request, CancellationToken cancellationToken)
     {
-        var role = await managementApiService.GetMyProjectRoleAsync(request.ProjectId, cancellationToken);
+        var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
         if (role.IsNullOrEmpty() || !AuthorizeConstants.PaperAuthor.EqualsIgnoreCase(role))
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
@@ -81,6 +82,15 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
         foreach (var oldMainContributor in oldMainContributors)
         {
             oldMainContributor.Update(markSectionId: section.Id);
+            var newMainContributor = PaperContributorEntity.Create(
+                id: Guid.NewGuid(),
+                sectionRole: oldMainContributor.SectionRole,
+                paperId: oldMainContributor.PaperId,
+                sectionId: newMainSection.Id,
+                memberId: oldMainContributor.MemberId,
+                markSectionId: newMainSection.Id // Mark new contributor to new main section
+            );
+            session.Store(newMainContributor);
             session.Update(oldMainContributor);
         }
 

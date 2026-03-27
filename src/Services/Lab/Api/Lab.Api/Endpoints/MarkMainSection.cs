@@ -1,4 +1,5 @@
 ﻿using Lab.Api.Constants;
+using Lab.Application.Dtos.Sections;
 using Lab.Application.Features.Section.Commands.MarkMainSection;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,9 +21,9 @@ public class MarkMainSection : ICarterModule
     private async Task<ApiUpdatedResponse<Guid>> HandleMarkMainSectionAsync(
         ISender sender,
         [FromRoute] Guid id,
-        [FromBody] Guid projectId)
+        [FromBody] MarkMainSectionDto dto)
     {
-        var command = new MarkMainSectionCommand(projectId, id);
+        var command = new MarkMainSectionCommand(dto, id);
         var result = await sender.Send(command);
         return new ApiUpdatedResponse<Guid>(result);
     }
