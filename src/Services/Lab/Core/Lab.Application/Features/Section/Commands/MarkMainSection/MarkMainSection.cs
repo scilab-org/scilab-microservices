@@ -51,6 +51,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             displayOrder: section.DisplayOrder,
             numbered: section.Numbered,
             isMainSection: true,
+            isOldMainSection: false,
             title: section.Title,
             sectionSumary: section.SectionSumary,
             description: section.Description,
@@ -59,7 +60,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             previousVersionSectionId: section.Id
         );
 
-        section.Update(nextVersionSectionId: newMainSection.Id);
+        section.Update(nextVersionSectionId: newMainSection.Id, isOldMainSection: true);
 
         // Find contributor to find old main section
         var contributor = await session.Query<PaperContributorEntity>()

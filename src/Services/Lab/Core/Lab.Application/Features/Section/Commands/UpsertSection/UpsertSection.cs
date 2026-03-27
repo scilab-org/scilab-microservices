@@ -81,6 +81,7 @@ public class UpsertSectionCommandHandler(
                 displayOrder: section.DisplayOrder,
                 numbered: dto.Numbered,
                 isMainSection: false,
+                isOldMainSection: false,
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,

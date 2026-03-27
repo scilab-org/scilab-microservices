@@ -20,43 +20,84 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         GetSectionByMarkSectionIdQuery request,
         CancellationToken cancellationToken)
     {
-        // Get all contributors for this paper
-        var contributors = await session.Query<PaperContributorEntity>()
-            .Where(c => c.MarkSectionId == request.MarkSectionId && c.SectionRole != AuthorizeConstants.SectionRead)
+        // Get all contributors of the markSectionId
+        var allContributors = await session.Query<PaperContributorEntity>()
+            .Where(c => c.MarkSectionId == request.MarkSectionId
+                        && c.SectionRole != AuthorizeConstants.SectionRead)
             .ToListAsync(cancellationToken);
-        if (!contributors.Any())
+
+        if (!allContributors.Any())
             return new GetSectionByMarkSectionIdResult([]);
 
-        var paperId = contributors.First().PaperId;
+        // Get sectionIds from contributors except main section (markSectionId)
+        var childSectionIds = allContributors
+            .Where(c => c.SectionId.HasValue 
+                        && c.SectionId.Value != request.MarkSectionId)
+            .Select(c => c.SectionId!.Value)
+            .Distinct().ToList();
         
-        // 2. Get sections
-        var sectionIds = contributors.Where(x => x.SectionId != null)
-                                    .Select(x => x.SectionId!.Value).Distinct().ToList();
-        
-        var sections = await session.Query<SectionEntity>()
-            .Where(x => sectionIds.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var childSectionsTask = childSectionIds.Any()
+            ? session.Query<SectionEntity>()
+                .Where(s => childSectionIds.Contains(s.Id))
+                .ToListAsync(cancellationToken)
+            : Task.FromResult<IReadOnlyList<SectionEntity>>([]);
 
-        var sectionMap = sections.ToDictionary(x => x.Id);
+
+
+        var mainSectionTask = session.LoadAsync<SectionEntity>(
+            request.MarkSectionId, cancellationToken);
+
+        await Task.WhenAll(childSectionsTask, mainSectionTask);
+
+        var childSectionMap = (await childSectionsTask).ToDictionary(s => s.Id);
+        var mainSection     = await mainSectionTask;
+
+        // contributor.SectionId là id của section con họ đang giữ
+        var memberIdsWithSection = allContributors
+            .Where(c => c.SectionId.HasValue && c.SectionId.Value != request.MarkSectionId)
+            .Select(c => c.MemberId)
+            .ToHashSet();
         
-        // Get members
-        var members = await managementApiService
+        var filteredContributors = allContributors
+            .Where(c =>
+                string.Equals(c.SectionRole, AuthorizeConstants.PaperAuthor, StringComparison.OrdinalIgnoreCase)
+                || memberIdsWithSection.Contains(c.MemberId))
+            .ToList();
+
+        if (!filteredContributors.Any())
+            return new GetSectionByMarkSectionIdResult([]);
+
+        var paperId = filteredContributors.First().PaperId;
+        
+        //Fetch members
+        var membersTask = managementApiService
             .GetSubProjectMembersByPaperIdAsync(paperId, cancellationToken);
 
-        var memberMap = members.ToDictionary(x => x.MemberId);
+        // Collect userIds need to fetch
+        var relevantMemberIds = filteredContributors.Select(c => c.MemberId).ToHashSet();
 
-        // Get users
-        var userIds = members
+        var members = await membersTask;
+        var memberMap = members
+            .Where(m => relevantMemberIds.Contains(m.MemberId)) // ✅ chỉ giữ relevant members
+            .ToDictionary(x => x.MemberId);
+
+        var userIds = memberMap.Values
             .Select(m => m.UserId)
             .Where(id => id != Guid.Empty)
             .Distinct().ToList();
 
         var userMap = await userApiService.GetUsersByIdsAsync(userIds, cancellationToken);
-
-        // Build response DTOs
-        var items = contributors.Select(c =>
+        
+        var items = filteredContributors.Select(c =>
         {
-            sectionMap.TryGetValue(c.SectionId ?? Guid.Empty, out var section);
+            // PaperAuthor uses main section, other roles use their specific section if they have one
+            var isPaperAuthor = string.Equals(
+                c.SectionRole, AuthorizeConstants.PaperAuthor, StringComparison.OrdinalIgnoreCase);
+
+            var section = isPaperAuthor
+                ? mainSection
+                : (c.SectionId.HasValue ? childSectionMap.GetValueOrDefault(c.SectionId.Value) : null);
+
             memberMap.TryGetValue(c.MemberId, out var member);
             userMap.TryGetValue(member?.UserId ?? Guid.Empty, out var user);
 
@@ -70,22 +111,23 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
                 SectionRole   = c.SectionRole,
                 SectionId     = c.SectionId,
                 MarkSectionId = c.MarkSectionId,
-                
-                Title = section?.Title,
-                IsMainSection = section?.IsMainSection ?? false,
-                ParentSectionId = section?.ParentSectionId,
+
+                Title                    = section?.Title,
+                IsMainSection            = section?.IsMainSection ?? false,
+                ParentSectionId          = section?.ParentSectionId,
                 PreviousVersionSectionId = section?.PreviousVersionSectionId,
-                NextVersionSectionId = section?.NextVersionSectionId,
-                CreatedBy = section?.CreatedBy,
-                CreatedOnUtc = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
-                LastModifiedOnUtc = section?.LastModifiedOnUtc,
-                
-                Name  = name,
-                Email = user?.Email ?? member?.Email,
+                NextVersionSectionId     = section?.NextVersionSectionId,
+                CreatedBy                = section?.CreatedBy,
+                CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
+                LastModifiedOnUtc        = section?.LastModifiedOnUtc,
+
+                Name    = name,
+                Email   = user?.Email ?? member?.Email,
                 Content = section?.Content
             };
         }).ToList();
 
+        
         return new GetSectionByMarkSectionIdResult(items);
     }
 }
