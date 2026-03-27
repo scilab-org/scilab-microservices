@@ -53,6 +53,7 @@ public sealed class ApiRoutes
         public const string GetPaperSamples = $"{Base}/sample";
         public const string Initialize = $"{BaseManager}/initialize";
         public const string GetAssignedPaperSections = $"{Base}/{{id}}/assigned-sections";
+        public const string GetAssignedPaperSectionsHistory = $"{Base}/{{id}}/assigned-sections/history";
         public const string GetSectionsByPaperId = $"{Base}/{{id}}/sections";
         public const string GetPaperById = $"{Base}/{{id}}";
 

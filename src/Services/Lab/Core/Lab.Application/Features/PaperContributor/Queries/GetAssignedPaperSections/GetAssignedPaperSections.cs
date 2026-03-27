@@ -43,25 +43,60 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
         if (!contributors.Any())
             return new GetMySectionsResult(request.PaperId, subProjectId, memberId, [], 0, paging);
 
-        // Collect assigned markSectionIds
-        var markSectionIds = contributors
-            .Select(c => c.SectionId)
+        var sectionIds = contributors
+            .Where(c => c.SectionId.HasValue)
+            .Select(c => c.SectionId!.Value)
+            .Distinct()
+            .ToList();
+
+        var sections = await session.Query<SectionEntity>()
+            .Where(s => s.PaperId == request.PaperId && sectionIds.Contains(s.Id))
+            .ToListAsync(cancellationToken);
+
+        var sectionMap = sections.ToDictionary(x => x.Id);
+
+        var sectionPairs = contributors
+            .Where(c => c.SectionId.HasValue)
+            .Select(c =>
+            {
+                sectionMap.TryGetValue(c.SectionId!.Value, out var section);
+                return new
+                {
+                    Contributor = c,
+                    Section = section,
+                    TitleKey = GetTitleKey(section, c.SectionId!.Value)
+                };
+            })
+            .Where(x => x.Section != null)
+            .ToList();
+
+        // Keep only the newest contributor row per title (case-insensitive)
+        var latestContributors = sectionPairs
+            .GroupBy(x => x.TitleKey, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g
+                .OrderByDescending(x => x.Contributor.CreatedOnUtc)
+                .ThenByDescending(x => x.Contributor.LastModifiedOnUtc ?? x.Contributor.CreatedOnUtc)
+                .First())
+            .ToList();
+
+        var latestSectionIds = latestContributors
+            .Select(x => x.Contributor.SectionId!.Value)
             .Distinct()
             .ToList();
 
         // Query + paginate in one DB call; TotalItemCount is embedded in IPagedList
         var pagedSections = await session.Query<SectionEntity>()
-            .Where(s => s.PaperId == request.PaperId && markSectionIds.Contains(s.Id))
+            .Where(s => s.PaperId == request.PaperId && latestSectionIds.Contains(s.Id))
             .OrderBy(s => s.DisplayOrder)
             .ToPagedListAsync(paging.PageNumber, paging.PageSize, cancellationToken);
 
-        // contributor lookup: markSectionId -> contributor (one contributor per markSection)
-        var contributorMap = contributors.ToDictionary(c => c.SectionId);
+        // contributor lookup: sectionId -> newest contributor for that title
+        var contributorMap = latestContributors.ToDictionary(x => x.Contributor.SectionId!.Value);
 
         var assignedSections = pagedSections
             .Select(s =>
             {
-                var c = contributorMap[s.Id];
+                var c = contributorMap[s.Id].Contributor;
                 return new AssignedSectionDto
                 {
                     Id                 = s.Id,
@@ -70,6 +105,8 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     Content            = s.Content,
                     Description        = s.Description,
                     SectionSumary      = s.SectionSumary,
+                    CreatedOnUtc       = s.CreatedOnUtc,
+                    LastModifiedOnUtc  = s.LastModifiedOnUtc,
                     DisplayOrder       = s.DisplayOrder,
                     Numbered           = s.Numbered,
                     ParentSectionId    = s.ParentSectionId,
@@ -82,6 +119,12 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
             .ToList();
 
         return new GetMySectionsResult(request.PaperId, subProjectId, memberId, assignedSections, pagedSections.TotalItemCount, paging);
+    }
+
+    private static string GetTitleKey(SectionEntity? section, Guid fallbackId)
+    {
+        var title = section?.Title?.Trim();
+        return string.IsNullOrWhiteSpace(title) ? fallbackId.ToString() : title;
     }
     #endregion
 }

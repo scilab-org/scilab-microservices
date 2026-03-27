@@ -76,6 +76,9 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
                 ParentSectionId = section?.ParentSectionId,
                 PreviousVersionSectionId = section?.PreviousVersionSectionId,
                 NextVersionSectionId = section?.NextVersionSectionId,
+                CreatedBy = section?.CreatedBy,
+                CreatedOnUtc = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
+                LastModifiedOnUtc = section?.LastModifiedOnUtc,
                 
                 Name  = name,
                 Email = user?.Email ?? member?.Email,

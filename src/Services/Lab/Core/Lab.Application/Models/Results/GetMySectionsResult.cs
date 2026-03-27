@@ -1,4 +1,4 @@
-﻿using Lab.Application.Dtos.Sections;
+using Lab.Application.Dtos.Sections;
 
 namespace Lab.Application.Models.Results;
 
@@ -9,8 +9,6 @@ public class GetMySectionsResult
     public Guid MemberId { get; init; }
     public List<AssignedSectionDto> Items { get; init; }
     public PagingResult Paging { get; init; }
-    
-    #region Ctors
 
     public GetMySectionsResult(
         Guid paperId,
@@ -26,7 +24,5 @@ public class GetMySectionsResult
         Items = items;
         Paging = PagingResult.Of(totalCount, pagination);
     }
-
-    #endregion
 }
 
