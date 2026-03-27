@@ -110,7 +110,7 @@ public class CreatePaperCommandHandler(
             {
                 await managementApiService.AddSubProjectMembersAsync(
                     subProjectId.Value,
-                    new[] { (request.UserId, AuthorizeConstants.ProjectAuthor) },
+                    new[] { (request.UserId, AuthorizeConstants.PaperAuthor) },
                     cancellationToken);
             }
         }

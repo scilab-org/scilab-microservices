@@ -16,10 +16,13 @@ public sealed class AuthorizeConstants
 
     #region Section Role Constants
 
-    public const string ProjectCreate = "project:create";
-    public const string PaperAuthor = "paper:author";
     public const string SectionEdit = "section:edit";
     public const string SectionRead = "section:read";
 
+    #endregion
+    #region Section Role Constants
+
+    public const string PaperAuthor = "paper:author";
+    public const string PaperMember = "paper:member";
     #endregion
 }
