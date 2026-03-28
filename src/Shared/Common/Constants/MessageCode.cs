@@ -31,6 +31,8 @@ public sealed class MessageCode
     public const string SubProjectNotFound = "SUB_PROJECT_NOT_FOUND";
 
     public const string ProjectHasPaper = "PROJECT_HAS_PAPER";
+    
+    public const string ProjectCodeAlreadyExists = "PROJECT_CODE_ALREADY_EXISTS";
 
     #endregion
 

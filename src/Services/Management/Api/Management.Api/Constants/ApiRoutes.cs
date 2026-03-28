@@ -66,6 +66,7 @@ public sealed class ApiRoutes
         public const string CreateSubProject = $"{Base}/{{projectId}}/sub-projects";
         public const string GetSubProjects = $"{Base}/{{projectId}}/sub-projects";
         public const string GetProjectPapers = $"{Base}/{{projectId}}/papers";
+        public const string DeleteProjectPaperByBankId = $"{Base}/paper-bank/{{paperBankId}}";
    }
     public static class Member
     {

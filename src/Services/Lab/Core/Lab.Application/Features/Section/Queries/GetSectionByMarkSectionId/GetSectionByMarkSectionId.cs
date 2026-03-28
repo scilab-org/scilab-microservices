@@ -114,6 +114,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
 
                 Title                    = section?.Title,
                 IsMainSection            = section?.IsMainSection ?? false,
+                IsOldMainSection         = section?.IsOldMainSection ?? false,
                 ParentSectionId          = section?.ParentSectionId,
                 PreviousVersionSectionId = section?.PreviousVersionSectionId,
                 NextVersionSectionId     = section?.NextVersionSectionId,

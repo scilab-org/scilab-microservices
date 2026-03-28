@@ -47,6 +47,13 @@ public interface IManagementServiceApi
     [Get("/projects/{projectId}/my-role")]
     Task<HttpResponseMessage> GetMyProjectRoleAsync(
         [AliasAs("projectId")] Guid projectId);
+
+    /// <summary>
+    /// POST /projects/paper-bank/{paperBankId} — removes this paper id from all projects.
+    /// </summary>
+    [Post("/projects/paper-bank/{paperBankId}")]
+    Task<HttpResponseMessage> DeleteProjectPaperByBankIdAsync(
+        [AliasAs("paperBankId")] Guid paperBankId);
 }
 
 public class CreateSubProjectRequest

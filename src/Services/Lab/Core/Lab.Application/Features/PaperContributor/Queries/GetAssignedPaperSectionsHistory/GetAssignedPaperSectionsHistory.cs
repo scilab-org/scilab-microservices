@@ -124,7 +124,9 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
                         PaperContributorId = contributor.Id,
                         MemberId = memberId,
                         MarkSectionId = section.Id, 
-                        SectionRole = contributor.SectionRole
+                        SectionRole = contributor.SectionRole,
+                        IsOldMainSection = section.IsOldMainSection,
+                        IsMainSection = section.IsMainSection
                     });
                 }
             }
@@ -132,20 +134,11 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
             current = section.PreviousVersionSectionId;
         }
     }
-
-    // =========================
-    // 5. DEDUPLICATE BY SECTION ID
-    // =========================
-    // Multiple contributor groups can walk overlapping version chains,
-    // causing the same old section to be collected more than once.
     historyItems = historyItems
         .GroupBy(x => x.Id)
         .Select(g => g.First())
         .ToList();
-
-    // =========================
-    // 6. SORT + PAGING
-    // =========================
+    
     var sortedItems = historyItems
         .OrderBy(x => x.DisplayOrder)
         .ThenByDescending(x => x.CreatedOnUtc)

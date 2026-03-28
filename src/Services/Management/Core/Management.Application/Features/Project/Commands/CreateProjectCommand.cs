@@ -42,6 +42,11 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
     {
         var dto = command.Dto;
 
+        var checkCode = await session.Query<ProjectEntity>()
+            .AnyAsync(p => p.Code == dto.Code, cancellationToken);
+        if (checkCode)
+            throw new ClientValidationException(MessageCode.ProjectCodeAlreadyExists, dto.Code!);
+        
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = ProjectEntity.Create(

@@ -1,4 +1,5 @@
-﻿using Lab.Domain.Entities;
+﻿using Lab.Application.Services;
+using Lab.Domain.Entities;
 using Marten;
 using MediatR;
 
@@ -16,12 +17,19 @@ public class DeletePaperBankCommandValidator : AbstractValidator<DeletePaperBank
     }
 }
 
-public class DeletePaperBankCommandHandler(IDocumentSession session) : IRequestHandler<DeletePaperBankCommand, Unit>
+public class DeletePaperBankCommandHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService) : IRequestHandler<DeletePaperBankCommand, Unit>
 {
     public async Task<Unit> Handle(DeletePaperBankCommand request, CancellationToken cancellationToken)
     {
         var paper = await session.LoadAsync<PaperBankEntity>(request.Id, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id.ToString());
+
+        var removedPaperIds = await managementApiService.DeleteProjectPaperByBankIdAsync(request.Id, cancellationToken);
+
+        if (removedPaperIds is null)
+            throw new ApplicationException("Failed to remove paper-bank from Management projects.");
 
         session.Delete(paper);
         await session.SaveChangesAsync(cancellationToken);

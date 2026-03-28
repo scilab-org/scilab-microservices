@@ -119,6 +119,21 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
         return (dto.SubProjectId, dto.MemberId);
     }
 
+    public async Task<List<Guid>?> DeleteProjectPaperByBankIdAsync(
+        Guid paperBankId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await managementServiceApi.DeleteProjectPaperByBankIdAsync(paperBankId);
+
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var body = await response.Content.ReadFromJsonAsync<ApiDeletedResponse<List<Guid>>>(
+            cancellationToken: cancellationToken);
+
+        return body?.Value;
+    }
+
     public async Task<List<SubProjectMemberInfo>> GetSubProjectMembersByPaperIdAsync(
         Guid paperId,
         CancellationToken cancellationToken = default)

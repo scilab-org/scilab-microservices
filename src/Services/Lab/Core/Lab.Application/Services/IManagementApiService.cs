@@ -62,6 +62,14 @@ public interface IManagementApiService
     Task<string?> GetMyProjectRoleAsync(
         Guid projectId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a paper-bank id from all projects that reference it in Management service.
+    /// Returns removed paper ids when successful.
+    /// </summary>
+    Task<List<Guid>?> DeleteProjectPaperByBankIdAsync(
+        Guid paperBankId,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record SubProjectMemberInfo(
