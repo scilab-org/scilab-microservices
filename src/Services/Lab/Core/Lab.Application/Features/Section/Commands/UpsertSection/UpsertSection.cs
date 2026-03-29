@@ -75,6 +75,15 @@ public class UpsertSectionCommandHandler(
         // If writer is not author, the section will be created as a new version of main section, and the new section will be updated by writer, the main section will be updated by author
         if (section.IsMainSection == true)
         {
+            // Prevent writer from creating multiple versions of the same main section
+            var availableSection = await session.Query<SectionEntity>()
+                .Where(x => x.PaperId == section.PaperId &&
+                            x.IsMainSection == false &&
+                            x.PreviousVersionSectionId == section.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (availableSection != null)
+                throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, availableSection.Id);
+
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
                 content: dto.Content,
