@@ -38,8 +38,6 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
     });
 });
 
-builder.Services.AddRequestTimeouts();
-
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -48,8 +46,6 @@ app.UseCors(policyName);
 
 // Configure the HTTP request pipeline.
 app.UseRateLimiter();
-
-app.UseRequestTimeouts();
 
 app.MapReverseProxy();
 
