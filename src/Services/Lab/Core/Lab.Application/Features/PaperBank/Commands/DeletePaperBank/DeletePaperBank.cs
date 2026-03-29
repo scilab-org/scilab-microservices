@@ -26,11 +26,8 @@ public class DeletePaperBankCommandHandler(
         var paper = await session.LoadAsync<PaperBankEntity>(request.Id, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
-        var removedPaperIds = await managementApiService.DeleteProjectPaperByBankIdAsync(request.Id, cancellationToken);
-
-        if (removedPaperIds is null)
-            throw new ApplicationException("Failed to remove paper-bank from Management projects.");
-
+        await managementApiService.DeleteProjectPaperByBankIdAsync(request.Id, cancellationToken);
+        
         session.Delete(paper);
         await session.SaveChangesAsync(cancellationToken);
 
