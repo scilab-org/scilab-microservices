@@ -60,7 +60,9 @@ public static class DependencyInjection
             {
                 EndPoints = { cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.EndPoint}"]! },
                 Password = cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.Password}"],
-                AbortOnConnectFail = false
+                AbortOnConnectFail = false,
+                ConnectTimeout = 1000,
+                SyncTimeout = 1000
             };
             options.InstanceName = cfg[$"{RedisCacheCfg.Section}:{RedisCacheCfg.InstanceName}"];
         });
