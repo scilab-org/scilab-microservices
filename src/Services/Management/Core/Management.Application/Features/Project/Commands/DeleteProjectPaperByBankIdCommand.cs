@@ -41,7 +41,7 @@ public class DeleteProjectPaperByBankIdCommandHandler(IDocumentSession session)
         }
         
         if (removedPaperIds.Count == 0)
-            throw new NotFoundException(MessageCode.PaperNotFoundInProject);
+            return removedPaperIds;
         
         
         await session.SaveChangesAsync(cancellationToken);

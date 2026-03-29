@@ -125,8 +125,8 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
     {
         var response = await managementServiceApi.DeleteProjectPaperByBankIdAsync(paperBankId);
 
-        if (!response.IsSuccessStatusCode)
-            return null;
+        // if (!response.IsSuccessStatusCode)
+        //     return null;
 
         var body = await response.Content.ReadFromJsonAsync<ApiDeletedResponse<List<Guid>>>(
             cancellationToken: cancellationToken);
