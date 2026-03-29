@@ -20,6 +20,7 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
     public List<string> TagNames { get; set; } = new();
+    public IngestStatus? IngestStatus { get; set; }
 
     #endregion
 
@@ -73,6 +74,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? paperType,
         string? journalName,
         string? conferenceName,
+        IngestStatus? ingestStatus,
         List<string>? tagNames = null)
     {
         Title = title ?? Title;
@@ -86,6 +88,14 @@ public sealed class PaperBankEntity : Entity<Guid>
         JournalName = journalName;
         ConferenceName = conferenceName;
         TagNames = tagNames ?? TagNames;
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+        IngestStatus = ingestStatus ?? IngestStatus;
+    }
+
+    public void UpdateIngestionStatus(bool isIngested, IngestStatus ingestStatus)
+    {
+        IsIngested = isIngested;
+        IngestStatus = ingestStatus;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

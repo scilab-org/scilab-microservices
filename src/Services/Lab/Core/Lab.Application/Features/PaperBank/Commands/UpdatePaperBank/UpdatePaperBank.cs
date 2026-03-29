@@ -70,7 +70,8 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
             paperType: dto.PaperType,
             journalName: dto.JournalName,
             conferenceName: dto.ConferenceName,
-            tagNames: tagNames);
+            tagNames: tagNames,
+            ingestStatus: dto.IngestStatus);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
