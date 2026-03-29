@@ -1,4 +1,5 @@
-﻿using Lab.Api.Constants;
+﻿using BuildingBlocks.Authentication.Extensions;
+using Lab.Api.Constants;
 using Lab.Application.Features.Section.Queries.GetSectionByMarkSectionId;
 using Lab.Application.Models.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +20,15 @@ public class GetSectionByMarkSectionId: ICarterModule
     
     private async Task<IResult> HandleAsync(
         ISender sender,
-        [FromRoute] Guid id)
+        [FromRoute] Guid id,
+        IHttpContextAccessor httpContext)
     {
-        var query = new GetSectionByMarkSectionIdQuery(id);
+        var currentUser = httpContext.GetCurrentUser();
+
+        if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
+            return Results.Unauthorized();
+
+        var query = new GetSectionByMarkSectionIdQuery(id, userId);
         var result = await sender.Send(query);
         return TypedResults.Ok(new ApiGetResponse<GetSectionByMarkSectionIdResult>(result));
     }

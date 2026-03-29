@@ -17,6 +17,7 @@ public class SectionContributorDto
     public string? CreatedBy { get; set; }
     public DateTimeOffset CreatedOnUtc { get; set; }
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
+    public bool? IsOldMainSection { get; set; } = false;
     
     
     //User info

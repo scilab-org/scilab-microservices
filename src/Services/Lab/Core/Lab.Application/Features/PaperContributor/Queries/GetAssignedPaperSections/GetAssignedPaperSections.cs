@@ -113,7 +113,10 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     PaperContributorId = c.Id,
                     SectionRole        = c.SectionRole,
                     MemberId           = c.MemberId,
-                    MarkSectionId      = c.MarkSectionId
+                    MarkSectionId      = c.MarkSectionId,
+                    IsMainSection       = s.IsMainSection,
+                    IsOldMainSection    = s.IsOldMainSection,
+                    Rule                = s.Rule
                 };
             })
             .ToList();

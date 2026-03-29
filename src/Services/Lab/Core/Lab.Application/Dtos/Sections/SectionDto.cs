@@ -16,6 +16,9 @@ public class SectionDto : DtoId<Guid>
     public Guid? ParentSectionId { get; set; }
     public Guid PaperId { get; set; }
     public string SectionRole { get; set; } = "project:manager";
+    public bool? IsOldMainSection { get; set; } = false;
+    public bool? IsMainSection { get; set; } = false;
+    public string? Rule { get; set; }
     
 }
 

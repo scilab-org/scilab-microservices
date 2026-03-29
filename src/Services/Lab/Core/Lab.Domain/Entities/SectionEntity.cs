@@ -14,6 +14,7 @@ public class SectionEntity : Entity<Guid>
     public float DisplayOrder { get; set; }
     public bool? Numbered { get; set; } = true;
     public bool? IsMainSection { get; set; } = false;
+    public bool? IsOldMainSection { get; set; } = false;
     public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
     public Guid? NextVersionSectionId { get; set; }
@@ -30,6 +31,7 @@ public class SectionEntity : Entity<Guid>
         float displayOrder,
         bool? numbered = true,
         bool? isMainSection = false,
+        bool? isOldMainSection = false,
         string? title = null,
         string? sectionSumary = null,
         string? description = null,
@@ -51,6 +53,7 @@ public class SectionEntity : Entity<Guid>
             DisplayOrder = displayOrder,
             Numbered = numbered,
             IsMainSection = isMainSection,
+            IsOldMainSection = isOldMainSection,
             ParentSectionId = parentSectionId,
             PreviousVersionSectionId = previousVersionSectionId,
             NextVersionSectionId = nextVersionSectionId,
@@ -63,7 +66,7 @@ public class SectionEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string? content,
+    public void Update(string? content = null,
         string? title = null,
         float? displayOrder = null,
         string? sectionSumary = null,
@@ -71,6 +74,7 @@ public class SectionEntity : Entity<Guid>
         string? rule = null,
         bool? numbered = true,
         bool? isMainSection = null,
+        bool? isOldMainSection = null,
         Guid? parentSectionId = null,
         Guid? previousVersionSectionId = null,
         Guid? nextVersionSectionId = null)
@@ -83,6 +87,7 @@ public class SectionEntity : Entity<Guid>
         Rule = rule ?? Rule;
         Numbered = numbered ?? Numbered;
         IsMainSection = isMainSection ?? IsMainSection;
+        IsOldMainSection = isOldMainSection ?? IsOldMainSection;
         ParentSectionId = parentSectionId ?? ParentSectionId;
         PreviousVersionSectionId = previousVersionSectionId ?? PreviousVersionSectionId;
         NextVersionSectionId = nextVersionSectionId ?? NextVersionSectionId;

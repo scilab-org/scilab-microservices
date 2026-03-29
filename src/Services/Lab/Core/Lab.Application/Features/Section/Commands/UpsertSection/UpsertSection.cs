@@ -55,25 +55,43 @@ public class UpsertSectionCommandHandler(
 
 
         //If writer is author the section will update in main section
-        if (contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
-        {
-            // Author can update the main section directly
-            section.Update(
-                content: dto.Content,
-                numbered: dto.Numbered,
-                title: dto.Title,
-                sectionSumary: dto.SectionSumary,
-                parentSectionId: dto.ParentSectionId
-            );
-
-            session.Update(section);
-            await session.SaveChangesAsync(cancellationToken);
-            return section.Id;
-        }
+        // if (contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
+        // {
+        //     // Author can update the main section directly
+        //     section.Update(
+        //         content: dto.Content,
+        //         numbered: dto.Numbered,
+        //         title: dto.Title,
+        //         sectionSumary: dto.SectionSumary,
+        //         parentSectionId: dto.ParentSectionId
+        //     );
+        //
+        //     session.Update(section);
+        //     await session.SaveChangesAsync(cancellationToken);
+        //     return section.Id;
+        // }
 
         // If writer is not author, the section will be created as a new version of main section, and the new section will be updated by writer, the main section will be updated by author
         if (section.IsMainSection == true)
         {
+            // Prevent writer from creating multiple versions of the same main section
+            var availableSection = await session.Query<SectionEntity>()
+                .Where(x => x.PaperId == section.PaperId &&
+                            x.IsMainSection == false &&
+                            x.PreviousVersionSectionId == section.Id)
+                .ToListAsync(cancellationToken);
+            if (availableSection.Any())
+            {
+                var contributorWithVersion = await session.Query<PaperContributorEntity>()
+                    .Where(x => x.PaperId == section.PaperId &&
+                                x.MemberId == dto.MemberId &&
+                                x.SectionId == availableSection.Select(s => s.Id).FirstOrDefault())
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (contributorWithVersion != null)
+                    throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, section.Id);
+                
+            }
+                
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
                 content: dto.Content,
@@ -81,6 +99,7 @@ public class UpsertSectionCommandHandler(
                 displayOrder: section.DisplayOrder,
                 numbered: dto.Numbered,
                 isMainSection: false,
+                isOldMainSection: false,
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,

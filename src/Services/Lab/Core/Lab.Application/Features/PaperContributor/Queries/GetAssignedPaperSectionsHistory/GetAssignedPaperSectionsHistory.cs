@@ -14,13 +14,15 @@ public record GetAssignedPaperSectionsHistoryQuery(
     PaginationRequest Paging)
     : IQuery<GetAssignedPaperSectionsHistoryResult>;
 
-public sealed class GetAssignedPaperSectionsHistoryQueryValidator : AbstractValidator<GetAssignedPaperSectionsHistoryQuery>
+public sealed class GetAssignedPaperSectionsHistoryQueryValidator 
+    : AbstractValidator<GetAssignedPaperSectionsHistoryQuery>
 {
     public GetAssignedPaperSectionsHistoryQueryValidator()
     {
         RuleFor(x => x.PaperId)
             .NotEmpty()
             .WithMessage(MessageCode.PaperIdIsRequired);
+
         RuleFor(x => x.UserId)
             .NotEmpty()
             .WithMessage(MessageCode.UserIdIsRequired);
@@ -36,96 +38,119 @@ public sealed class GetAssignedPaperSectionsHistoryQueryHandler(
     IManagementApiService managementApiService)
     : IQueryHandler<GetAssignedPaperSectionsHistoryQuery, GetAssignedPaperSectionsHistoryResult>
 {
-    public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
-        GetAssignedPaperSectionsHistoryQuery request,
-        CancellationToken cancellationToken)
+public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
+    GetAssignedPaperSectionsHistoryQuery request,
+    CancellationToken cancellationToken)
+{
+    var paging = request.Paging;
+    var filter = request.Filter;
+    
+    var memberInfo = await managementApiService.GetMemberByPaperIdAsync(
+        request.PaperId, request.UserId, cancellationToken);
+
+    if (memberInfo == null)
+        throw new NotFoundException(MessageCode.MemberNotFound, request.UserId.ToString());
+
+    var (_, memberId) = memberInfo.Value;
+
+
+    var contributors = await session.Query<PaperContributorEntity>()
+        .Where(x => x.PaperId == request.PaperId
+                 && x.MemberId == memberId)
+        .ToListAsync(cancellationToken);
+
+    if (!contributors.Any())
+        return new GetAssignedPaperSectionsHistoryResult([], 0, paging);
+
+    if (!string.IsNullOrWhiteSpace(filter.SectionRole))
     {
-        var paging = request.Paging;
-        var filter = request.Filter;
-
-        var memberInfo = await managementApiService.GetMemberByPaperIdAsync(
-            request.PaperId, request.UserId, cancellationToken);
-        if (memberInfo == null)
-            throw new NotFoundException(MessageCode.MemberNotFound, request.UserId.ToString());
-
-        var (_, memberId) = memberInfo.Value;
-
-        var contributors = await session.Query<PaperContributorEntity>()
-            .Where(x => x.PaperId == request.PaperId && x.MemberId == memberId && x.MarkSectionId != Guid.Empty)
-            .ToListAsync(cancellationToken);
-
-        if (!string.IsNullOrWhiteSpace(filter.SectionRole))
-        {
-            contributors = contributors
-                .Where(x => x.SectionRole.Equals(filter.SectionRole, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        if (!contributors.Any())
-            return new GetAssignedPaperSectionsHistoryResult([], 0, paging);
-
-        var sectionIds = contributors
-            .Select(c => c.MarkSectionId)
-            .Distinct()
+        contributors = contributors
+            .Where(x => x.SectionRole.Equals(filter.SectionRole, StringComparison.OrdinalIgnoreCase))
             .ToList();
-
-        var sections = await session.Query<SectionEntity>()
-            .Where(s => s.PaperId == request.PaperId && sectionIds.Contains(s.Id))
-            .ToListAsync(cancellationToken);
-
-        var sectionMap = sections.ToDictionary(x => x.Id);
-
-        var sectionPairs = contributors
-            .Select(c =>
-            {
-                sectionMap.TryGetValue(c.MarkSectionId, out var section);
-                return new
-                {
-                    Contributor = c,
-                    Section = section,
-                    TitleKey = section?.Title?.Trim() ?? c.MarkSectionId.ToString()
-                };
-            })
-            .Where(x => x.Section != null)
-            .ToList();
-
-        var historyItems = sectionPairs
-            .GroupBy(x => x.TitleKey, StringComparer.OrdinalIgnoreCase)
-            .SelectMany(group => group
-                .OrderByDescending(x => x.Section?.CreatedOnUtc)
-                .ThenByDescending(x => x.Section?.LastModifiedOnUtc ?? x.Section?.CreatedOnUtc)
-                .ThenByDescending(x => x.Section?.Id)
-                .Skip(1))
-            .Where(x =>
-                (!filter.FromDate.HasValue || x.Section?.CreatedOnUtc >= filter.FromDate.Value) &&
-                (!filter.ToDate.HasValue || x.Section?.CreatedOnUtc <= filter.ToDate.Value))
-            .Select(x => new AssignedSectionHistoryItemDto
-            {
-                Id = x.Section!.Id,
-                PaperId = x.Section.PaperId,
-                Title = x.Section.Title,
-                Content = x.Section.Content,
-                Description = x.Section.Description,
-                SectionSumary = x.Section.SectionSumary,
-                CreatedOnUtc = x.Section.CreatedOnUtc,
-                LastModifiedOnUtc = x.Section.LastModifiedOnUtc,
-                DisplayOrder = x.Section.DisplayOrder,
-                Numbered = x.Section.Numbered,
-                ParentSectionId = x.Section.ParentSectionId,
-                PaperContributorId = x.Contributor.Id,
-                MemberId = x.Contributor.MemberId,
-                MarkSectionId = x.Contributor.MarkSectionId,
-                SectionRole = x.Contributor.SectionRole
-            })
-            .OrderBy(x => x.DisplayOrder)
-            .ThenBy(x => x.Title)
-            .ToList();
-
-        var pagedItems = historyItems
-            .Skip((paging.PageNumber - 1) * paging.PageSize)
-            .Take(paging.PageSize)
-            .ToList();
-
-        return new GetAssignedPaperSectionsHistoryResult(pagedItems, historyItems.Count, paging);
     }
+
+ 
+    var contributorGroups = contributors
+        .GroupBy(x => x.MarkSectionId)
+        .Select(g => g.OrderByDescending(x => x.CreatedOnUtc).First())
+        .ToList();
+
+
+    var allSections = await session.Query<SectionEntity>()
+        .Where(x => x.PaperId == request.PaperId)
+        .ToListAsync(cancellationToken);
+
+    var sectionById = allSections.ToDictionary(x => x.Id);
+
+    var historyItems = new List<AssignedSectionHistoryItemDto>();
+
+    foreach (var contributor in contributorGroups)
+    {
+        if (!sectionById.TryGetValue(contributor.MarkSectionId, out var currentMain))
+            continue;
+
+        var visited = new HashSet<Guid>();
+        var current = currentMain.PreviousVersionSectionId;
+
+        while (current.HasValue && sectionById.TryGetValue(current.Value, out var section))
+        {
+            if (!visited.Add(section.Id))
+            {
+                current = section.PreviousVersionSectionId;
+                continue;
+            }
+
+            if (section.IsOldMainSection == true)
+            {
+                var matchesFilter =
+                    (!filter.FromDate.HasValue || section.CreatedOnUtc >= filter.FromDate.Value) &&
+                    (!filter.ToDate.HasValue || section.CreatedOnUtc <= filter.ToDate.Value);
+
+                if (matchesFilter)
+                {
+                    historyItems.Add(new AssignedSectionHistoryItemDto
+                    {
+                        Id = section.Id,
+                        PaperId = section.PaperId,
+                        Title = section.Title,
+                        Content = section.Content,
+                        Description = section.Description,
+                        SectionSumary = section.SectionSumary,
+                        CreatedOnUtc = section.CreatedOnUtc,
+                        LastModifiedOnUtc = section.LastModifiedOnUtc,
+                        DisplayOrder = section.DisplayOrder,
+                        Numbered = section.Numbered,
+                        ParentSectionId = section.ParentSectionId,
+                        PaperContributorId = contributor.Id,
+                        MemberId = memberId,
+                        MarkSectionId = section.Id, 
+                        SectionRole = contributor.SectionRole,
+                        IsOldMainSection = section.IsOldMainSection,
+                        IsMainSection = section.IsMainSection
+                    });
+                }
+            }
+
+            current = section.PreviousVersionSectionId;
+        }
+    }
+    historyItems = historyItems
+        .GroupBy(x => x.Id)
+        .Select(g => g.First())
+        .ToList();
+    
+    var sortedItems = historyItems
+        .OrderBy(x => x.DisplayOrder)
+        .ThenByDescending(x => x.CreatedOnUtc)
+        .ToList();
+
+    var totalCount = sortedItems.Count;
+
+    var pagedItems = sortedItems
+        .Skip((paging.PageNumber - 1) * paging.PageSize)
+        .Take(paging.PageSize)
+        .ToList();
+
+    return new GetAssignedPaperSectionsHistoryResult(pagedItems, totalCount, paging);
+}
 }

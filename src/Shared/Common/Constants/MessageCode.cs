@@ -13,6 +13,7 @@ public sealed class MessageCode
     public const string AccessDenied = "ACCESS_DENIED";
 
     public const string UnknownError = "UNKNOWN_ERROR";
+
     #endregion
 
     #region Project Management
@@ -28,8 +29,10 @@ public sealed class MessageCode
     public const string AllPapersAlreadyExist = "ALL_PAPERS_ALREADY_EXIST";
 
     public const string SubProjectNotFound = "SUB_PROJECT_NOT_FOUND";
-    
+
     public const string ProjectHasPaper = "PROJECT_HAS_PAPER";
+
+    public const string ProjectCodeAlreadyExists = "PROJECT_CODE_ALREADY_EXISTS";
 
     #endregion
 
@@ -40,8 +43,6 @@ public sealed class MessageCode
     public const string DatasetIdIsRequired = "DATASET_ID_IS_REQUIRED";
 
     public const string DatasetIsNotExists = "DATASET_IS_NOT_EXISTS";
-
-
 
     #endregion
 
@@ -118,13 +119,13 @@ public sealed class MessageCode
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
     public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
-    
+
     public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
     public const string PaperContextIsRequired = "PAPER_CONTEXT_IS_REQUIRED";
 
     public const string PaperJournalIsRequired = "PAPER_JOURNAL_IS_REQUIRED";
-    
+
     #endregion
 
     #region Tag Message Codes
@@ -180,6 +181,10 @@ public sealed class MessageCode
 
     public const string SectionIsNotExists = "SECTION_IS_NOT_EXISTS";
 
+    public const string SectionIsAlreadyMainSection = "SECTION_IS_ALREADY_MAIN_SECTION";
+
+    public const string SectionAlreadyHasVersion =  "SECTION_ALREADY_HAS_VERSION";
+
     #endregion
 
     #region Comment Management
@@ -189,7 +194,7 @@ public sealed class MessageCode
 
     #endregion
 
-    #region Journal Message Codes
+    #region Journal Management
 
     public const string JournalNameIsRequired = "JOURNAL_NAME_IS_REQUIRED";
 
@@ -208,10 +213,12 @@ public sealed class MessageCode
     #endregion
 
     #region PaperContributor Management
-    
+
     public const string PaperContributorIdIsRequired = "PAPER_CONTRIBUTOR_ID_IS_REQUIRED";
-    
+
     public const string PaperContributorNotFound = "PAPER_CONTRIBUTOR_NOT_FOUND";
+
+    public const string ContributorIsNotExists = "CONTRIBUTOR_IS_NOT_EXISTS";
 
     #endregion
 }
