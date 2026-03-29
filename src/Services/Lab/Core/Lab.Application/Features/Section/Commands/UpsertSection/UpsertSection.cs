@@ -50,26 +50,27 @@ public class UpsertSectionCommandHandler(
                         x.SectionId == section.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (contributor == null || contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.SectionRead))
+        if (contributor == null || contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.SectionRead) ||
+            contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
 
         //If writer is author the section will update in main section
-        if (contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
-        {
-            // Author can update the main section directly
-            section.Update(
-                content: dto.Content,
-                numbered: dto.Numbered,
-                title: dto.Title,
-                sectionSumary: dto.SectionSumary,
-                parentSectionId: dto.ParentSectionId
-            );
-
-            session.Update(section);
-            await session.SaveChangesAsync(cancellationToken);
-            return section.Id;
-        }
+        // if (contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
+        // {
+        //     // Author can update the main section directly
+        //     section.Update(
+        //         content: dto.Content,
+        //         numbered: dto.Numbered,
+        //         title: dto.Title,
+        //         sectionSumary: dto.SectionSumary,
+        //         parentSectionId: dto.ParentSectionId
+        //     );
+        //
+        //     session.Update(section);
+        //     await session.SaveChangesAsync(cancellationToken);
+        //     return section.Id;
+        // }
 
         // If writer is not author, the section will be created as a new version of main section, and the new section will be updated by writer, the main section will be updated by author
         if (section.IsMainSection == true)
