@@ -50,8 +50,7 @@ public class UpsertSectionCommandHandler(
                         x.SectionId == section.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (contributor == null || contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.SectionRead) ||
-            contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
+        if (contributor == null || contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.SectionRead))
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
 
@@ -80,10 +79,19 @@ public class UpsertSectionCommandHandler(
                 .Where(x => x.PaperId == section.PaperId &&
                             x.IsMainSection == false &&
                             x.PreviousVersionSectionId == section.Id)
-                .FirstOrDefaultAsync(cancellationToken);
-            if (availableSection != null)
-                throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, availableSection.Id);
-
+                .ToListAsync(cancellationToken);
+            if (availableSection.Any())
+            {
+                var contributorWithVersion = await session.Query<PaperContributorEntity>()
+                    .Where(x => x.PaperId == section.PaperId &&
+                                x.MemberId == dto.MemberId &&
+                                x.SectionId == availableSection.Select(s => s.Id).FirstOrDefault())
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (contributorWithVersion != null)
+                    throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, section.Id);
+                
+            }
+                
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
                 content: dto.Content,
