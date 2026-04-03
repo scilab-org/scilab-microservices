@@ -4,5 +4,7 @@ public enum TaskDefineStatus
 {
     ToDo = 1,
     InProgress = 2,
-    Completed = 3,
+    InReview = 3,
+    Completed = 4,
+    Closed = 5
 }

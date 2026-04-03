@@ -16,7 +16,7 @@ public class DeletePaperContributorCommandHandler(IDocumentSession session)
     {
         var current = await session.LoadAsync<PaperContributorEntity>(command.Id, cancellationToken);
         if (current is null)
-            throw new NotFoundException($"Template with id {command.Id} not found.");
+            throw new NotFoundException(MessageCode.PaperContributorNotFound);
 
         session.Delete(current);
         await session.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,5 @@
 ﻿using Lab.Application.Dtos.PaperContributors;
+using Lab.Domain.Constants;
 using Lab.Domain.Entities;
 using Marten;
 
@@ -40,7 +41,7 @@ public sealed class CreatePaperContributorCommandHandler(IDocumentSession sessio
     {
         var dto = command.Dto;
 
-        var entity = PaperContributorEntity.Create(
+        var mainEntity  = PaperContributorEntity.Create(
             id: Guid.NewGuid(),
             sectionRole: dto.SectionRole!,
             paperId: dto.PaperId,
@@ -48,10 +49,43 @@ public sealed class CreatePaperContributorCommandHandler(IDocumentSession sessio
             memberId: dto.MemberId,
             markSectionId: dto.MarkSectionId);
 
-        session.Store(entity);
+        session.Store(mainEntity );
+        
+        // Check the "reference" section and assign if not already assigned
+        var candidateSections = await session.Query<SectionEntity>()
+            .Where(s => s.PaperId == dto.PaperId && s.IsMainSection == true && s.IsOldMainSection == false)
+            .ToListAsync(cancellationToken);
+
+        var referenceSection = candidateSections
+            .FirstOrDefault(s => SectionConstants.IsReferenceSection(s.Title));
+        
+        if (referenceSection != null)
+        {
+            var alreadyAssigned = await session.Query<PaperContributorEntity>()
+                .AnyAsync(pc =>
+                        pc.PaperId == dto.PaperId &&
+                        pc.MemberId == dto.MemberId &&
+                        (pc.SectionId == referenceSection.Id || pc.MarkSectionId == referenceSection.Id),
+                    cancellationToken);
+
+            if (!alreadyAssigned)
+            {
+                var referenceEntity = PaperContributorEntity.Create(
+                    id: Guid.NewGuid(),
+                    sectionRole: dto.SectionRole!,
+                    paperId: dto.PaperId,
+                    sectionId: referenceSection.Id,
+                    memberId: dto.MemberId,
+                    markSectionId: referenceSection.Id
+                );
+
+                session.Store(referenceEntity);
+            }
+        }
+        
         await session.SaveChangesAsync(cancellationToken);
 
-        return entity.Id;
+        return mainEntity.Id;
     }
 
     #endregion

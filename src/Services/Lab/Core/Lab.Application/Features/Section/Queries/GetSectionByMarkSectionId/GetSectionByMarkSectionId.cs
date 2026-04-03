@@ -4,6 +4,7 @@ using Lab.Application.Models.Results;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
+using Marten.Linq.SoftDeletes;
 
 namespace Lab.Application.Features.Section.Queries.GetSectionByMarkSectionId;
 
@@ -25,6 +26,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
 
         // Get all contributors of the markSectionId
         var allContributors = await session.Query<PaperContributorEntity>()
+            .Where(c => c.MaybeDeleted())
             .Where(c => c.MarkSectionId == request.MarkSectionId
                         && c.SectionRole != AuthorizeConstants.SectionRead)
             .ToListAsync(cancellationToken);
