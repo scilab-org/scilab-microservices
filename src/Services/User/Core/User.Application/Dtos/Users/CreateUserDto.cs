@@ -8,11 +8,11 @@ public sealed class CreateUserDto
 
     public string Email { get; set; } = default!;
 
-    public string? FirstName { get; set; }
+    public required string FirstName { get; set; }
 
-    public string? LastName { get; set; }
+    public required string LastName { get; set; }
 
-    public string InitialPassword { get; set; } = default!;
+    public required string InitialPassword { get; set; } = default!;
 
     public bool TemporaryPassword { get; set; } = true;
 
