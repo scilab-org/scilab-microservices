@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
 using Lab.Api.Constants;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Features.Section.Commands.UpsertSection;
@@ -21,11 +24,16 @@ public class UpdateSection : ICarterModule
 
     private async Task<ApiUpdatedResponse<Guid>> HandleUpdateSectionAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         IMapper mapper,
         [FromRoute] Guid id,
         [FromBody] UpsertSectionDto request)
     {
-        var command = new UpsertSectionCommand(request, id);
+        var currentUser = httpContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+
+        var command = new UpsertSectionCommand(request, id, currentUser.UserName);
         var result = await sender.Send(command);
         return new ApiUpdatedResponse<Guid>(result);
     }

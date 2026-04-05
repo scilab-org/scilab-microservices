@@ -126,6 +126,8 @@ public sealed class MessageCode
 
     public const string PaperJournalIsRequired = "PAPER_JOURNAL_IS_REQUIRED";
 
+    public const string PaperBankIdsIsRequired = "PAPER_BANK_IDS_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
@@ -184,6 +186,8 @@ public sealed class MessageCode
     public const string SectionIsAlreadyMainSection = "SECTION_IS_ALREADY_MAIN_SECTION";
 
     public const string SectionAlreadyHasVersion =  "SECTION_ALREADY_HAS_VERSION";
+
+    public const string SectionContentIsRequired = "SECTION_CONTENT_IS_REQUIRED";
 
     #endregion
 

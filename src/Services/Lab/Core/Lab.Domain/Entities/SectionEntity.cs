@@ -20,6 +20,7 @@ public class SectionEntity : Entity<Guid>
     public Guid? NextVersionSectionId { get; set; }
     public Guid PaperId { get; set; }
     public List<string>? Files { get; set; }
+    public List<Guid>? References { get; set; }
 
     #endregion
 
@@ -38,8 +39,9 @@ public class SectionEntity : Entity<Guid>
         string? rule = null,
         Guid? parentSectionId = null,
         Guid? previousVersionSectionId = null,
-        Guid? nextVersionSectionId = null
-    )
+        Guid? nextVersionSectionId = null,
+        string? createdBy = null,
+        List<Guid>? references = null)
     {
         return new SectionEntity()
         {
@@ -57,6 +59,8 @@ public class SectionEntity : Entity<Guid>
             ParentSectionId = parentSectionId,
             PreviousVersionSectionId = previousVersionSectionId,
             NextVersionSectionId = nextVersionSectionId,
+            CreatedBy = createdBy,
+            References = references,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -77,7 +81,9 @@ public class SectionEntity : Entity<Guid>
         bool? isOldMainSection = null,
         Guid? parentSectionId = null,
         Guid? previousVersionSectionId = null,
-        Guid? nextVersionSectionId = null)
+        Guid? nextVersionSectionId = null,
+        Guid? paperId = null,
+        List<Guid>? references = null)
     {
         Content = content ?? Content;
         Title = title ?? Title;
@@ -91,6 +97,8 @@ public class SectionEntity : Entity<Guid>
         ParentSectionId = parentSectionId ?? ParentSectionId;
         PreviousVersionSectionId = previousVersionSectionId ?? PreviousVersionSectionId;
         NextVersionSectionId = nextVersionSectionId ?? NextVersionSectionId;
+        PaperId = paperId ?? PaperId;
+        References = references ?? References;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

@@ -1,4 +1,7 @@
-﻿using Lab.Api.Constants;
+﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using Common.Constants;
+using Lab.Api.Constants;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Features.Section.Commands.MarkMainSection;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +23,14 @@ public class MarkMainSection : ICarterModule
 
     private async Task<ApiUpdatedResponse<Guid>> HandleMarkMainSectionAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
         [FromRoute] Guid id,
         [FromBody] MarkMainSectionDto dto)
     {
-        var command = new MarkMainSectionCommand(dto, id);
+        var currentUser = httpContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+        var command = new MarkMainSectionCommand(dto, currentUser.UserName, id);
         var result = await sender.Send(command);
         return new ApiUpdatedResponse<Guid>(result);
     }

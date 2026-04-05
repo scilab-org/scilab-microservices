@@ -5,7 +5,7 @@ using Marten;
 
 namespace Lab.Application.Features.Section.Commands.UpsertSection;
 
-public record UpsertSectionCommand(UpsertSectionDto Dto, Guid Id) : ICommand<Guid>;
+public record UpsertSectionCommand(UpsertSectionDto Dto, Guid Id, string UserName) : ICommand<Guid>;
 
 public class UpsertSectionCommandValidator : AbstractValidator<UpsertSectionCommand>
 {
@@ -53,25 +53,7 @@ public class UpsertSectionCommandHandler(
         if (contributor == null || contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.SectionRead))
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
-
-        //If writer is author the section will update in main section
-        // if (contributor.SectionRole.EqualsIgnoreCase(AuthorizeConstants.PaperAuthor))
-        // {
-        //     // Author can update the main section directly
-        //     section.Update(
-        //         content: dto.Content,
-        //         numbered: dto.Numbered,
-        //         title: dto.Title,
-        //         sectionSumary: dto.SectionSumary,
-        //         parentSectionId: dto.ParentSectionId
-        //     );
-        //
-        //     session.Update(section);
-        //     await session.SaveChangesAsync(cancellationToken);
-        //     return section.Id;
-        // }
-
-        // If writer is not author, the section will be created as a new version of main section, and the new section will be updated by writer, the main section will be updated by author
+        // If the section is main, the section will be created as a new version of main section, and the new section will be updated by writer
         if (section.IsMainSection == true)
         {
             // Prevent writer from creating multiple versions of the same main section
@@ -89,9 +71,9 @@ public class UpsertSectionCommandHandler(
                     .FirstOrDefaultAsync(cancellationToken);
                 if (contributorWithVersion != null)
                     throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, section.Id);
-                
+
             }
-                
+
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
                 content: dto.Content,
@@ -106,7 +88,8 @@ public class UpsertSectionCommandHandler(
                 rule: section.Rule,
                 parentSectionId: dto.ParentSectionId,
                 //Mark new section as new version of main section
-                previousVersionSectionId: section.Id
+                previousVersionSectionId: section.Id,
+                createdBy: request.UserName
             );
 
             // Update contributor to point to new section

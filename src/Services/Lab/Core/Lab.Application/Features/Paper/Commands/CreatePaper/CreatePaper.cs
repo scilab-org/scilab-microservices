@@ -92,7 +92,8 @@ public class CreatePaperCommandHandler(
                     numbered: template.Numbered,
                     isMainSection: true,
                     paperId: entity.Id,
-                    parentSectionId: template.ParentSectionId
+                    parentSectionId: template.ParentSectionId,
+                    createdBy: request.UserName
                 );
                 session.Store(section);
             }

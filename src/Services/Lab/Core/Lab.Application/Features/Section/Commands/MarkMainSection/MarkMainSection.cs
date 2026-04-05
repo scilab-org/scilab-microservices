@@ -6,7 +6,7 @@ using Marten;
 
 namespace Lab.Application.Features.Section.Commands.MarkMainSection;
 
-public record MarkMainSectionCommand(MarkMainSectionDto Dto, Guid Id) : ICommand<Guid>;
+public record MarkMainSectionCommand(MarkMainSectionDto Dto, string UserName, Guid Id) : ICommand<Guid>;
 
 public class MarkMainSectionCommandValidator : AbstractValidator<MarkMainSectionCommand>
 {
@@ -57,7 +57,9 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             description: section.Description,
             rule: section.Rule,
             parentSectionId: section.ParentSectionId,
-            previousVersionSectionId: section.Id
+            previousVersionSectionId: section.Id,
+            references: section.References,
+            createdBy: request.UserName
         );
 
         section.Update(nextVersionSectionId: newMainSection.Id, isOldMainSection: true);
