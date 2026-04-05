@@ -1,5 +1,6 @@
 ﻿using Lab.Domain.Abstractions;
 using Lab.Domain.Enums;
+using Lab.Domain.Models;
 
 namespace Lab.Domain.Entities;
 
@@ -21,7 +22,8 @@ public sealed class PaperEntity : Entity<Guid>
     public string? StyleDescription { get; set; }
     public string? StyleRule { get; set; }
     public PaperStatus? Status { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string>? TagNames { get; set; } = new();
+    public List<Reference>? References { get; set; } = new();
 
     #endregion
 
@@ -42,6 +44,7 @@ public sealed class PaperEntity : Entity<Guid>
         string? styleRule = null,
         PaperStatus? status = null,
         List<string>? tagNames = null,
+        List<Reference>? references = null,
         string? createdBy = null)
     {
         return new PaperEntity()
@@ -61,6 +64,7 @@ public sealed class PaperEntity : Entity<Guid>
             StyleRule = styleRule,
             Status = status ?? PaperStatus.Processing,
             TagNames = tagNames ?? new(),
+            References = references ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
             CreatedBy = createdBy
@@ -84,7 +88,8 @@ public sealed class PaperEntity : Entity<Guid>
         string? styleRule = null,
         PaperStatus? status = null,
         string? gapType = null,
-        List<string>? tagNames = null)
+        List<string>? tagNames = null,
+        List<Reference>? references = null)
     {
         Title = title ?? Title;
         Template = template ?? Template;
@@ -96,6 +101,7 @@ public sealed class PaperEntity : Entity<Guid>
         GapType = gapType  ?? GapType;
         Status = status ?? Status;
         TagNames = tagNames ?? TagNames;
+        References = references ?? References;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
