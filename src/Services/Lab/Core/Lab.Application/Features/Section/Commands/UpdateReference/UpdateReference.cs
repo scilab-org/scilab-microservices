@@ -24,14 +24,14 @@ public class UpdateReferenceCommandValidator : AbstractValidator<UpdateReference
                     .WithMessage(MessageCode.PaperIdIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperIdIsRequired);
-                RuleFor(x => x.Dto.Content)
-                    .NotEmpty()
-                    .WithMessage(MessageCode.SectionContentIsRequired)
-                    .NotNull()
-                    .WithMessage(MessageCode.SectionContentIsRequired);
+                // RuleFor(x => x.Dto.Content)
+                //     .NotEmpty()
+                //     .WithMessage(MessageCode.SectionContentIsRequired)
+                //     .NotNull()
+                //     .WithMessage(MessageCode.SectionContentIsRequired);
                 RuleFor(x => x.Dto.PaperBankIds)
                     .NotNull()
-                    .Must(ids => ids != null && ids.Any(id => id != Guid.Empty))
+                    .Must(ids => ids != null && ids.All(id => id != Guid.Empty))
                     .WithMessage(MessageCode.PaperBankIdsIsRequired);
                 RuleFor(x => x.Id)
                     .NotEmpty()
@@ -48,6 +48,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
     public async Task<Guid> Handle(UpdateReferenceCommand request, CancellationToken cancellationToken)
     {
         var dto = request.Dto;
+        Guid responseId;
 
         var memberInfo = await service.GetMemberByPaperIdAsync(dto.PaperId, request.UserId, cancellationToken);
         if (memberInfo == null)
@@ -95,7 +96,9 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         var selectedPaperIds = dto.PaperBankIds
             .Where(x => x != Guid.Empty)
             .Distinct()
-            .ToHashSet();
+            .ToList();
+
+        var selectedPaperIdSet = selectedPaperIds.ToHashSet();
 
         var contributorSectionIds = await session.Query<PaperContributorEntity>()
             .Where(x => x.PaperId == dto.PaperId &&
@@ -106,7 +109,14 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
             .Distinct()
             .ToListAsync(cancellationToken);
 
-        var mergedReferenceIds = new HashSet<Guid>(selectedPaperIds);
+        var mergedReferenceIds = new List<Guid>();
+        var mergedReferenceIdSet = new HashSet<Guid>();
+
+        foreach (var paperId in selectedPaperIds)
+        {
+            if (mergedReferenceIdSet.Add(paperId))
+                mergedReferenceIds.Add(paperId);
+        }
 
         var otherSectionIds = contributorSectionIds
             .Where(x => x != effectiveSectionId)
@@ -123,17 +133,32 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 if (section.References == null) continue;
 
                 foreach (var referenceId in section.References.Where(x => x != Guid.Empty))
-                    mergedReferenceIds.Add(referenceId);
+                {
+                    if (mergedReferenceIdSet.Add(referenceId))
+                        mergedReferenceIds.Add(referenceId);
+                }
             }
         }
 
-        var referenceSectionPaperBankIds = mergedReferenceIds.ToList();
+        var referenceSectionPaperBankIds = mergedReferenceIds;
+
+        var paperBanks = referenceSectionPaperBankIds.Count == 0
+            ? new List<PaperBankEntity>()
+            : await session.Query<PaperBankEntity>()
+                .Where(x => referenceSectionPaperBankIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        var paperBankContentMap = paperBanks.ToDictionary(x => x.Id, x => x.ReferenceContent);
+        var generatedReferenceContent = BuildReferenceSectionContent(
+            referenceSectionPaperBankIds
+                .Where(paperBankContentMap.ContainsKey)
+                .Select(id => paperBankContentMap[id]));
 
         if (currentReferenceSection.IsMainSection == true)
         {
             var newReferenceSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
-                content: dto.Content,
+                content: generatedReferenceContent,
                 paperId: referenceMainSection.PaperId,
                 displayOrder: referenceMainSection.DisplayOrder,
                 numbered: referenceMainSection.Numbered,
@@ -154,12 +179,40 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         }
         else
         {
-            currentReferenceSection.Update(content: dto.Content, references: referenceSectionPaperBankIds);
+            currentReferenceSection.Update(content: generatedReferenceContent, references: referenceSectionPaperBankIds);
             session.Update(currentReferenceSection);
         }
 
-        currentEditSection.Update(references: dto.PaperBankIds);
-        session.Update(currentEditSection);
+        if (currentEditSection.IsMainSection is null or false)
+        {
+            currentEditSection.Update(references: selectedPaperIds);
+            session.Update(currentEditSection);
+            responseId = currentEditSection.Id;
+        }
+        else
+        {
+            var newEditSection = SectionEntity.Create(
+                id: Guid.NewGuid(),
+                content: currentEditSection.Content,
+                paperId: currentEditSection.PaperId,
+                displayOrder: currentEditSection.DisplayOrder,
+                numbered: currentEditSection.Numbered,
+                isMainSection: null,
+                isOldMainSection: null,
+                title: currentEditSection.Title,
+                sectionSumary: currentEditSection.SectionSumary,
+                description: currentEditSection.Description,
+                rule: currentEditSection.Rule,
+                parentSectionId: currentEditSection.ParentSectionId,
+                previousVersionSectionId: currentEditSection.Id,
+                references: selectedPaperIds,
+                createdBy: request.UserName);
+
+            contributor.Update(sectionId: newEditSection.Id, markSectionId: currentEditSection.Id);
+            session.Store(newEditSection);
+            session.Update(contributor);
+            responseId = newEditSection.Id;
+        }
 
         var paper = await session.LoadAsync<PaperEntity>(dto.PaperId, cancellationToken)
                     ?? throw new NotFoundException(MessageCode.PaperIsNotExists, dto.PaperId.ToString());
@@ -171,7 +224,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         {
             var reference = references[i];
 
-            if (reference.SectionIds.Contains(effectiveSectionId) && !selectedPaperIds.Contains(reference.PaperId))
+            if (reference.SectionIds.Contains(effectiveSectionId) && !selectedPaperIdSet.Contains(reference.PaperId))
             {
                 reference.SectionIds.RemoveAll(x => x == effectiveSectionId);
                 if (reference.SectionIds.Count == 0)
@@ -179,7 +232,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
             }
         }
 
-        foreach (var paperId in selectedPaperIds)
+        foreach (var paperId in selectedPaperIdSet)
         {
             var reference = references.FirstOrDefault(x => x.PaperId == paperId);
 
@@ -203,6 +256,25 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
 
         await session.SaveChangesAsync(cancellationToken);
 
-        return effectiveSectionId;
+        return responseId;
+    }
+
+    private static string BuildReferenceSectionContent(IEnumerable<string?> referenceEntries)
+    {
+        var combinedReferenceContent = string.Join(
+            $"{Environment.NewLine}{Environment.NewLine}",
+            referenceEntries
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x!.Trim())
+                .Distinct());
+
+        if (string.IsNullOrWhiteSpace(combinedReferenceContent))
+            return string.Empty;
+
+        return $"\\begin{{filecontents}}{{references.bib}}{Environment.NewLine}" +
+               combinedReferenceContent +
+               $"{Environment.NewLine}\\end{{filecontents}}{Environment.NewLine}" +
+               "\\addbibresource{references.bib}" +
+               $"{Environment.NewLine}\\printbibliography";
     }
 }
