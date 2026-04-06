@@ -13,6 +13,8 @@ public interface ILabApiService
     Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetAvailablePapersAsync(
         IEnumerable<Guid> existingPaperIds,
         string? title = null,
+        string[]? author = null,
+        string? publisher = null,
         string? @abstract = null,
         string? doi = null,
         int? status = null,
@@ -74,6 +76,10 @@ public interface ILabApiService
     Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetPaperBanksByIdsPagedAsync(
         IEnumerable<Guid> paperIds,
         string? title = null,
+        string? pages = null,
+        string? number = null,
+        string? volume = null,
+        string? referenceContent = null,
         string[]? tags = null,
         int pageNumber = 1,
         int pageSize = 10,
@@ -92,7 +98,7 @@ public interface ILabApiService
     Task<bool> DeletePaperAsync(
         Guid paperId,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>Returns all sections for a given paperId from the Lab service.</summary>
     Task<List<LabSectionDto>> GetSectionsByPaperIdAsync(
         Guid paperId,
@@ -106,6 +112,8 @@ public interface ILabApiService
     /// <summary>Returns all papers assigned to the current user across their projects.</summary>
     Task<(List<PaperInfoDto> Items, long TotalCount)> GetAssignedPapersAsync(
         string? title = null,
+        string[]? author = null,
+        string? publisher = null,
         string? @abstract = null,
         string? doi = null,
         int? status = null,

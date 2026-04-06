@@ -57,6 +57,8 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
         var entity = PaperBankEntity.Create(
             id: Guid.NewGuid(),
             title: dto.Title,
+            authors: dto.Authors,
+            publisher: dto.Publisher,
             abstractText: dto.Abstract,
             doi: dto.Doi,
             status: dto.Status ?? PaperStatus.Sampled,
@@ -66,7 +68,11 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
             journalName: dto.JournalName,
+            pages: dto.Pages,
+            number: dto.Number,
+            volume: dto.Volume,
             conferenceName: dto.ConferenceName,
+            referenceContent: dto.ReferenceContent,
             tagNames: tagNames);
 
         await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
@@ -91,8 +97,6 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
         await outboxRepo.AddMessageAsync(outbox, cancellationToken);
         await session.SaveChangesAsync(cancellationToken);
 
-
-       
         return entity.Id;
     }
 

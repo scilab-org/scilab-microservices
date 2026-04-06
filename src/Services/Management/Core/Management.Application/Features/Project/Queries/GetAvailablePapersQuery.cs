@@ -43,6 +43,8 @@ public class GetAvailablePapersQueryHandler(
         var (items, totalCount) = await labApiService.GetAvailablePapersAsync(
             existingPaperIds: existingPaperIds,
             title: filter.Title,
+            author: filter.Author,
+            publisher: filter.Publisher,
             @abstract: filter.Abstract,
             doi: filter.Doi,
             status: filter.Status,

@@ -8,7 +8,10 @@ using Marten.Pagination;
 
 namespace Management.Application.Features.Project.Queries;
 
-public sealed record GetAssignedPapersQuery(Guid UserId, PaginationRequest Paging, string? Title = null) : IQuery<GetAssignedPapersResult>;
+public sealed record GetAssignedPapersQuery(
+    Guid UserId,
+    PaginationRequest Paging,
+    string? Title = null) : IQuery<GetAssignedPapersResult>;
 
 public sealed class GetAssignedPapersValidator : AbstractValidator<GetAssignedPapersQuery>
 {

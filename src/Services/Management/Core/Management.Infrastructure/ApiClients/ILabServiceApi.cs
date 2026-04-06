@@ -23,6 +23,8 @@ public interface ILabServiceApi
         [AliasAs("pageNumber")] int pageNumber = 1,
         [AliasAs("pageSize")] int pageSize = 1000,
         [AliasAs("title")] string? title = null,
+        [AliasAs("author")] string[]? author = null,
+        [AliasAs("publisher")] string? publisher = null,
         [AliasAs("abstract")] string? @abstract = null,
         [AliasAs("doi")] string? doi = null,
         [AliasAs("status")] int? status = null,
@@ -50,13 +52,13 @@ public interface ILabServiceApi
     /// </summary>
     [Delete("/admin/paper-bank/{id}")]
     Task<HttpResponseMessage> DeletePaperBankAsync([AliasAs("id")] Guid paperId);
-    
+
     /// <summary>
     /// DELETE /manager/papers/{id} — deletes a paper by id.
     /// </summary>
     [Delete("/manager/papers/{id}")]
     Task<HttpResponseMessage> DeletePaperAsync([AliasAs("id")] Guid paperId);
-    
+
     /// <summary>
     /// GET /papers/{id}/sections — returns all sections for a paper.
     /// </summary>
@@ -77,6 +79,8 @@ public interface ILabServiceApi
         [AliasAs("pageNumber")] int pageNumber = 1,
         [AliasAs("pageSize")] int pageSize = 1000,
         [AliasAs("title")] string? title = null,
+        [AliasAs("author")] string[]? author = null,
+        [AliasAs("publisher")] string? publisher = null,
         [AliasAs("abstract")] string? @abstract = null,
         [AliasAs("doi")] string? doi = null,
         [AliasAs("status")] int? status = null,

@@ -92,6 +92,43 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
             await session.LoadAsync<SectionEntity>(currentUserContributor.SectionId!, cancellationToken)
             ?? throw new NotFoundException(MessageCode.SectionIsNotExists);
 
+        var selectedPaperIds = dto.PaperBankIds
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToHashSet();
+
+        var contributorSectionIds = await session.Query<PaperContributorEntity>()
+            .Where(x => x.PaperId == dto.PaperId &&
+                        x.MemberId == memberId &&
+                        x.SectionId != null &&
+                        x.MarkSectionId != referenceMainSection.Id)
+            .Select(x => x.SectionId!.Value)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var mergedReferenceIds = new HashSet<Guid>(selectedPaperIds);
+
+        var otherSectionIds = contributorSectionIds
+            .Where(x => x != effectiveSectionId)
+            .ToList();
+
+        if (otherSectionIds.Count > 0)
+        {
+            var otherSections = await session.Query<SectionEntity>()
+                .Where(x => otherSectionIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+            foreach (var section in otherSections)
+            {
+                if (section.References == null) continue;
+
+                foreach (var referenceId in section.References.Where(x => x != Guid.Empty))
+                    mergedReferenceIds.Add(referenceId);
+            }
+        }
+
+        var referenceSectionPaperBankIds = mergedReferenceIds.ToList();
+
         if (currentReferenceSection.IsMainSection == true)
         {
             var newReferenceSection = SectionEntity.Create(
@@ -108,7 +145,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 rule: referenceMainSection.Rule,
                 parentSectionId: referenceMainSection.ParentSectionId,
                 previousVersionSectionId: referenceMainSection.Id,
-                references: dto.PaperBankIds,
+                references: referenceSectionPaperBankIds,
                 createdBy: request.UserName);
 
             currentUserContributor.Update(sectionId: newReferenceSection.Id, markSectionId: referenceMainSection.Id);
@@ -117,7 +154,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         }
         else
         {
-            currentReferenceSection.Update(content: dto.Content, references: dto.PaperBankIds);
+            currentReferenceSection.Update(content: dto.Content, references: referenceSectionPaperBankIds);
             session.Update(currentReferenceSection);
         }
 
@@ -127,10 +164,6 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         var paper = await session.LoadAsync<PaperEntity>(dto.PaperId, cancellationToken)
                     ?? throw new NotFoundException(MessageCode.PaperIsNotExists, dto.PaperId.ToString());
 
-        var selectedPaperIds = dto.PaperBankIds
-            .Where(x => x != Guid.Empty)
-            .Distinct()
-            .ToHashSet();
 
         List<PaperReference> references = paper.References ?? new List<PaperReference>();
 

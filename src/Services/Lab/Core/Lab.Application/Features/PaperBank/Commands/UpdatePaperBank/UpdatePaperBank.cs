@@ -61,6 +61,8 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
 
         entity.Update(
             title: dto.Title,
+            authors: dto.Authors,
+            publisher: dto.Publisher,
             abstractText: dto.Abstract,
             doi: dto.Doi,
             status: dto.Status,
@@ -69,7 +71,11 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
             journalName: dto.JournalName,
+            pages: dto.Pages,
+            number: dto.Number,
+            volume: dto.Volume,
             conferenceName: dto.ConferenceName,
+            referenceContent: dto.ReferenceContent,
             tagNames: tagNames,
             ingestStatus: dto.IngestStatus);
 
