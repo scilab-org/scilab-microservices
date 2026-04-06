@@ -147,6 +147,7 @@ public sealed class ApiRoutes
         public const string GetSectionFileById = $"{Base}/{{id}}/files";
         public const string MarkMainSection = $"{Base}/{{id}}/mark-main-section";
         public const string Reference = $"{Base}/{{id}}/reference";
+        public const string InUseReference = $"{Base}/{{id}}/reference/in-use";
 
         #endregion
 

@@ -118,6 +118,7 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
         {
             Id = paperBank.Id,
             Title = paperBank.Title,
+            Authors = paperBank.Authors,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             FilePath = paperBank.FilePath,
@@ -127,7 +128,11 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             PublicationDate = paperBank.PublicationDate,
             PaperType = paperBank.PaperType,
             JournalName = paperBank.JournalName,
+            Pages = paperBank.Pages,
+            Number = paperBank.Number,
+            Volume = paperBank.Volume,
             ConferenceName = paperBank.ConferenceName,
+            ReferenceContent = paperBank.ReferenceContent,
             TagNames = paperBank.TagNames
         };
     }

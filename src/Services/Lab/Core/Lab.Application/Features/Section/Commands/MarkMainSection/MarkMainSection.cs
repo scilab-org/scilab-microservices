@@ -2,6 +2,7 @@
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
+using PaperReference = Lab.Domain.Models.Reference;
 using Marten;
 
 namespace Lab.Application.Features.Section.Commands.MarkMainSection;
@@ -131,6 +132,52 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             session.Update(oldContributor);
             session.Store(newContributor);
         }
+
+        var versionSectionIds = otherVersionSections
+            .Select(x => x.Id)
+            .Append(oldMainSection.Id)
+            .ToHashSet();
+
+        var mainSectionReferenceIds = (section.References ?? [])
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToHashSet();
+
+        var paper = await session.LoadAsync<PaperEntity>(section.PaperId, cancellationToken)
+                    ?? throw new NotFoundException(MessageCode.PaperIsNotExists, section.PaperId.ToString());
+
+        var references = (paper.References ?? [])
+            .Select(reference => new PaperReference
+            {
+                PaperId = reference.PaperId,
+                SectionIds = reference.SectionIds
+                    .Where(sectionId => !versionSectionIds.Contains(sectionId))
+                    .Distinct()
+                    .ToList()
+            })
+            .Where(reference => reference.SectionIds.Count > 0)
+            .ToList();
+
+        foreach (var paperId in mainSectionReferenceIds)
+        {
+            var reference = references.FirstOrDefault(x => x.PaperId == paperId);
+
+            if (reference is null)
+            {
+                references.Add(new PaperReference
+                {
+                    PaperId = paperId,
+                    SectionIds = [newMainSection.Id]
+                });
+                continue;
+            }
+
+            if (!reference.SectionIds.Contains(newMainSection.Id))
+                reference.SectionIds.Add(newMainSection.Id);
+        }
+
+        paper.Update(references: references);
+        session.Update(paper);
 
         session.Store(newMainSection);
         session.Update(section);
