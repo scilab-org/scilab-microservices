@@ -24,11 +24,6 @@ public class UpdateReferenceCommandValidator : AbstractValidator<UpdateReference
                     .WithMessage(MessageCode.PaperIdIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperIdIsRequired);
-                // RuleFor(x => x.Dto.Content)
-                //     .NotEmpty()
-                //     .WithMessage(MessageCode.SectionContentIsRequired)
-                //     .NotNull()
-                //     .WithMessage(MessageCode.SectionContentIsRequired);
                 RuleFor(x => x.Dto.PaperBankIds)
                     .NotNull()
                     .Must(ids => ids != null && ids.All(id => id != Guid.Empty))
@@ -100,47 +95,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
 
         var selectedPaperIdSet = selectedPaperIds.ToHashSet();
 
-        var contributorSectionIds = await session.Query<PaperContributorEntity>()
-            .Where(x => x.PaperId == dto.PaperId &&
-                        x.MemberId == memberId &&
-                        x.SectionId != null &&
-                        x.MarkSectionId != referenceMainSection.Id)
-            .Select(x => x.SectionId!.Value)
-            .Distinct()
-            .ToListAsync(cancellationToken);
-
-        var mergedReferenceIds = new List<Guid>();
-        var mergedReferenceIdSet = new HashSet<Guid>();
-
-        foreach (var paperId in selectedPaperIds)
-        {
-            if (mergedReferenceIdSet.Add(paperId))
-                mergedReferenceIds.Add(paperId);
-        }
-
-        var otherSectionIds = contributorSectionIds
-            .Where(x => x != effectiveSectionId)
-            .ToList();
-
-        if (otherSectionIds.Count > 0)
-        {
-            var otherSections = await session.Query<SectionEntity>()
-                .Where(x => otherSectionIds.Contains(x.Id))
-                .ToListAsync(cancellationToken);
-
-            foreach (var section in otherSections)
-            {
-                if (section.References == null) continue;
-
-                foreach (var referenceId in section.References.Where(x => x != Guid.Empty))
-                {
-                    if (mergedReferenceIdSet.Add(referenceId))
-                        mergedReferenceIds.Add(referenceId);
-                }
-            }
-        }
-
-        var referenceSectionPaperBankIds = mergedReferenceIds;
+        var referenceSectionPaperBankIds = selectedPaperIds;
 
         var paperBanks = referenceSectionPaperBankIds.Count == 0
             ? new List<PaperBankEntity>()
@@ -211,6 +166,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
             contributor.Update(sectionId: newEditSection.Id, markSectionId: currentEditSection.Id);
             session.Store(newEditSection);
             session.Update(contributor);
+            effectiveSectionId = newEditSection.Id;
             responseId = newEditSection.Id;
         }
 
