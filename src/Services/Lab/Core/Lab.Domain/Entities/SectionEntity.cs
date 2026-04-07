@@ -11,6 +11,9 @@ public class SectionEntity : Entity<Guid>
     public string? SectionSumary { get; set; }
     public string? Description { get; set; }
     public string? Rule { get; set; }
+    public string? PaperRule { get; set; }
+    public string? ProjectRule { get; set; }
+    public string? SectionRule { get; set; }
     public float DisplayOrder { get; set; }
     public bool? Numbered { get; set; } = true;
     public bool? IsMainSection { get; set; } = false;
@@ -21,6 +24,7 @@ public class SectionEntity : Entity<Guid>
     public Guid PaperId { get; set; }
     public List<string>? Files { get; set; }
     public List<Guid>? References { get; set; }
+    public List<string>? Packages { get; set; }
 
     #endregion
 
@@ -41,7 +45,11 @@ public class SectionEntity : Entity<Guid>
         Guid? previousVersionSectionId = null,
         Guid? nextVersionSectionId = null,
         string? createdBy = null,
-        List<Guid>? references = null)
+        List<Guid>? references = null,
+        string? paperRule = null,
+        string? projectRule = null,
+        string? sectionRule = null,
+        List<string>? packages = null)
     {
         return new SectionEntity()
         {
@@ -52,6 +60,9 @@ public class SectionEntity : Entity<Guid>
             SectionSumary = sectionSumary,
             Description = description,
             Rule = rule,
+            PaperRule = paperRule,
+            ProjectRule = projectRule,
+            SectionRule = sectionRule,
             DisplayOrder = displayOrder,
             Numbered = numbered,
             IsMainSection = isMainSection,
@@ -61,6 +72,7 @@ public class SectionEntity : Entity<Guid>
             NextVersionSectionId = nextVersionSectionId,
             CreatedBy = createdBy,
             References = references,
+            Packages = packages,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -83,7 +95,11 @@ public class SectionEntity : Entity<Guid>
         Guid? previousVersionSectionId = null,
         Guid? nextVersionSectionId = null,
         Guid? paperId = null,
-        List<Guid>? references = null)
+        List<Guid>? references = null,
+        string? paperRule = null,
+        string? projectRule = null,
+        string? sectionRule = null,
+        List<string>? packages = null)
     {
         Content = content ?? Content;
         Title = title ?? Title;
@@ -91,6 +107,9 @@ public class SectionEntity : Entity<Guid>
         SectionSumary = sectionSumary ?? SectionSumary;
         Description = description ?? Description;
         Rule = rule ?? Rule;
+        PaperRule = paperRule ?? PaperRule;
+        ProjectRule = projectRule ?? ProjectRule;
+        SectionRule = sectionRule ?? SectionRule;
         Numbered = numbered ?? Numbered;
         IsMainSection = isMainSection ?? IsMainSection;
         IsOldMainSection = isOldMainSection ?? IsOldMainSection;
@@ -99,6 +118,7 @@ public class SectionEntity : Entity<Guid>
         NextVersionSectionId = nextVersionSectionId ?? NextVersionSectionId;
         PaperId = paperId ?? PaperId;
         References = references ?? References;
+        Packages = packages ?? Packages;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

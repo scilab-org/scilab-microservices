@@ -99,6 +99,10 @@ public sealed class PaperEntity : Entity<Guid>
         MainContribution = mainContribution ?? MainContribution;
         Rule = rule ?? Rule;
         GapType = gapType  ?? GapType;
+        Journal = journal ?? Journal;
+        StyleName = styleName ?? StyleName;
+        StyleDescription = styleDescription ?? StyleDescription;
+        StyleRule = styleRule ?? StyleRule;
         Status = status ?? Status;
         TagNames = tagNames ?? TagNames;
         References = references ?? References;

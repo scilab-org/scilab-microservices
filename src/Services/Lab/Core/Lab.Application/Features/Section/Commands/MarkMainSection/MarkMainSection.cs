@@ -1,5 +1,6 @@
 ﻿using JasperFx.Core;
 using Lab.Application.Dtos.Sections;
+using Lab.Application.Rules;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using PaperReference = Lab.Domain.Models.Reference;
@@ -60,7 +61,11 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             parentSectionId: section.ParentSectionId,
             previousVersionSectionId: section.Id,
             references: section.References,
-            createdBy: request.UserName
+            createdBy: request.UserName,
+            paperRule: section.PaperRule,
+            projectRule: section.ProjectRule,
+            packages: section.Packages,
+            sectionRule: section.SectionRule ?? SectionRuleComposer.BuildSectionRule(section.Title, section.Description)
         );
 
         section.Update(nextVersionSectionId: newMainSection.Id, isOldMainSection: true);

@@ -107,6 +107,12 @@ public interface ILabServiceApi
     [Post("/author/paper-contributors")]
     Task<HttpResponseMessage> CreatePaperContributorAsync([Body] CreatePaperContributorRequest body);
 
+    /// <summary>
+    /// PUT /admin/system/project-rules — rebuilds project-derived rules for Lab sections.
+    /// </summary>
+    [Put("/admin/system/project-rules")]
+    Task<HttpResponseMessage> UpdateProjectRulesAsync([Body] UpdateProjectRulesRequest body);
+
     #endregion
 }
 
@@ -115,6 +121,14 @@ public sealed class CreatePaperContributorRequest
     public string SectionRole { get; set; } = null!;
     public Guid PaperId { get; set; }
     public Guid? SectionId { get; set; }
-    public Guid MemberId { get; set; }
+    public List<Guid> MemberIds { get; set; } = [];
     public Guid MarkSectionId { get; set; }
+}
+
+public sealed class UpdateProjectRulesRequest
+{
+    public List<Guid> PaperIds { get; set; } = [];
+    public string? Context { get; set; }
+    public string? Domain { get; set; }
+    public string? Keypoint { get; set; }
 }

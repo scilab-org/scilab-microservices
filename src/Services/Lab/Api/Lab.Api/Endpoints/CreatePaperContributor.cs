@@ -15,7 +15,7 @@ public class CreatePaperContributor: ICarterModule
         app.MapPost(ApiRoutes.PaperContributor.Create, HandleCreatePaperContributorAsync)
             .WithTags(ApiRoutes.PaperContributor.Tags)
             .WithName(nameof(CreatePaperContributor))
-            .Produces<ApiCreatedResponse<Guid>>(StatusCodes.Status201Created)
+            .Produces<ApiCreatedResponse<List<Guid>>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .DisableAntiforgery();
         // .RequireAuthorization();
@@ -32,7 +32,7 @@ public class CreatePaperContributor: ICarterModule
         var command = new CreatePaperContributorCommand(req);
         var result = await sender.Send(command);
 
-        return TypedResults.Created($"{ApiRoutes.PaperContributor.Create}/{result}", new ApiCreatedResponse<Guid>(result));
+        return TypedResults.Created($"{ApiRoutes.PaperContributor.Create}", new ApiCreatedResponse<List<Guid>>(result));
     }
 
     #endregion

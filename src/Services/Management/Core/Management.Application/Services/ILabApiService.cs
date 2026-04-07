@@ -136,9 +136,17 @@ public interface ILabApiService
     Task<bool> CreatePaperContributorAsync(
         string sectionRole,
         Guid paperId,
-        Guid memberId,
+        List<Guid> memberIds,
         Guid markSectionId,
         Guid? sectionId = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Rebuilds Lab section rules when a project's rule-related fields change.</summary>
+    Task<bool> UpdateProjectRulesAsync(
+        IEnumerable<Guid> paperIds,
+        string? context,
+        string? domain,
+        string? keypoint,
         CancellationToken cancellationToken = default);
 
     #endregion

@@ -124,9 +124,10 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = section?.LastModifiedOnUtc,
 
-            Name    = user != null ? $"{user.FirstName} {user.LastName}".Trim() : member?.Username,
-            Email   = user?.Email ?? member?.Email,
-            Content = section?.Content
+            Name     = user != null ? $"{user.FirstName} {user.LastName}".Trim() : member?.Username,
+            Email    = user?.Email ?? member?.Email,
+            Content  = section?.Content,
+            Packages = section?.Packages
         };
     }
     #endregion

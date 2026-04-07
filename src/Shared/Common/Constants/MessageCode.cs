@@ -188,6 +188,8 @@ public sealed class MessageCode
     public const string SectionAlreadyHasVersion =  "SECTION_ALREADY_HAS_VERSION";
 
     public const string SectionContentIsRequired = "SECTION_CONTENT_IS_REQUIRED";
+    
+    public const string PaperDescriptionIsRequired = "PAPER_DESCRIPTION_IS_REQUIRED";
 
     #endregion
 
