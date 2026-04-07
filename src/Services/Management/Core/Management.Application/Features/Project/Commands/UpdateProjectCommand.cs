@@ -1,4 +1,5 @@
 ﻿using Management.Application.Dtos.Projects;
+using Management.Application.Services;
 using Management.Domain.Entities;
 using Marten;
 
@@ -38,7 +39,9 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
     #endregion
 }
 
-public class UpdateProjectCommandHandler(IDocumentSession session) : ICommandHandler<UpdateProjectCommand, Guid>
+public class UpdateProjectCommandHandler(
+    IDocumentSession session,
+    ILabApiService labApiService) : ICommandHandler<UpdateProjectCommand, Guid>
 {
     #region Implementations
 
@@ -53,6 +56,12 @@ public class UpdateProjectCommandHandler(IDocumentSession session) : ICommandHan
         //     throw new NoPermissionException("Cannot change domain after adding papers or datasets.");
         
         var dto = command.Dto;
+        var nextContext = dto.Context;
+        var nextDomain = dto.Domain ?? entity.Domain;
+        var nextKeypoint = dto.Keypoint;
+        var requiresRuleSync = !string.Equals(entity.Context, nextContext, StringComparison.Ordinal)
+                               || !string.Equals(entity.Domain, nextDomain, StringComparison.Ordinal)
+                               || !string.Equals(entity.Keypoint, nextKeypoint, StringComparison.Ordinal);
         
         entity.Update(
             name: dto.Name!,
@@ -61,9 +70,30 @@ public class UpdateProjectCommandHandler(IDocumentSession session) : ICommandHan
             status: dto.Status,
             startDate: dto.StartDate,
             endDate: dto.EndDate,
-            context: dto.Context,
-            domain: dto.Domain ?? entity.Domain,
+            context: nextContext,
+            domain: nextDomain,
             keypoint: dto.Keypoint);
+
+        var subProject = await session.Query<ProjectEntity>()
+            .Where(x => x.ParentProjectId == entity.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        if (requiresRuleSync && subProject != null)
+        {
+            var paperIds = await session.Query<ProjectEntity>()
+                .Where(x => x.ParentProjectId == entity.Id)
+                .SelectMany(x => x.PaperIds)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+            
+            await labApiService.UpdateProjectRulesAsync(
+                paperIds,
+                nextContext,
+                nextDomain,
+                nextKeypoint,
+                cancellationToken);
+
+        }
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

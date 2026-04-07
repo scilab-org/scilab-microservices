@@ -1,5 +1,6 @@
 using JasperFx.Core;
 using Lab.Application.Dtos.Sections;
+using Lab.Application.Rules;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
@@ -109,7 +110,11 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 parentSectionId: referenceMainSection.ParentSectionId,
                 previousVersionSectionId: referenceMainSection.Id,
                 references: dto.PaperBankIds,
-                createdBy: request.UserName);
+                createdBy: request.UserName,
+                paperRule: referenceMainSection.PaperRule,
+                projectRule: referenceMainSection.ProjectRule,
+                sectionRule: referenceMainSection.SectionRule
+                    ?? SectionRuleComposer.BuildSectionRule(referenceMainSection.Title, referenceMainSection.Description));
 
             currentUserContributor.Update(sectionId: newReferenceSection.Id, markSectionId: referenceMainSection.Id);
             session.Store(newReferenceSection);

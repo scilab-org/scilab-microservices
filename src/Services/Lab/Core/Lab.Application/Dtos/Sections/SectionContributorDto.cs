@@ -25,4 +25,5 @@ public class SectionContributorDto
     public string? Email { get; set; }
     
     public string? Content { get; set; } = null!;
+    public List<string>? Packages { get; set; }
 }

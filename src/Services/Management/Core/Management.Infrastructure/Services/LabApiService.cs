@@ -453,7 +453,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     public async Task<bool> CreatePaperContributorAsync(
         string sectionRole,
         Guid paperId,
-        Guid memberId,
+        List<Guid> memberIds,
         Guid markSectionId,
         Guid? sectionId = null,
         CancellationToken cancellationToken = default)
@@ -464,7 +464,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             {
                 SectionRole   = sectionRole,
                 PaperId       = paperId,
-                MemberId      = memberId,
+                MemberIds     = memberIds,
                 MarkSectionId = markSectionId,
                 SectionId     = sectionId
             });
@@ -505,6 +505,39 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         catch
         {
             return new List<LabPaperContributorDto>();
+        }
+    }
+
+    public async Task<bool> UpdateProjectRulesAsync(
+        IEnumerable<Guid> paperIds,
+        string? context,
+        string? domain,
+        string? keypoint,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = paperIds
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+            return true;
+
+        try
+        {
+            var response = await labServiceApi.UpdateProjectRulesAsync(new UpdateProjectRulesRequest
+            {
+                PaperIds = ids,
+                Context = context,
+                Domain = domain,
+                Keypoint = keypoint
+            });
+
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
         }
     }
 

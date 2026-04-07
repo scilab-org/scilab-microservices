@@ -103,21 +103,19 @@ public class AddSubProjectMembersCommandHandler(
         // For each author member, fetch sections from Lab and create a PaperContributor per section
         if (authorMembers.Count > 0 && subProject.PaperIds.Count > 0)
         {
-            var paperId  = subProject.PaperIds.First();
-            var sections = await labApiService.GetSectionsByPaperIdAsync(paperId, cancellationToken);
+            var paperId    = subProject.PaperIds.First();
+            var sections   = await labApiService.GetSectionsByPaperIdAsync(paperId, cancellationToken);
+            var authorMemberIds = authorMembers.Select(m => m.MemberId).ToList();
 
-            foreach (var (memberId, _) in authorMembers)
+            foreach (var section in sections)
             {
-                foreach (var section in sections)
-                {
-                    await labApiService.CreatePaperContributorAsync(
-                        sectionRole   : AuthorizeConstants.PaperAuthor,
-                        paperId       : paperId,
-                        memberId      : memberId,
-                        markSectionId : section.Id,
-                        sectionId     : section.Id,
-                        cancellationToken: cancellationToken);
-                }
+                await labApiService.CreatePaperContributorAsync(
+                    sectionRole      : AuthorizeConstants.PaperAuthor,
+                    paperId          : paperId,
+                    memberIds        : authorMemberIds,
+                    markSectionId    : section.Id,
+                    sectionId        : section.Id,
+                    cancellationToken: cancellationToken);
             }
         }
 

@@ -49,9 +49,10 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             CreatedOnUtc             = mainSection?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = mainSection?.LastModifiedOnUtc,
 
-            Name    = null,
-            Email   = null,
-            Content = mainSection?.Content
+            Name     = null,
+            Email    = null,
+            Content  = mainSection?.Content,
+            Packages = mainSection?.Packages
         };
 
         if (!allContributors.Any())
@@ -146,9 +147,10 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
                 CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
                 LastModifiedOnUtc        = section?.LastModifiedOnUtc,
 
-                Name    = name,
-                Email   = user?.Email ?? member?.Email,
-                Content = section?.Content
+                Name     = name,
+                Email    = user?.Email ?? member?.Email,
+                Content  = section?.Content,
+                Packages = section?.Packages
             };
         })
         .ToList();

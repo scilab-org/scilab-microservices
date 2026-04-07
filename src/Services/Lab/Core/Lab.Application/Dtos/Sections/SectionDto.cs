@@ -19,7 +19,7 @@ public class SectionDto : DtoId<Guid>
     public bool? IsOldMainSection { get; set; } = false;
     public bool? IsMainSection { get; set; } = false;
     public string? Rule { get; set; }
-    
+    public List<string>? Packages { get; set; }
 }
 
 public class AssignedSectionDto : SectionDto

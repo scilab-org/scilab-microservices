@@ -11,6 +11,7 @@ public sealed class ApiRoutes
         private const string BaseAdmin = "/admin/system";
 
         public const string InitializeData = $"{BaseAdmin}/initialize-data";
+        public const string UpdateProjectRules = $"{BaseAdmin}/project-rules";
 
         #endregion
     }
@@ -49,6 +50,7 @@ public sealed class ApiRoutes
         #region Enpoints
 
         public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
         public const string Delete = $"{BaseManager}/{{id}}";
         public const string GetPaperSamples = $"{Base}/sample";
         public const string Initialize = $"{BaseManager}/initialize";
@@ -139,6 +141,7 @@ public sealed class ApiRoutes
 
         public const string Create = $"{Base}";
         public const string Update = $"{Base}/{{id}}";
+        public const string UpdateGuideline = $"{Base}/{{id}}/guideline";
         public const string Delete = $"{Base}/{{id}}";
         public const string GetSectionById = $"{Base}/{{id}}";
         public const string GetSectionByMarkSectionId = $"{Base}/mark-section/{{id}}";

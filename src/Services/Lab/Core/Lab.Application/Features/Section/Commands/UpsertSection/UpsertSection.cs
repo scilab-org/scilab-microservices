@@ -1,4 +1,5 @@
 ﻿using JasperFx.Core;
+using Lab.Application.Rules;
 using Lab.Application.Dtos.Sections;
 using Lab.Domain.Entities;
 using Marten;
@@ -85,11 +86,17 @@ public class UpsertSectionCommandHandler(
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,
-                rule: section.Rule,
+                rule: SectionRuleComposer.ComposeNormalizedRule(
+                    section.ProjectRule,
+                    section.PaperRule,
+                    SectionRuleComposer.BuildSectionRule(dto.Title, section.Description)),
                 parentSectionId: dto.ParentSectionId,
                 //Mark new section as new version of main section
                 previousVersionSectionId: section.Id,
-                createdBy: request.UserName
+                createdBy: request.UserName,
+                paperRule: section.PaperRule,
+                projectRule: section.ProjectRule,
+                sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description)
             );
 
             // Update contributor to point to new section
@@ -105,12 +112,15 @@ public class UpsertSectionCommandHandler(
         }
 
         // If the section is not main section, it means the section is already a new version of main section, so just update the section directly
+        var sectionRule = SectionRuleComposer.BuildSectionRule(dto.Title ?? section.Title, section.Description);
         section.Update(
             content: dto.Content,
             numbered: dto.Numbered,
             title: dto.Title,
             sectionSumary: dto.SectionSumary,
-            parentSectionId: dto.ParentSectionId
+            parentSectionId: dto.ParentSectionId,
+            sectionRule: sectionRule,
+            rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule)
         );
 
         session.Update(section);

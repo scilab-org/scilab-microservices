@@ -13,6 +13,7 @@ public class CreateSectionDto
     public string? Description { get; init; }
     public string? Rule { get; init; }
     public Guid? ParentSectionId { get; init; }
+    public List<string>? Packages { get; init; }
 
     #endregion
 }
