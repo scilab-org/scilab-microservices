@@ -23,6 +23,8 @@ public interface ILabServiceApi
         [AliasAs("pageNumber")] int pageNumber = 1,
         [AliasAs("pageSize")] int pageSize = 1000,
         [AliasAs("title")] string? title = null,
+        [AliasAs("author")] string[]? author = null,
+        [AliasAs("publisher")] string? publisher = null,
         [AliasAs("abstract")] string? @abstract = null,
         [AliasAs("doi")] string? doi = null,
         [AliasAs("status")] int? status = null,
@@ -50,13 +52,13 @@ public interface ILabServiceApi
     /// </summary>
     [Delete("/admin/paper-bank/{id}")]
     Task<HttpResponseMessage> DeletePaperBankAsync([AliasAs("id")] Guid paperId);
-    
+
     /// <summary>
     /// DELETE /manager/papers/{id} — deletes a paper by id.
     /// </summary>
     [Delete("/manager/papers/{id}")]
     Task<HttpResponseMessage> DeletePaperAsync([AliasAs("id")] Guid paperId);
-    
+
     /// <summary>
     /// GET /papers/{id}/sections — returns all sections for a paper.
     /// </summary>
@@ -77,6 +79,8 @@ public interface ILabServiceApi
         [AliasAs("pageNumber")] int pageNumber = 1,
         [AliasAs("pageSize")] int pageSize = 1000,
         [AliasAs("title")] string? title = null,
+        [AliasAs("author")] string[]? author = null,
+        [AliasAs("publisher")] string? publisher = null,
         [AliasAs("abstract")] string? @abstract = null,
         [AliasAs("doi")] string? doi = null,
         [AliasAs("status")] int? status = null,
@@ -103,6 +107,12 @@ public interface ILabServiceApi
     [Post("/author/paper-contributors")]
     Task<HttpResponseMessage> CreatePaperContributorAsync([Body] CreatePaperContributorRequest body);
 
+    /// <summary>
+    /// PUT /admin/system/project-rules — rebuilds project-derived rules for Lab sections.
+    /// </summary>
+    [Put("/admin/system/project-rules")]
+    Task<HttpResponseMessage> UpdateProjectRulesAsync([Body] UpdateProjectRulesRequest body);
+
     #endregion
 }
 
@@ -111,6 +121,14 @@ public sealed class CreatePaperContributorRequest
     public string SectionRole { get; set; } = null!;
     public Guid PaperId { get; set; }
     public Guid? SectionId { get; set; }
-    public Guid MemberId { get; set; }
+    public List<Guid> MemberIds { get; set; } = [];
     public Guid MarkSectionId { get; set; }
+}
+
+public sealed class UpdateProjectRulesRequest
+{
+    public List<Guid> PaperIds { get; set; } = [];
+    public string? Context { get; set; }
+    public string? Domain { get; set; }
+    public string? Keypoint { get; set; }
 }

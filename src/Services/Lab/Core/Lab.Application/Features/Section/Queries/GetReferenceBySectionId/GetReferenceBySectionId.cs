@@ -32,18 +32,12 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             .Distinct()
             .ToList();
 
-        var inUseSet = inUseIds.ToHashSet();
-
-        var inUsePaperBanks = inUseIds.Count == 0
+        var inUse = inUseIds.Count == 0
             ? []
-            : await session.Query<PaperBankEntity>()
+            : (await session.Query<PaperBankEntity>()
                 .Where(x => inUseIds.Contains(x.Id))
-                .ToListAsync(cancellationToken);
-
-        var inUseMap = inUsePaperBanks.ToDictionary(x => x.Id, ToPaperBankDto);
-        var inUse = inUseIds
-            .Where(inUseMap.ContainsKey)
-            .Select(x => inUseMap[x])
+                .ToListAsync(cancellationToken))
+            .Select(ToPaperBankDto)
             .ToList();
 
         var paper = await session.LoadAsync<PaperEntity>(section.PaperId, cancellationToken)
@@ -51,17 +45,23 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
 
         var paperReferences = paper.References ?? [];
 
-        var groupedOtherReferences = paperReferences
-            .Where(x => x.PaperId != Guid.Empty && !inUseSet.Contains(x.PaperId))
-            .GroupBy(x => x.PaperId)
+        var filteredReferences = paperReferences
+            .Where(x => x.PaperId != Guid.Empty)
             .Select(x => new
             {
-                PaperId = x.Key,
-                SectionIds = x.SelectMany(y => y.SectionIds).Where(id => id != Guid.Empty).Distinct().ToList()
+                x.PaperId,
+                SectionIds = x.SectionIds
+                    .Where(id => id != Guid.Empty && id != section.Id)
+                    .Distinct()
+                    .ToList()
             })
+            .Where(x => x.SectionIds.Count != 0)
             .ToList();
 
-        var otherReferencePaperIds = groupedOtherReferences.Select(x => x.PaperId).ToList();
+        var otherReferencePaperIds = filteredReferences
+            .Select(x => x.PaperId)
+            .Distinct()
+            .ToList();
         var otherPaperBanks = otherReferencePaperIds.Count == 0
             ? []
             : await session.Query<PaperBankEntity>()
@@ -70,10 +70,18 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
 
         var otherPaperBankMap = otherPaperBanks.ToDictionary(x => x.Id, ToPaperBankDto);
 
-        var allSectionIds = groupedOtherReferences
+        var allSectionIds = filteredReferences
             .SelectMany(x => x.SectionIds)
             .Distinct()
             .ToList();
+
+        var filteredReferenceMap = filteredReferences
+            .GroupBy(x => x.PaperId)
+            .ToDictionary(
+                x => x.Key,
+                x => x.SelectMany(y => y.SectionIds)
+                    .Distinct()
+                    .ToList());
 
         var sections = allSectionIds.Count == 0
             ? []
@@ -91,12 +99,12 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             CreatedBy = x.CreatedBy
         });
 
-        var otherReferences = groupedOtherReferences
-            .Where(x => otherPaperBankMap.ContainsKey(x.PaperId))
-            .Select(x => new PaperBankReferenceDto
+        var otherReferences = otherReferencePaperIds
+            .Where(otherPaperBankMap.ContainsKey)
+            .Select(paperId => new PaperBankReferenceDto
             {
-                PaperBank = otherPaperBankMap[x.PaperId],
-                Sections = x.SectionIds
+                PaperBank = otherPaperBankMap[paperId],
+                Sections = filteredReferenceMap[paperId]
                     .Where(sectionMap.ContainsKey)
                     .Select(id => sectionMap[id])
                     .OrderBy(s => s.DisplayOrder)
@@ -118,6 +126,8 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
         {
             Id = paperBank.Id,
             Title = paperBank.Title,
+            Authors = paperBank.Authors,
+            Publisher = paperBank.Publisher,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             FilePath = paperBank.FilePath,
@@ -127,7 +137,11 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             PublicationDate = paperBank.PublicationDate,
             PaperType = paperBank.PaperType,
             JournalName = paperBank.JournalName,
+            Pages = paperBank.Pages,
+            Number = paperBank.Number,
+            Volume = paperBank.Volume,
             ConferenceName = paperBank.ConferenceName,
+            ReferenceContent = paperBank.ReferenceContent,
             TagNames = paperBank.TagNames
         };
     }

@@ -5,7 +5,7 @@ using Marten;
 
 namespace Lab.Application.Features.PaperContributor.Commands.CreatePaperContributor;
 
-public sealed record CreatePaperContributorCommand(CreatePaperContributorDto Dto) : ICommand<Guid>;
+public sealed record CreatePaperContributorCommand(CreatePaperContributorDto Dto) : ICommand<List<Guid>>;
 
 public sealed class CreatePaperContributorCommandValidator : AbstractValidator<CreatePaperContributorCommand>
 {
@@ -24,7 +24,7 @@ public sealed class CreatePaperContributorCommandValidator : AbstractValidator<C
                     .NotEmpty()
                     .WithMessage(MessageCode.PaperIdIsRequired);
 
-                RuleFor(x => x.Dto.MemberId)
+                RuleFor(x => x.Dto.MemberIds)
                     .NotEmpty()
                     .WithMessage(MessageCode.MemberIdIsRequired);
             });
@@ -33,59 +33,70 @@ public sealed class CreatePaperContributorCommandValidator : AbstractValidator<C
     #endregion
 }
 
-public sealed class CreatePaperContributorCommandHandler(IDocumentSession session) : ICommandHandler<CreatePaperContributorCommand, Guid>
+public sealed class CreatePaperContributorCommandHandler(IDocumentSession session) : ICommandHandler<CreatePaperContributorCommand, List<Guid>>
 {
     #region Implementations
 
-    public async Task<Guid> Handle(CreatePaperContributorCommand command, CancellationToken cancellationToken)
+    public async Task<List<Guid>> Handle(CreatePaperContributorCommand command, CancellationToken cancellationToken)
     {
         var dto = command.Dto;
+        var createdIds = new List<Guid>();
 
-        var mainEntity  = PaperContributorEntity.Create(
-            id: Guid.NewGuid(),
-            sectionRole: dto.SectionRole!,
-            paperId: dto.PaperId,
-            sectionId: dto.SectionId,
-            memberId: dto.MemberId,
-            markSectionId: dto.MarkSectionId);
+        // Check the "reference" section once for the paper (only needed for non-PaperAuthor roles)
+        IReadOnlyList<SectionEntity>? candidateSections = null;
+        SectionEntity? referenceSection = null;
 
-        session.Store(mainEntity );
-        
-        // Check the "reference" section and assign if not already assigned
-        var candidateSections = await session.Query<SectionEntity>()
-            .Where(s => s.PaperId == dto.PaperId && s.IsMainSection == true && s.IsOldMainSection == false)
-            .ToListAsync(cancellationToken);
-
-        var referenceSection = candidateSections
-            .FirstOrDefault(s => SectionConstants.IsReferenceSection(s.Title));
-        
-        if (referenceSection != null)
+        if (dto.SectionRole != AuthorizeConstants.PaperAuthor)
         {
-            var alreadyAssigned = await session.Query<PaperContributorEntity>()
-                .AnyAsync(pc =>
-                        pc.PaperId == dto.PaperId &&
-                        pc.MemberId == dto.MemberId &&
-                        (pc.SectionId == referenceSection.Id || pc.MarkSectionId == referenceSection.Id),
-                    cancellationToken);
+            candidateSections = await session.Query<SectionEntity>()
+                .Where(s => s.PaperId == dto.PaperId && s.IsMainSection == true && s.IsOldMainSection == false)
+                .ToListAsync(cancellationToken);
 
-            if (!alreadyAssigned)
+            referenceSection = candidateSections
+                .FirstOrDefault(s => SectionConstants.IsReferenceSection(s.Title));
+        }
+
+        foreach (var memberId in dto.MemberIds)
+        {
+            var mainEntity = PaperContributorEntity.Create(
+                id: Guid.NewGuid(),
+                sectionRole: dto.SectionRole!,
+                paperId: dto.PaperId,
+                sectionId: dto.SectionId,
+                memberId: memberId,
+                markSectionId: dto.MarkSectionId);
+
+            session.Store(mainEntity);
+            createdIds.Add(mainEntity.Id);
+
+            if (referenceSection != null)
             {
-                var referenceEntity = PaperContributorEntity.Create(
-                    id: Guid.NewGuid(),
-                    sectionRole: dto.SectionRole!,
-                    paperId: dto.PaperId,
-                    sectionId: referenceSection.Id,
-                    memberId: dto.MemberId,
-                    markSectionId: referenceSection.Id
-                );
+                var alreadyAssigned = await session.Query<PaperContributorEntity>()
+                    .AnyAsync(pc =>
+                            pc.PaperId == dto.PaperId &&
+                            pc.MemberId == memberId &&
+                            (pc.SectionId == referenceSection.Id || pc.MarkSectionId == referenceSection.Id),
+                        cancellationToken);
 
-                session.Store(referenceEntity);
+                if (!alreadyAssigned)
+                {
+                    var referenceEntity = PaperContributorEntity.Create(
+                        id: Guid.NewGuid(),
+                        sectionRole: dto.SectionRole!,
+                        paperId: dto.PaperId,
+                        sectionId: referenceSection.Id,
+                        memberId: memberId,
+                        markSectionId: referenceSection.Id
+                    );
+
+                    session.Store(referenceEntity);
+                }
             }
         }
-        
+
         await session.SaveChangesAsync(cancellationToken);
 
-        return mainEntity.Id;
+        return createdIds;
     }
 
     #endregion

@@ -8,6 +8,8 @@ public sealed class PaperBankEntity : Entity<Guid>
     #region Fields, Properties and Indexers
 
     public string Title { get; set; } = null!;
+    public string? Authors { get; set; }
+    public string? Publisher { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
@@ -18,7 +20,11 @@ public sealed class PaperBankEntity : Entity<Guid>
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
+    public string? Pages {get; set;}
+    public string? Number { get; set; }
+    public string? Volume {get; set;}
     public string? ConferenceName { get; set; }
+    public string? ReferenceContent { get; set; }
     public List<string> TagNames { get; set; } = new();
     public IngestStatus? IngestStatus { get; set; }
 
@@ -28,22 +34,30 @@ public sealed class PaperBankEntity : Entity<Guid>
 
     public static PaperBankEntity Create(Guid id,
         string title,
-        string? abstractText,
-        string? doi,
-        PaperStatus? status,
-        string? parsedText,
-        bool? isIngested,
-        bool? isAutoTagged,
-        DateTimeOffset? publicationDate,
-        string? paperType,
-        string? journalName,
-        string? conferenceName,
+        string? authors = null,
+        string? publisher = null,
+        string? abstractText = null,
+        string? doi = null,
+        PaperStatus? status = null,
+        string? parsedText = null,
+        bool? isIngested = null,
+        bool? isAutoTagged = null,
+        DateTimeOffset? publicationDate = null,
+        string? paperType = null,
+        string? journalName = null,
+        string? pages = null,
+        string? number = null,
+        string? volume = null,
+        string? conferenceName = null,
+        string? referenceContent = null,
         List<string>? tagNames = null)
     {
         return new PaperBankEntity()
         {
             Id = id,
             Title = title,
+            Authors = authors,
+            Publisher = publisher,
             Abstract = abstractText,
             Doi = doi,
             Status = status ?? PaperStatus.Draft,
@@ -53,7 +67,11 @@ public sealed class PaperBankEntity : Entity<Guid>
             PublicationDate = publicationDate,
             PaperType = paperType,
             JournalName = journalName,
+            Pages = pages,
+            Number = number,
+            Volume = volume,
             ConferenceName = conferenceName,
+            ReferenceContent = referenceContent,
             TagNames = tagNames ?? new(),
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -64,32 +82,44 @@ public sealed class PaperBankEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string? title,
-        string? abstractText,
-        string? doi,
-        PaperStatus? status,
-        bool? isIngested,
-        bool? isAutoTagged,
-        DateTimeOffset? publicationDate,
-        string? paperType,
-        string? journalName,
-        string? conferenceName,
-        IngestStatus? ingestStatus,
+    public void Update(string? title = null,
+        string? authors = null,
+        string? publisher = null,
+        string? abstractText = null,
+        string? doi = null,
+        PaperStatus? status = null,
+        bool? isIngested = null,
+        bool? isAutoTagged = null,
+        DateTimeOffset? publicationDate = null,
+        string? paperType = null,
+        string? journalName = null,
+        string? pages = null,
+        string? number = null,
+        string? volume = null,
+        string? conferenceName = null,
+        string? referenceContent = null,
+        IngestStatus? ingestStatus = null,
         List<string>? tagNames = null)
     {
         Title = title ?? Title;
-        Abstract = abstractText;
-        Doi = doi;
-        Status = status;
+        Authors = authors ?? Authors;
+        Publisher = publisher ?? Publisher;
+        Abstract = abstractText ?? Abstract;
+        Doi = doi ?? Doi;
+        Status = status ?? Status;
         IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
-        PublicationDate = publicationDate;
-        PaperType = paperType;
-        JournalName = journalName;
-        ConferenceName = conferenceName;
+        PublicationDate = publicationDate ?? PublicationDate;
+        PaperType = paperType ?? PaperType;
+        JournalName = journalName ?? JournalName;
+        Pages = pages ?? Pages;
+        Number = number ?? Number;
+        Volume = volume ?? Volume;
+        ConferenceName = conferenceName ?? ConferenceName;
+        ReferenceContent = referenceContent ?? ReferenceContent;
+        IngestStatus = ingestStatus ?? IngestStatus;
         TagNames = tagNames ?? TagNames;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
-        IngestStatus = ingestStatus ?? IngestStatus;
     }
 
     public void UpdateIngestionStatus(bool isIngested, IngestStatus ingestStatus)

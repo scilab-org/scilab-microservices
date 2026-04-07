@@ -22,6 +22,8 @@ file sealed class LabPaperItem
 {
     public Guid Id { get; set; }
     public string? Title { get; set; }
+    public string? Authors { get; set; }
+    public string? Publisher { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
@@ -31,7 +33,11 @@ file sealed class LabPaperItem
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
+    public string? Pages { get; set; }
+    public string? Number { get; set; }
+    public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
+    public string? ReferenceContent { get; set; }
     public List<string> TagNames { get; set; } = new();
 }
 
@@ -69,6 +75,8 @@ file sealed class LabPaperFull
 {
     public Guid Id { get; set; }
     public string? Title { get; set; }
+    public string? Authors { get; set; }
+    public string? Publisher { get; set; }
     public string? Template { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
@@ -80,7 +88,11 @@ file sealed class LabPaperFull
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
+    public string? Pages { get; set; }
+    public string? Number { get; set; }
+    public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
+    public string? ReferenceContent { get; set; }
     public List<string> TagNames { get; set; } = new();
     public string? CreatedBy { get; set; }
 }
@@ -161,6 +173,8 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     public async Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetAvailablePapersAsync(
         IEnumerable<Guid> existingPaperIds,
         string? title = null,
+        string[]? author = null,
+        string? publisher = null,
         string? @abstract = null,
         string? doi = null,
         int? status = null,
@@ -180,6 +194,8 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             pageNumber: pageNumber,
             pageSize: pageSize,
             title: title,
+            author: author,
+            publisher: publisher,
             @abstract: @abstract,
             doi: doi,
             status: status,
@@ -335,6 +351,10 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     public async Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetPaperBanksByIdsPagedAsync(
         IEnumerable<Guid> paperIds,
         string? title = null,
+        string? pages = null,
+        string? number = null,
+        string? volume = null,
+        string? referenceContent = null,
         string[]? tags = null,
         int pageNumber = 1,
         int pageSize = 10,
@@ -353,6 +373,38 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             var search = title.Trim();
             allPapers = allPapers
                 .Where(p => p.Title != null && p.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(pages))
+        {
+            var search = pages.Trim();
+            allPapers = allPapers
+                .Where(p => p.Pages != null && p.Pages.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(number))
+        {
+            var search = number.Trim();
+            allPapers = allPapers
+                .Where(p => p.Number != null && p.Number.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(volume))
+        {
+            var search = volume.Trim();
+            allPapers = allPapers
+                .Where(p => p.Volume != null && p.Volume.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(referenceContent))
+        {
+            var search = referenceContent.Trim();
+            allPapers = allPapers
+                .Where(p => p.ReferenceContent != null && p.ReferenceContent.Contains(search, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 
@@ -453,7 +505,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     public async Task<bool> CreatePaperContributorAsync(
         string sectionRole,
         Guid paperId,
-        Guid memberId,
+        List<Guid> memberIds,
         Guid markSectionId,
         Guid? sectionId = null,
         CancellationToken cancellationToken = default)
@@ -464,7 +516,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             {
                 SectionRole   = sectionRole,
                 PaperId       = paperId,
-                MemberId      = memberId,
+                MemberIds     = memberIds,
                 MarkSectionId = markSectionId,
                 SectionId     = sectionId
             });
@@ -508,8 +560,43 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<bool> UpdateProjectRulesAsync(
+        IEnumerable<Guid> paperIds,
+        string? context,
+        string? domain,
+        string? keypoint,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = paperIds
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+            return true;
+
+        try
+        {
+            var response = await labServiceApi.UpdateProjectRulesAsync(new UpdateProjectRulesRequest
+            {
+                PaperIds = ids,
+                Context = context,
+                Domain = domain,
+                Keypoint = keypoint
+            });
+
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public async Task<(List<PaperInfoDto> Items, long TotalCount)> GetAssignedPapersAsync(
         string? title = null,
+        string[]? author = null,
+        string? publisher = null,
         string? @abstract = null,
         string? doi = null,
         int? status = null,
@@ -529,6 +616,8 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
                 pageNumber,
                 pageSize,
                 title,
+                author,
+                publisher,
                 @abstract,
                 doi,
                 status,
@@ -598,6 +687,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+
     #endregion
 }
 
@@ -607,6 +697,8 @@ file static class LabPaperItemMapper
     {
         Id              = p.Id,
         Title           = p.Title,
+        Authors         = p.Authors,
+        Publisher       = p.Publisher,
         Abstract        = p.Abstract,
         Doi             = p.Doi,
         FilePath        = p.FilePath,
@@ -614,7 +706,11 @@ file static class LabPaperItemMapper
         PublicationDate = p.PublicationDate,
         PaperType       = p.PaperType,
         JournalName     = p.JournalName,
+        Pages           = p.Pages,
+        Number          = p.Number,
+        Volume          = p.Volume,
         ConferenceName  = p.ConferenceName,
+        ReferenceContent = p.ReferenceContent,
         TagNames        = p.TagNames
     };
 
@@ -622,6 +718,8 @@ file static class LabPaperItemMapper
     {
         Id              = p.Id,
         Title           = p.Title,
+        Authors         = p.Authors,
+        Publisher       = p.Publisher,
         Template        = p.Template,
         Abstract        = p.Abstract,
         Doi             = p.Doi,
@@ -631,7 +729,11 @@ file static class LabPaperItemMapper
         PublicationDate = p.PublicationDate,
         PaperType       = p.PaperType,
         JournalName     = p.JournalName,
+        Pages           = p.Pages,
+        Number          = p.Number,
+        Volume          = p.Volume,
         ConferenceName  = p.ConferenceName,
+        ReferenceContent = p.ReferenceContent,
         TagNames        = p.TagNames,
         CreatedBy       = p.CreatedBy
     };

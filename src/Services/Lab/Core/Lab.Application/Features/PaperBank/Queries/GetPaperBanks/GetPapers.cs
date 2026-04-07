@@ -30,6 +30,23 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => x.Title.Contains(title));
         }
 
+        if (filter.Author?.Any() == true)
+        {
+            var authorKeywords = NormalizeAuthorKeywords(filter.Author);
+
+            foreach (var keyword in authorKeywords)
+            {
+                var local = keyword;
+                query = query.Where(x => x.Authors != null && x.Authors.ToLower().Contains(local));
+            }
+        }
+
+        if (!filter.Publisher.IsNullOrWhiteSpace())
+        {
+            var publisher = filter.Publisher.Trim();
+            query = query.Where(x => x.Publisher != null && x.Publisher.Contains(publisher));
+        }
+
         if (!filter.Abstract.IsNullOrWhiteSpace())
         {
             var abstractText = filter.Abstract.Trim();
@@ -75,6 +92,7 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => x.ConferenceName != null && x.ConferenceName.Contains(conferenceName));
         }
 
+
         if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
         {
             query = query.Where(x => x.IsDeleted());
@@ -82,7 +100,7 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
         if (filter.Tag?.Any() == true)
         {
-            var tagNames = NomalizeTagNames(filter.Tag);
+            var tagNames = NormalizeTagNames(filter.Tag);
 
             foreach (var searchTag in tagNames)
             {
@@ -108,20 +126,32 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
         var papers = result.ToList();
         var items = mapper.Map<List<PaperBankDto>>(papers);
 
-        var reponse = new GetPaperBanksResult(items, totalCount, paging);
+        var response = new GetPaperBanksResult(items, totalCount, paging);
 
-        return reponse;
+        return response;
     }
 
     #endregion
 
     #region Methods
 
-    private List<string> NomalizeTagNames(string[]? tagNames)
+    private List<string> NormalizeTagNames(string[]? tagNames)
     {
         if (tagNames == null) return new List<string>();
 
         return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
+    }
+
+    private List<string> NormalizeAuthorKeywords(string[]? authors)
+    {
+        if (authors == null) return new List<string>();
+
+        return authors
+            .SelectMany(x => x
+                .Trim()
+                .ToLowerInvariant()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .ToList();
     }
 
     #endregion
