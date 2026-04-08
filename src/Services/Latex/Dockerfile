@@ -22,6 +22,10 @@ RUN curl -fsSL https://sourceforge.net/projects/biblatex-biber/files/biblatex-bi
     | tar -xz -C /usr/local/bin/ \
     && chmod +x /usr/local/bin/biber
 
+RUN curl -fsSL https://sourceforge.net/projects/biblatex-biber/files/biblatex-biber/2.17/binaries/Linux/biber-linux_x86_64.tar.gz \
+    | tar -xz -C /usr/local/bin/ \
+    && chmod +x /usr/local/bin/biber
+
 WORKDIR /service
 COPY src/Services/Latex/server.py .
 RUN pip install --no-cache-dir fastapi uvicorn httpx python-multipart

@@ -72,8 +72,7 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
                 : $"\\begin{{filecontents*}}{{references.bib}}{Environment.NewLine}{Environment.NewLine}" +
                   combinedReferenceContent +
                   $"{Environment.NewLine}{Environment.NewLine}\\end{{filecontents*}}{Environment.NewLine}{Environment.NewLine}" +
-                  "\\addbibresource{references.bib}" +
-                  $"{Environment.NewLine}{Environment.NewLine}\\printbibliography",
+                  "\\addbibresource{references.bib}",
             PaperBanks = items
         };
     }
