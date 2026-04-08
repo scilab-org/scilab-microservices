@@ -62,7 +62,7 @@ public class
                 ? string.Empty
                 : $"\\begin{{filecontents*}}{{references.bib}}{Environment.NewLine}{Environment.NewLine}" +
                   combinedReferenceContent +
-                  $"{Environment.NewLine}{Environment.NewLine}\\end{{filecontents}}{Environment.NewLine}{Environment.NewLine}" +
+                  $"{Environment.NewLine}{Environment.NewLine}\\end{{filecontents*}}{Environment.NewLine}{Environment.NewLine}" +
                   "\\addbibresource{references.bib}" +
                   $"{Environment.NewLine}{Environment.NewLine}\\printbibliography",
             PaperBanks = items
