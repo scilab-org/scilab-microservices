@@ -151,6 +151,7 @@ public sealed class ApiRoutes
         public const string MarkMainSection = $"{Base}/{{id}}/mark-main-section";
         public const string Reference = $"{Base}/{{id}}/reference";
         public const string InUseReference = $"{Base}/{{id}}/reference/in-use";
+        public const string PreviewReference = $"{Base}/reference/preview";
 
         #endregion
 
