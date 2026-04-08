@@ -8,5 +8,6 @@ public class UpsertSectionDto
     public bool? Numbered { get; init; } = true;
     public string? SectionSumary { get; init; }
     public Guid? ParentSectionId { get; init; }
-    public List<string> Packages { get; init; } = new();
+    public List<string> CurrentSectionPackages { get; init; } = new();
+    public List<string> ReferencesPackages { get; init; } = new();
 }
