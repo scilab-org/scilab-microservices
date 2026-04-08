@@ -1,4 +1,6 @@
-﻿using EventSourcing.Events.Lab;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+using EventSourcing.Events.Lab;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Repositories;
 using Lab.Application.Services;
@@ -84,7 +86,15 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
         {
             PaperId = entity.Id,
             PaperName = entity.Title,
-            ParsedText = entity.ParsedText ?? string.Empty
+            ParsedText = entity.ParsedText ?? string.Empty,
+            ReferenceKey = GenerateReferenceKey(entity),
+            Authors = entity.Authors,
+            Publisher = entity.Publisher,
+            JournalName = entity.JournalName,
+            Volume = entity.Volume,
+            Pages = entity.Pages,
+            Doi = entity.Doi,
+            PublicationMonthYear = FormatMonthYear(entity.PublicationDate),
         };
 
         var outbox = OutboxMessageEntity.Create(
@@ -122,6 +132,42 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             entity.UpdateFilePath(uploaded.PublicURL);
         }
     }
+
+    private static string GenerateReferenceKey(PaperBankEntity entity)
+    {
+        var year = entity.PublicationDate?.Year.ToString() ?? string.Empty;
+
+        // Normalise " and " separators (case-insensitive) → ", "
+        var authors = entity.Authors ?? string.Empty;
+        var normalizedAuthors = Regex.Replace(authors, @"\s+and\s+", ", ", RegexOptions.IgnoreCase);
+
+        // First non-empty token after splitting on ","
+        var firstAuthorToken = normalizedAuthors
+            .Split(',')
+            .Select(p => p.Trim())
+            .FirstOrDefault(p => !string.IsNullOrEmpty(p));
+
+        // Fallback chain: first author token → title → "Paper"
+        var raw = firstAuthorToken
+            ?? (string.IsNullOrWhiteSpace(entity.Title) ? "Paper" : entity.Title);
+
+        // Strip non-alphanumeric characters
+        var authorToken = Regex.Replace(raw, @"[^A-Za-z0-9]+", string.Empty);
+
+        // Prefix "Paper" if the token starts with a digit
+        if (authorToken.Length > 0 && char.IsDigit(authorToken[0]))
+            authorToken = "Paper" + authorToken;
+
+        if (string.IsNullOrEmpty(authorToken))
+            authorToken = "Paper";
+
+        return $"{authorToken}{year.Trim()}";
+    }
+
+    private static string? FormatMonthYear(DateTimeOffset? date)
+        => date.HasValue
+            ? date.Value.ToString("MMMM yyyy", CultureInfo.InvariantCulture)
+            : null;
 
     private List<string> NomalizeTagNames(List<string>? tagNames)
     {
