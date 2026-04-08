@@ -97,8 +97,12 @@ public class UpsertSectionCommandHandler(
                 paperRule: section.PaperRule,
                 projectRule: section.ProjectRule,
                 sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description),
-                packages: dto.Packages
+                packages: dto.CurrentSectionPackages
             );
+
+            // Find reference section and create a new version with updated packages
+            if (dto.ReferencesPackages.Any())
+                await UpsertReferenceSectionAsync(section.PaperId, dto.MemberId, dto.ReferencesPackages, request.UserName, cancellationToken);
 
             // Update contributor to point to new section
             contributor.Update(
@@ -121,13 +125,79 @@ public class UpsertSectionCommandHandler(
             sectionSumary: dto.SectionSumary,
             parentSectionId: dto.ParentSectionId,
             sectionRule: sectionRule,
-            packages: dto.Packages,
+            packages: dto.CurrentSectionPackages,
             rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule)
         );
+        
+        // Find reference section and update its packages directly
+        if (dto.ReferencesPackages.Any())
+            await UpsertReferenceSectionAsync(section.PaperId, dto.MemberId, dto.ReferencesPackages, request.UserName, cancellationToken);
 
         session.Update(section);
         await session.SaveChangesAsync(cancellationToken);
         return section.Id;
+    }
+
+    private async Task UpsertReferenceSectionAsync(
+        Guid paperId,
+        Guid memberId,
+        List<string> referencesPackages,
+        string createdBy,
+        CancellationToken cancellationToken)
+    {
+        var refContributors = await session.Query<PaperContributorEntity>()
+            .Where(x => x.PaperId == paperId && x.MemberId == memberId)
+            .ToListAsync(cancellationToken);
+
+        var refSectionIds = refContributors
+            .Where(x => x.SectionId != null)
+            .Select(x => x.SectionId!.Value)
+            .ToList();
+
+        var refSection = (await session.Query<SectionEntity>()
+            .Where(x => refSectionIds.Contains(x.Id))
+            .ToListAsync(cancellationToken))
+            .FirstOrDefault(x => x.Title != null && x.Title.ToLower().Contains("reference"));
+
+        if (refSection == null) return;
+
+        var refContributor = refContributors.FirstOrDefault(x => x.SectionId == refSection.Id);
+
+        if (refSection.IsMainSection == true)
+        {
+            var newRefSection = SectionEntity.Create(
+                id: Guid.NewGuid(),
+                content: refSection.Content,
+                paperId: refSection.PaperId,
+                displayOrder: refSection.DisplayOrder,
+                numbered: refSection.Numbered,
+                isMainSection: false,
+                isOldMainSection: false,
+                title: refSection.Title,
+                sectionSumary: refSection.SectionSumary,
+                description: refSection.Description,
+                rule: refSection.Rule,
+                parentSectionId: refSection.ParentSectionId,
+                previousVersionSectionId: refSection.Id,
+                createdBy: createdBy,
+                paperRule: refSection.PaperRule,
+                projectRule: refSection.ProjectRule,
+                sectionRule: refSection.SectionRule,
+                packages: referencesPackages
+            );
+            session.Store(newRefSection);
+
+            if (refContributor != null)
+            {
+                refContributor.Update(sectionId: newRefSection.Id, markSectionId: refSection.Id);
+                session.Update(refContributor);
+            }
+        }
+        else
+        {
+            refSection.Update(packages: referencesPackages);
+            session.Update(refSection);
+        }
     }
 
     #endregion
