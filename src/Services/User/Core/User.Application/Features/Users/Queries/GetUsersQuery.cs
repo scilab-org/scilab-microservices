@@ -10,7 +10,9 @@ namespace User.Application.Features.Users.Queries;
 
 public sealed record GetUsersQuery(
     GetUsersFilter Filter,
-    PaginationRequest Paging) : IQuery<GetUsersResult>;
+    PaginationRequest Paging,
+    string? ExcludeUserId = null,
+    string? ExcludeAdminGroupName = null) : IQuery<GetUsersResult>;
 
 public sealed class GetUsersQueryHandler(
     IKeycloakService keycloakService) : IQueryHandler<GetUsersQuery, GetUsersResult>
@@ -28,6 +30,8 @@ public sealed class GetUsersQueryHandler(
             enabled: filter.Enabled,
             pageNumber: paging.PageNumber,
             pageSize: paging.PageSize,
+            excludeUserId: query.ExcludeUserId,
+            excludeAdminGroupName: query.ExcludeAdminGroupName,
             cancellationToken: cancellationToken);
 
         return new GetUsersResult(users, totalCount, paging);

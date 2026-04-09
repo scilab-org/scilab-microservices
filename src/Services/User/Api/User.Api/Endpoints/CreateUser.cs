@@ -54,9 +54,7 @@ public sealed class CreateUser : ICarterModule
             LastName = req.LastName,
             InitialPassword = req.InitialPassword,
             TemporaryPassword = req.TemporaryPassword,
-            GroupNames = string.IsNullOrWhiteSpace(req.GroupNames)
-                ? null
-                : req.GroupNames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+            GroupNames = ["app:user"]
         };
 
         if (req.AvatarImage is { Length: > 0 })

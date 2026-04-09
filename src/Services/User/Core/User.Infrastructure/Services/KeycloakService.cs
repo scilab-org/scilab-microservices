@@ -260,35 +260,76 @@ public sealed class KeycloakService : IKeycloakService
         bool? enabled,
         int pageNumber,
         int pageSize,
+        string? excludeUserId = null,
+        string? excludeAdminGroupName = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var accessToken = await GetAccessTokenAsync();
-
-            var totalCount = await _keycloakApi.GetUsersCountAsync(_realm, searchText, accessToken, enabled);
-
             var first = (pageNumber - 1) * pageSize;
-            var users = await _keycloakApi.SearchUsersAsync(_realm, searchText, first, pageSize, accessToken, enabled, briefRepresentation: false);
 
-            // Enrich each user with groups and realm roles
-            var enrichedUsers = new List<UserDto>();
-            foreach (var user in users)
-            {
-                var userGroups = await _keycloakApi.GetUserGroupsAsync(_realm, user.Id, accessToken);
+            List<UserDto> enrichedUsers;
+            int totalCount;
 
-                enrichedUsers.Add(MapToUserDto(user, userGroups));
-            }
-
-            // Apply client-side filtering by group name
             if (!string.IsNullOrWhiteSpace(groupName))
             {
-                enrichedUsers = enrichedUsers
-                    .Where(u => u.Groups.Any(g =>
-                        g.Name != null && g.Name.Contains(groupName, StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
+                // Resolve group name to group ID
+                var groups = await _keycloakApi.GetGroupsAsync(_realm, groupName, accessToken);
+                var group = groups.FirstOrDefault(g =>
+                    string.Equals(g.Name, groupName, StringComparison.OrdinalIgnoreCase))
+                    ?? groups.FirstOrDefault();
 
-                totalCount = enrichedUsers.Count;
+                if (group == null)
+                    return ([], 0);
+
+                // Fetch current page of group members via Keycloak's group members endpoint
+                var members = await _keycloakApi.GetGroupMembersAsync(
+                    _realm, group.Id, first, pageSize, accessToken);
+
+                // Fetch total count using brief representation (lightweight, IDs + username only)
+                var allBrief = await _keycloakApi.GetGroupMembersAsync(
+                    _realm, group.Id, 0, 10_000, accessToken, briefRepresentation: true);
+                totalCount = allBrief.Count;
+
+                enrichedUsers = new List<UserDto>();
+                foreach (var user in members)
+                {
+                    var userGroups = await _keycloakApi.GetUserGroupsAsync(_realm, user.Id, accessToken);
+                    enrichedUsers.Add(MapToUserDto(user, userGroups));
+                }
+            }
+            else
+            {
+                // No group filter — use Keycloak's native search + pagination
+                totalCount = await _keycloakApi.GetUsersCountAsync(_realm, searchText, accessToken, enabled);
+
+                var users = await _keycloakApi.SearchUsersAsync(
+                    _realm, searchText, first, pageSize, accessToken, enabled, briefRepresentation: false);
+
+                enrichedUsers = new List<UserDto>();
+                foreach (var user in users)
+                {
+                    var userGroups = await _keycloakApi.GetUserGroupsAsync(_realm, user.Id, accessToken);
+                    enrichedUsers.Add(MapToUserDto(user, userGroups));
+                }
+            }
+
+            // Exclude the current user
+            if (!string.IsNullOrWhiteSpace(excludeUserId))
+            {
+                enrichedUsers = enrichedUsers
+                    .Where(u => !string.Equals(u.Id, excludeUserId, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // Managers cannot see admin accounts
+            if (!string.IsNullOrWhiteSpace(excludeAdminGroupName))
+            {
+                enrichedUsers = enrichedUsers
+                    .Where(u => !u.Groups.Any(g =>
+                        g.Name != null && string.Equals(g.Name, excludeAdminGroupName, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
             }
 
             return (enrichedUsers, totalCount);

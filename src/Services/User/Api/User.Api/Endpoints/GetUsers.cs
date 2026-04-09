@@ -42,9 +42,15 @@ public sealed class GetUsers : ICarterModule
     {
         var currentUser = httpContext.GetCurrentUser();
 
+        var excludeAdminGroupName = currentUser.HasGroups(AuthorizeConstants.ProjectManager)
+            ? AuthorizeConstants.SystemAdmin
+            : null;
+
         var filter = new GetUsersFilter(searchText, groupName, enabled);
         var paging = new PaginationRequest(pageNumber, pageSize);
-        var query = new GetUsersQuery(filter, paging);
+        var query = new GetUsersQuery(filter, paging,
+            ExcludeUserId: currentUser.Id,
+            ExcludeAdminGroupName: excludeAdminGroupName);
 
         var result = await sender.Send(query);
 

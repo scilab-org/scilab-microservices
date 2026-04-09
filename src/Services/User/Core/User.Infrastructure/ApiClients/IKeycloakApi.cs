@@ -96,6 +96,15 @@ public interface IKeycloakApi
         [AliasAs("search")] string? search,
         [Authorize("Bearer")] string token);
 
+    [Get("/admin/realms/{realm}/groups/{groupId}/members")]
+    Task<List<KeycloakUserResponse>> GetGroupMembersAsync(
+        [AliasAs("realm")] string realm,
+        [AliasAs("groupId")] string groupId,
+        [AliasAs("first")] int first,
+        [AliasAs("max")] int max,
+        [Authorize("Bearer")] string token,
+        [AliasAs("briefRepresentation")] bool briefRepresentation = false);
+
     [Put("/admin/realms/{realm}/users/{userId}/groups/{groupId}")]
     Task AssignUserToGroupAsync(
         [AliasAs("realm")] string realm,

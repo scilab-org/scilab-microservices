@@ -43,6 +43,8 @@ public interface IKeycloakService
         bool? enabled,
         int pageNumber,
         int pageSize,
+        string? excludeUserId = null,
+        string? excludeAdminGroupName = null,
         CancellationToken cancellationToken = default);
 
     Task<UserDto> GetUserByIdAsync(
