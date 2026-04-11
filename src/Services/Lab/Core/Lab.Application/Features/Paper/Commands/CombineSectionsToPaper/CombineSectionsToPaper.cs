@@ -9,7 +9,7 @@ using Marten;
 
 namespace Lab.Application.Features.Paper.Commands.CombineSectionsToPaper;
 
-public record CombineSectionsToPaperCommand(Guid PaperId, CreatePaperCombineDto Dto, String UserName)
+public record CombineSectionsToPaperCommand(Guid PaperId, CreatePaperCombineDto Dto, string UserName)
     : ICommand<CombineSectionsToPaperResult>;
 
 public class CombineSectionsToPaperCommandValidator : AbstractValidator<CombineSectionsToPaperCommand>
@@ -21,6 +21,11 @@ public class CombineSectionsToPaperCommandValidator : AbstractValidator<CombineS
             .WithMessage(MessageCode.PaperIdIsRequired)
             .NotNull()
             .WithMessage(MessageCode.PaperIdIsRequired);
+        RuleFor(x => x.Dto.ProjectId)
+            .NotEmpty()
+            .WithMessage(MessageCode.ProjectIdIsRequired)
+            .NotNull()
+            .WithMessage(MessageCode.ProjectIdIsRequired);
     }
 }
 

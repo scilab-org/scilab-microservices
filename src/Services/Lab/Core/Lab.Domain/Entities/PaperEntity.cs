@@ -135,16 +135,14 @@ public sealed class PaperEntity : Entity<Guid>
         return combine;
     }
 
-    public void UpdateCombineVersion(Guid combineId, string? name, string? content, List<Guid>? references,
-        string? modifiedBy)
+    public void UpdateCombineVersion(Guid combineId, string? content,
+        string? lastModifiedBy)
     {
         var combine = Combines.FirstOrDefault(c => c.Id == combineId);
         if (combine == null) return;
 
-        combine.Name = name ?? combine.Name;
         combine.Content = content ?? combine.Content;
-        combine.References = references ?? combine.References;
-        combine.LastModifiedBy = modifiedBy ?? combine.LastModifiedBy;
+        combine.LastModifiedBy = lastModifiedBy ?? combine.LastModifiedBy;
         combine.LastModifiedOnUtc = DateTimeOffset.UtcNow;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }

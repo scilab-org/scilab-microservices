@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Paper.Queries.GetCombinePaperById;
 
-public record GetCombinePaperByIdQuery(Guid PaperId, Guid VersionId) : IRequest<CombineSectionsToPaperResult>;
+public record GetCombinePaperByIdQuery(Guid PaperId, Guid VersionId) : ICommand<CombineSectionsToPaperResult>;
 
 public class GetCombinePaperByIdQueryValidator : AbstractValidator<GetCombinePaperByIdQuery>
 {
@@ -25,7 +25,7 @@ public class GetCombinePaperByIdQueryValidator : AbstractValidator<GetCombinePap
     }
 }
 
-public class GetCombinePaperByIdQueryHandler(IDocumentSession session) : IRequestHandler<GetCombinePaperByIdQuery, CombineSectionsToPaperResult>
+public class GetCombinePaperByIdQueryHandler(IDocumentSession session) : ICommandHandler<GetCombinePaperByIdQuery, CombineSectionsToPaperResult>
 {
     public async Task<CombineSectionsToPaperResult> Handle(GetCombinePaperByIdQuery request, CancellationToken cancellationToken)
     {

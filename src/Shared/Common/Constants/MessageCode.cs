@@ -132,6 +132,8 @@ public sealed class MessageCode
 
     public const string PaperCombineVersionIdIsRequired = "PAPER_COMBINE_VERSION_ID_IS_REQUIRED";
 
+    public const string PaperCombineContentIsRequired = "PAPER_COMBINE_CONTENT_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
