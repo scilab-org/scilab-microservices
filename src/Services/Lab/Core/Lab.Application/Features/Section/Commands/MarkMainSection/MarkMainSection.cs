@@ -2,6 +2,7 @@
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Rules;
 using Lab.Application.Services;
+using Lab.Domain.Constants;
 using Lab.Domain.Entities;
 using PaperReference = Lab.Domain.Models.Reference;
 using Marten;
@@ -83,10 +84,10 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
 
         // Find old contributor to old main section
         var oldMainContributors = await session.Query<PaperContributorEntity>()
-                                 .Where(x => x.PaperId == oldMainSection.PaperId &&
-                                             x.SectionId == oldMainSection.Id)
-                                 .ToListAsync(cancellationToken)
-                             ?? throw new NotFoundException(MessageCode.ContributorIsNotExists, oldMainSection.Id);
+                                      .Where(x => x.PaperId == oldMainSection.PaperId &&
+                                                  x.SectionId == oldMainSection.Id)
+                                      .ToListAsync(cancellationToken)
+                                  ?? throw new NotFoundException(MessageCode.ContributorIsNotExists, oldMainSection.Id);
 
         foreach (var oldMainContributor in oldMainContributors)
         {
@@ -148,6 +149,19 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             .Distinct()
             .ToHashSet();
 
+        var (distinctReferences, referenceContent) = await BuildReferenceContentAsync(section, cancellationToken);
+
+        var referenceMainSection = await session.Query<SectionEntity>()
+                                       .Where(s => s.PaperId == section.PaperId
+                                                   && (s.Title!.EqualsIgnoreCase(SectionConstants.ReferencesTitle) ||
+                                                       s.Title!.EqualsIgnoreCase(SectionConstants.ReferenceTitle))
+                                                   && s.IsMainSection == true)
+                                       .FirstOrDefaultAsync(cancellationToken)
+                                   ?? throw new NotFoundException(MessageCode.SectionIsNotExists);
+
+        referenceMainSection.Update(references: distinctReferences, content: referenceContent);
+        session.Update(referenceMainSection);
+
         var paper = await session.LoadAsync<PaperEntity>(section.PaperId, cancellationToken)
                     ?? throw new NotFoundException(MessageCode.PaperIsNotExists, section.PaperId.ToString());
 
@@ -191,5 +205,42 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
         await session.SaveChangesAsync(cancellationToken);
 
         return newMainSection.Id;
+    }
+
+    private async Task<(List<Guid>, string)> BuildReferenceContentAsync(
+        SectionEntity section,
+        CancellationToken cancellationToken)
+    {
+        var mainSections = await session.Query<SectionEntity>()
+            .Where(x => x.PaperId == section.PaperId &&
+                        x.IsMainSection == true)
+            .ToListAsync(cancellationToken);
+
+        var distinctReferences = mainSections
+            .Where(x => x.References != null)
+            .SelectMany(x => x.References!)
+            .Distinct()
+            .ToList();
+
+        if (distinctReferences.Count == 0)
+            return ([], string.Empty);
+
+        var items = await session.Query<PaperBankEntity>()
+            .Where(x => distinctReferences.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        var combinedReferenceContent = string.Join(
+            $"{Environment.NewLine}{Environment.NewLine}",
+            items
+                .Select(x => x.ReferenceContent)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct());
+
+        return (distinctReferences, string.IsNullOrWhiteSpace(combinedReferenceContent)
+            ? string.Empty
+            : $"\\begin{{filecontents*}}{{references.bib}}{Environment.NewLine}{Environment.NewLine}" +
+              combinedReferenceContent +
+              $"{Environment.NewLine}{Environment.NewLine}\\end{{filecontents*}}{Environment.NewLine}{Environment.NewLine}" +
+              "\\addbibresource{references.bib}");
     }
 }

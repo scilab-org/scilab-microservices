@@ -128,6 +128,10 @@ public sealed class MessageCode
 
     public const string PaperBankIdsIsRequired = "PAPER_BANK_IDS_IS_REQUIRED";
 
+    public const string PaperCombineIsNotExists = "PAPER_COMBINE_IS_NOT_EXISTS";
+
+    public const string PaperCombineVersionIdIsRequired = "PAPER_COMBINE_VERSION_ID_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
@@ -188,7 +192,7 @@ public sealed class MessageCode
     public const string SectionAlreadyHasVersion =  "SECTION_ALREADY_HAS_VERSION";
 
     public const string SectionContentIsRequired = "SECTION_CONTENT_IS_REQUIRED";
-    
+
     public const string PaperDescriptionIsRequired = "PAPER_DESCRIPTION_IS_REQUIRED";
 
     #endregion

@@ -234,10 +234,9 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         if (string.IsNullOrWhiteSpace(combinedReferenceContent))
             return string.Empty;
 
-        return $"\\begin{{filecontents}}{{references.bib}}{Environment.NewLine}" +
+        return $"\\begin{{filecontents*}}{{references.bib}}{Environment.NewLine}" +
                combinedReferenceContent +
-               $"{Environment.NewLine}\\end{{filecontents}}{Environment.NewLine}" +
-               "\\addbibresource{references.bib}" +
-               $"{Environment.NewLine}\\printbibliography";
+               $"{Environment.NewLine}\\end{{filecontents*}}{Environment.NewLine}" +
+               "\\addbibresource{references.bib}";
     }
 }

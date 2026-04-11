@@ -58,6 +58,8 @@ public sealed class ApiRoutes
         public const string GetAssignedPaperSectionsHistory = $"{Base}/{{id}}/assigned-sections/history";
         public const string GetSectionsByPaperId = $"{Base}/{{id}}/sections";
         public const string GetPaperById = $"{Base}/{{id}}";
+        public const string Combine = $"{Base}/{{id}}/combine";
+        public const string GetCombine = $"{Base}{{paperId}}/versions/{{versionId}}/combine";
 
         #endregion
     }
