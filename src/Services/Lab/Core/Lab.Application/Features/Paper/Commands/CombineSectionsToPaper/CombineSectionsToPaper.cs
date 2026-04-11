@@ -1,6 +1,7 @@
 using JasperFx.Core;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Models.Results;
+using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
 using Lab.Domain.Models;
@@ -8,7 +9,7 @@ using Marten;
 
 namespace Lab.Application.Features.Paper.Commands.CombineSectionsToPaper;
 
-public record CombineSectionsToPaperCommand(Guid PaperId, CreatePaperCombineDto Dto)
+public record CombineSectionsToPaperCommand(Guid PaperId, CreatePaperCombineDto Dto, String UserName)
     : ICommand<CombineSectionsToPaperResult>;
 
 public class CombineSectionsToPaperCommandValidator : AbstractValidator<CombineSectionsToPaperCommand>
@@ -23,12 +24,15 @@ public class CombineSectionsToPaperCommandValidator : AbstractValidator<CombineS
     }
 }
 
-public class CombineSectionsToPaperCommandHandler(IDocumentSession session)
+public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IManagementApiService managementApiService)
     : ICommandHandler<CombineSectionsToPaperCommand, CombineSectionsToPaperResult>
 {
     public async Task<CombineSectionsToPaperResult> Handle(CombineSectionsToPaperCommand request,
         CancellationToken cancellationToken)
     {
+        var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
+        if (role.IsNullOrEmpty() || !AuthorizeConstants.PaperAuthor.EqualsIgnoreCase(role))
+            throw new UnauthorizedException(MessageCode.AccessDenied);
         await session.BeginTransactionAsync(cancellationToken);
 
         var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
@@ -78,7 +82,7 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session)
                 name: name,
                 content: savedContent,
                 reference: referenceSection!.References,
-                createdBy: "test"
+                createdBy: request.UserName
             );
 
             session.Update(paper);
@@ -95,9 +99,9 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session)
                     Content = content,
                     References = referenceSection?.References,
                     IsSave = false,
-                    CreatedBy = null,
+                    CreatedBy = request.UserName,
                     CreatedOnUtc = DateTimeOffset.UtcNow,
-                    LastModifiedBy = null,
+                    LastModifiedBy = request.UserName,
                     LastModifiedOnUtc = DateTimeOffset.UtcNow
                 }
             };
