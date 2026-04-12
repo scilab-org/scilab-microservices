@@ -20,4 +20,5 @@ public  class PaperInfoDto : DtoId<Guid>
     public string? StyleRule { get; set; }
     public PaperStatus? Status { get; set; }
     public List<string> TagNames { get; set; } = new();
+    public List<PaperCombineInfo> Combines { get; set; } = new();
 }

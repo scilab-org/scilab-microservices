@@ -20,7 +20,7 @@ public class GetCombinePaperById : ICarterModule
     private async Task<ApiGetResponse<CombineSectionsToPaperResult>> HandleGetCombinePaperByIdQueryAsync(
         ISender sender,
         [FromRoute] Guid paperId,
-        [FromQuery] Guid versionId)
+        [FromRoute] Guid versionId)
     {
         var query = new GetCombinePaperByIdQuery(paperId, versionId);
         var result = await sender.Send(query);

@@ -128,34 +128,44 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
         IEnumerable<Guid> userIds,
         CancellationToken cancellationToken = default)
     {
-        var idSet = userIds.Select(x => x.ToString()).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (idSet.Count == 0) return new List<UserInfoDto>();
+        var ids = userIds.ToList();
+        if (ids.Count == 0) return new List<UserInfoDto>();
 
-        var response = await userServiceApi.GetUsersAsync(pageNumber: 1, pageSize: 1000);
-        if (!response.IsSuccessStatusCode)
-            return new List<UserInfoDto>();
+        var result = new List<UserInfoDto>(ids.Count);
 
-        var body = await response.Content.ReadFromJsonAsync<UserServiceGetResponse>(
-            cancellationToken: cancellationToken);
-
-        var allUsers = body?.Result?.Items ?? new List<UserServiceItem>();
-
-        return allUsers
-            .Where(u => idSet.Contains(u.Id))
-            .Select(u => new UserInfoDto
+        foreach (var userId in ids)
+        {
+            try
             {
-                Id = u.Id,
-                Username = u.Username,
-                Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Enabled = u.Enabled,
-                Groups = u.Groups?
-                             .Select(g => g.Name)
-                             .OfType<string>()   // tự động loại null
-                             .ToList()
-                         ?? new List<string>()     })
-            .ToList();
+                var response = await userServiceApi.GetUserByIdAsync(userId.ToString());
+                if (!response.IsSuccessStatusCode)
+                    continue;
+
+                var body = await response.Content.ReadFromJsonAsync<UserServiceGetByIdResponse>(
+                    cancellationToken: cancellationToken);
+
+                var u = body?.Result?.User;
+                if (u is null)
+                    continue;
+
+                result.Add(new UserInfoDto
+                {
+                    Id        = u.Id,
+                    Username  = u.Username,
+                    Email     = u.Email,
+                    FirstName = u.FirstName,
+                    LastName  = u.LastName,
+                    Enabled   = u.Enabled,
+                    Groups    = u.Groups?.Select(g => g.Name).ToList() ?? new List<string>()
+                });
+            }
+            catch
+            {
+                // skip unreachable / errored entries
+            }
+        }
+
+        return result;
     }
 
     public async Task AssignUserRoleAsync(

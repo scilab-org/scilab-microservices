@@ -29,7 +29,7 @@ public class DeleteSubProjectCommandHandler(
             .FirstOrDefault(p => p.ProjectId == subProject.Id && p.UserId == request.UserId);
         
         var isManager = managerMember?.ProjectRole == AuthorizeConstants.ProjectManager;
-        var isAuthor = authorMember?.ProjectRole == AuthorizeConstants.ProjectAuthor;
+        var isAuthor = authorMember?.ProjectRole == AuthorizeConstants.PaperAuthor;
         
         if (!isManager && !isAuthor)
             throw new NoPermissionException(MessageCode.AccessDenied);

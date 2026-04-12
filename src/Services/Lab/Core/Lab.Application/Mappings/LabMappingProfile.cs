@@ -11,6 +11,7 @@ using Lab.Application.Dtos.Tasks;
 using Lab.Application.Dtos.Template;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
+using Lab.Domain.Models;
 
 #endregion
 
@@ -40,6 +41,9 @@ public sealed class LabMappingProfile : Profile
     {
         CreateMap<PaperEntity, PaperDto>();
 
+        CreateMap<Combine, PaperCombineInfo>()
+            .ForMember(dest => dest.IsSave, opt => opt.MapFrom(_ => true));
+        
         CreateMap<PaperEntity, GetPaperBankByIdResult>()
             .ForMember(dest => dest.PaperBank, opt => opt.MapFrom(src => src));
     }
