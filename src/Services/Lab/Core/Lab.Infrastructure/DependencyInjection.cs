@@ -29,8 +29,7 @@ public static class DependencyInjection
             opts.UseSystemTextJsonForSerialization();
 
             opts.Schema.For<PaperEntity>()
-                .SoftDeleted()
-                .Index(p => p.TagNames);
+                .SoftDeleted();
             opts.Schema.For<PaperBankEntity>()
                 .SoftDeleted()
                 .Index(pb => pb.TagNames);

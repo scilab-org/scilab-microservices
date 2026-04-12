@@ -22,7 +22,7 @@ public sealed class PaperEntity : Entity<Guid>
     public string? StyleDescription { get; set; }
     public string? StyleRule { get; set; }
     public PaperStatus? Status { get; set; }
-    public List<string>? TagNames { get; set; } = new();
+    public List<Combine> Combines { get; set; } = new();
     public List<Reference>? References { get; set; } = new();
 
     #endregion
@@ -43,7 +43,7 @@ public sealed class PaperEntity : Entity<Guid>
         string? styleDescription = null,
         string? styleRule = null,
         PaperStatus? status = null,
-        List<string>? tagNames = null,
+        List<Combine>? combines = null,
         List<Reference>? references = null,
         string? createdBy = null)
     {
@@ -63,8 +63,8 @@ public sealed class PaperEntity : Entity<Guid>
             StyleDescription = styleDescription,
             StyleRule = styleRule,
             Status = status ?? PaperStatus.Processing,
-            TagNames = tagNames ?? new(),
-            References = references ?? new(),
+            Combines = combines ?? [],
+            References = references ?? [],
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
             CreatedBy = createdBy
@@ -88,7 +88,6 @@ public sealed class PaperEntity : Entity<Guid>
         string? styleRule = null,
         PaperStatus? status = null,
         string? gapType = null,
-        List<string>? tagNames = null,
         List<Reference>? references = null)
     {
         Title = title ?? Title;
@@ -98,13 +97,12 @@ public sealed class PaperEntity : Entity<Guid>
         ResearchGap = researchGap ?? ResearchGap;
         MainContribution = mainContribution ?? MainContribution;
         Rule = rule ?? Rule;
-        GapType = gapType  ?? GapType;
+        GapType = gapType ?? GapType;
         Journal = journal ?? Journal;
         StyleName = styleName ?? StyleName;
         StyleDescription = styleDescription ?? StyleDescription;
         StyleRule = styleRule ?? StyleRule;
         Status = status ?? Status;
-        TagNames = tagNames ?? TagNames;
         References = references ?? References;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
@@ -114,6 +112,38 @@ public sealed class PaperEntity : Entity<Guid>
         if (string.IsNullOrWhiteSpace(url)) return;
 
         FilePath = url;
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+
+    public Combine AddCombineVersion(string? name, string? content, List<Guid>? reference, string? createdBy)
+    {
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(content)) return null!;
+
+        var combine = new Combine()
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            Content = content,
+            References = reference,
+            CreatedBy = createdBy,
+            CreatedOnUtc = DateTimeOffset.UtcNow,
+            LastModifiedBy = createdBy,
+            LastModifiedOnUtc = DateTimeOffset.UtcNow
+        };
+        Combines.Add(combine);
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+        return combine;
+    }
+
+    public void UpdateCombineVersion(Guid combineId, string? content,
+        string? lastModifiedBy)
+    {
+        var combine = Combines.FirstOrDefault(c => c.Id == combineId);
+        if (combine == null) return;
+
+        combine.Content = content ?? combine.Content;
+        combine.LastModifiedBy = lastModifiedBy ?? combine.LastModifiedBy;
+        combine.LastModifiedOnUtc = DateTimeOffset.UtcNow;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

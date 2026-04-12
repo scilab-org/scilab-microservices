@@ -10,23 +10,35 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
         IEnumerable<Guid> userIds,
         CancellationToken cancellationToken = default)
     {
-        var idSet = userIds.Select(x => x.ToString()).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        if (idSet.Count == 0) return [];
+        var ids = userIds.ToList();
+        if (ids.Count == 0) return [];
 
-        var response = await userServiceApi.GetUsersAsync(pageNumber: 1, pageSize: 1000);
-        if (!response.IsSuccessStatusCode)
-            return [];
+        var result = new Dictionary<Guid, UserInfo>(ids.Count);
 
-        var body = await response.Content
-            .ReadFromJsonAsync<UserServiceGetResponse>(cancellationToken: cancellationToken);
+        foreach (var userId in ids)
+        {
+            try
+            {
+                var response = await userServiceApi.GetUserByIdAsync(userId.ToString());
+                if (!response.IsSuccessStatusCode)
+                    continue;
 
-        var allUsers = body?.Result?.Items ?? [];
+                var body = await response.Content
+                    .ReadFromJsonAsync<UserServiceGetByIdResponse>(cancellationToken: cancellationToken);
 
-        return allUsers
-            .Where(u => idSet.Contains(u.Id))
-            .ToDictionary(
-                u => Guid.Parse(u.Id),
-                u => new UserInfo(Guid.Parse(u.Id), u.Username, u.Email, u.FirstName, u.LastName));
+                var u = body?.Result?.User;
+                if (u is null)
+                    continue;
+
+                result[userId] = new UserInfo(Guid.Parse(u.Id), u.Username, u.Email, u.FirstName, u.LastName);
+            }
+            catch
+            {
+                // skip unreachable / errored entries
+            }
+        }
+
+        return result;
     }
 }
 
@@ -40,13 +52,13 @@ file sealed class UserServiceItem
     public string? LastName { get; set; }
 }
 
-file sealed class UserServiceResult
+file sealed class UserServiceGetByIdResult
 {
-    public List<UserServiceItem> Items { get; set; } = [];
+    public UserServiceItem? User { get; set; }
 }
 
-file sealed class UserServiceGetResponse
+file sealed class UserServiceGetByIdResponse
 {
-    public UserServiceResult? Result { get; set; }
+    public UserServiceGetByIdResult? Result { get; set; }
 }
 
