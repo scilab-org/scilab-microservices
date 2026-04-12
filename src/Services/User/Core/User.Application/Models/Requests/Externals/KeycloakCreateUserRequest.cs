@@ -1,11 +1,13 @@
 #region using
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 #endregion
 
 namespace User.Application.Models.Requests.Externals;
 
+[ExcludeFromCodeCoverage]
 public sealed class KeycloakCreateUserRequest
 {
     #region Fields, Properties and Indexers
@@ -43,6 +45,7 @@ public sealed class KeycloakCreateUserRequest
     #endregion
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class KeycloakCredential
 {
     #region Fields, Properties and Indexers

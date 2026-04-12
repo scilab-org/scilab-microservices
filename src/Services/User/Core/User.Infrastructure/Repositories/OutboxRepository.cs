@@ -7,8 +7,11 @@ using Microsoft.Extensions.Logging;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Infrastructure.Repositories;
 
+[ExcludeFromCodeCoverage]
 public class OutboxRepository(IDocumentSession session, ILogger<OutboxRepository> logger) : IOutboxRepository
 {
     #region Implementations

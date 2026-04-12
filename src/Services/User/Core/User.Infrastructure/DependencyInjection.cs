@@ -9,8 +9,11 @@ using User.Infrastructure.ApiClients.Extensions;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Infrastructure;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     #region Methods

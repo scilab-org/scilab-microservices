@@ -1,11 +1,13 @@
 #region using
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 #endregion
 
 namespace User.Application.Models.Responses.Externals;
 
+[ExcludeFromCodeCoverage]
 public sealed class KeycloakAccessTokenResponse
 {
     #region Fields, Properties and Indexers

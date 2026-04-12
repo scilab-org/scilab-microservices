@@ -6,8 +6,11 @@ using Refit;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Infrastructure.ApiClients.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ApiClientExtension
 {
     #region Methods

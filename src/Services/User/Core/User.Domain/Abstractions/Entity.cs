@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Domain.Abstractions;
 
+[ExcludeFromCodeCoverage]
 public abstract class Entity<T> : IEntityId<T>, IAuditable
 {
     #region Fields, Properties and Indexers

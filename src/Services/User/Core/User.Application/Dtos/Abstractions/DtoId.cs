@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Application.Dtos.Abstractions;
 
+[ExcludeFromCodeCoverage]
 public class DtoId<T> : IDtoId<T>
 {
     #region Fields, Properties and Indexers

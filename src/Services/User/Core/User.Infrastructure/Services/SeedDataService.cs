@@ -8,8 +8,11 @@ using Marten;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Infrastructure.Services;
 
+[ExcludeFromCodeCoverage]
 public sealed class SeedDataService : ISeedDataService
 {
     #region Implementations

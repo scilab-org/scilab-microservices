@@ -1,0 +1,17 @@
+global using Xunit;
+global using Moq;
+global using FluentAssertions;
+global using FluentValidation;
+global using FluentValidation.Results;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using System.Collections.Generic;
+global using Common.Models;
+global using Common.Constants;
+global using Common.ValueObjects;
+global using User.Application.Dtos.Users;
+global using User.Application.Dtos.Groups;
+global using User.Application.Dtos.Roles;
+global using User.Application.Services;
+global using User.Application.Models.Filters;
+global using User.Application.Models.Results;

@@ -4,12 +4,14 @@ using BuildingBlocks.Behaviors;
 using BuildingBlocks.Exceptions.Handler;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 #endregion
 
 namespace User.Application;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     #region Methods

@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace User.Application.Dtos.Abstractions;
 
+[ExcludeFromCodeCoverage]
 public abstract class AuditableDto : IAuditableDto
 {
     #region Fields, Properties and Indexers
