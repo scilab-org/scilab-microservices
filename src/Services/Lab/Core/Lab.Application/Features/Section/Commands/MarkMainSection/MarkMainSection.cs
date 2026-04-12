@@ -149,19 +149,6 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             .Distinct()
             .ToHashSet();
 
-        var (distinctReferences, referenceContent) = await BuildReferenceContentAsync(section, cancellationToken);
-
-        var referenceMainSection = await session.Query<SectionEntity>()
-                                       .Where(s => s.PaperId == section.PaperId
-                                                   && (s.Title!.EqualsIgnoreCase(SectionConstants.ReferencesTitle) ||
-                                                       s.Title!.EqualsIgnoreCase(SectionConstants.ReferenceTitle))
-                                                   && s.IsMainSection == true)
-                                       .FirstOrDefaultAsync(cancellationToken)
-                                   ?? throw new NotFoundException(MessageCode.SectionIsNotExists);
-
-        referenceMainSection.Update(references: distinctReferences, content: referenceContent);
-        session.Update(referenceMainSection);
-
         var paper = await session.LoadAsync<PaperEntity>(section.PaperId, cancellationToken)
                     ?? throw new NotFoundException(MessageCode.PaperIsNotExists, section.PaperId.ToString());
 
@@ -204,15 +191,31 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
 
         await session.SaveChangesAsync(cancellationToken);
 
+        var referenceMainSection = await session.Query<SectionEntity>()
+                                       .Where(s => s.PaperId == section.PaperId
+                                                   && (s.Title!.EqualsIgnoreCase(SectionConstants.ReferencesTitle) ||
+                                                       s.Title!.EqualsIgnoreCase(SectionConstants.ReferenceTitle))
+                                                   && s.IsMainSection == true)
+                                       .FirstOrDefaultAsync(cancellationToken)
+                                   ?? throw new NotFoundException(MessageCode.SectionIsNotExists);
+
+        var (distinctReferences, referenceContent) = await BuildReferenceContentAsync(referenceMainSection, cancellationToken);
+
+        referenceMainSection.Update(references: distinctReferences, content: referenceContent);
+        session.Update(referenceMainSection);
+
+        await session.SaveChangesAsync(cancellationToken);
+
         return newMainSection.Id;
     }
 
     private async Task<(List<Guid>, string)> BuildReferenceContentAsync(
-        SectionEntity section,
+        SectionEntity referenceSection,
         CancellationToken cancellationToken)
     {
         var mainSections = await session.Query<SectionEntity>()
-            .Where(x => x.PaperId == section.PaperId &&
+            .Where(x => x.PaperId == referenceSection.PaperId &&
+                        x.Id != referenceSection.Id &&
                         x.IsMainSection == true)
             .ToListAsync(cancellationToken);
 

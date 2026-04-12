@@ -86,10 +86,7 @@ public class UpsertSectionCommandHandler(
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,
-                rule: SectionRuleComposer.ComposeNormalizedRule(
-                    section.ProjectRule,
-                    section.PaperRule,
-                    SectionRuleComposer.BuildSectionRule(dto.Title, section.Description)),
+                rule: section.Rule,
                 parentSectionId: dto.ParentSectionId,
                 //Mark new section as new version of main section
                 previousVersionSectionId: section.Id,
@@ -128,7 +125,7 @@ public class UpsertSectionCommandHandler(
             packages: dto.CurrentSectionPackages,
             rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule)
         );
-        
+
         // Find reference section and update its packages directly
         if (dto.ReferencesPackages.Any())
             await UpsertReferenceSectionAsync(section.PaperId, dto.MemberId, dto.ReferencesPackages, request.UserName, cancellationToken);
