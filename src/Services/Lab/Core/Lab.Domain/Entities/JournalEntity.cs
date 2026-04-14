@@ -13,6 +13,7 @@ public class ConferenceJournalEntity : Entity<Guid>
     public string? TexFile { get; set; }
     public string? PdfFile { get; set; }
     public string? Style { get; set; }
+    public Guid TemplateId { get; set; }
 
     #endregion
 
@@ -25,6 +26,7 @@ public class ConferenceJournalEntity : Entity<Guid>
         DateTimeOffset startAt,
         DateTimeOffset endAt,
         string? style,
+        Guid templateId,
         string? texFile,
         string? pdfFile,
         string? createdBy = null)
@@ -37,6 +39,7 @@ public class ConferenceJournalEntity : Entity<Guid>
             StartAt = startAt,
             EndAt = endAt,
             Style = style,
+            TemplateId = templateId,
             TexFile = texFile,
             PdfFile = pdfFile,
             CreatedBy = createdBy,
@@ -55,6 +58,7 @@ public class ConferenceJournalEntity : Entity<Guid>
         DateTimeOffset? startAt = null,
         DateTimeOffset? endAt = null,
         string? style = null,
+        Guid? templateId = null,
         string? texFile = null,
         string? pdfFile = null,
         string? lastModifiedBy = null)
@@ -64,6 +68,7 @@ public class ConferenceJournalEntity : Entity<Guid>
         StartAt = startAt ?? StartAt;
         EndAt = endAt ?? EndAt;
         Style = style ?? Style;
+        TemplateId = templateId ?? TemplateId;
         TexFile = texFile ?? TexFile;
         PdfFile = pdfFile ?? PdfFile;
         LastModifiedBy = lastModifiedBy ?? LastModifiedBy;

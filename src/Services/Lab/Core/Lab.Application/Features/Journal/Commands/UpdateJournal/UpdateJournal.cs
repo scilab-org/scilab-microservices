@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Journal.Commands.UpdateJournal;
 
-public record UpdateJournalCommand(UpdateJournalEntityDto Dto, Guid ProjectId, string UserName) : ICommand<Guid>;
+public record UpdateJournalCommand(UpdateJournalEntityDto Dto, string UserName) : ICommand<Guid>;
 
 public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalCommand>
 {
@@ -21,9 +21,6 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
             {
                 RuleFor(x => x.Dto.Id)
                     .NotEmpty().WithMessage(MessageCode.JournalIdIsRequired);
-
-                RuleFor(x => x.ProjectId)
-                    .NotEmpty().WithMessage(MessageCode.JournalProjectIdIsRequired);
 
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
@@ -42,12 +39,6 @@ public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
 
     public async Task<Guid> Handle(UpdateJournalCommand request, CancellationToken cancellationToken)
     {
-        var role = await managementApiService.GetMyProjectRoleAsync(request.ProjectId, cancellationToken);
-        if (string.IsNullOrEmpty(role) && !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role!))
-        {
-            throw new UnauthorizedException(MessageCode.Unauthorized);
-        }
-
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = await session.LoadAsync<ConferenceJournalEntity>(request.Dto.Id, cancellationToken);
@@ -55,8 +46,11 @@ public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
         if (entity == null)
             throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Dto.Id);
 
-        if (entity.ProjectId != request.ProjectId)
-            throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Dto.Id);
+        var role = await managementApiService.GetMyProjectRoleAsync(entity.ProjectId, cancellationToken);
+        if (string.IsNullOrEmpty(role) && !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role!))
+        {
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+        }
 
         var normalizedName = "";
         if (request.Dto.Name != null)
@@ -65,7 +59,7 @@ public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
         if (!string.IsNullOrEmpty(normalizedName) && normalizedName != entity.Name)
         {
             var existingJournalName = await session.Query<ConferenceJournalEntity>()
-                .FirstOrDefaultAsync(x => x.Name == normalizedName && x.ProjectId == request.ProjectId && x.Id != request.Dto.Id, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Name == normalizedName && x.ProjectId == entity.ProjectId && x.Id != request.Dto.Id, cancellationToken);
 
             if (existingJournalName != null)
                 throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, normalizedName);

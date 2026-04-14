@@ -20,7 +20,6 @@ public class UpdateTemplateCommandCommandHandler(IDocumentSession session)
         current.Update(
             description: command.Dto.Description ?? current.Description,
             code: current.Code,
-            confereneceJournalId: current.ConferenceJournalId,
             sections: command.Dto.Sections ?? current.Sections
         );
         session.Store(current);

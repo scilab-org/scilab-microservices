@@ -172,11 +172,13 @@ public sealed class ApiRoutes
 
         #region Endpoints
 
-        public const string Create = $"{Base}/projects/{{projectId}}";
-        public const string Update = $"{Base}/{{id}}/projects/{{projectId}}";
-        public const string Delete = $"{Base}/{{id}}/projects/{{projectId}}";
-        public const string GetJournals = $"{Base}/projects/{{projectId}}";
-        public const string GetJournalById = $"{Base}/{{id}}/projects/{{projectId}}";
+        public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
+        public const string Delete = $"{Base}/{{id}}";
+        public const string GetJournals = $"{Base}";
+        public const string GetJournalById = $"{Base}/{{id}}";
+        public const string GetJournalsInProject = $"{Base}/projects/{{projectId}}";
+        public const string GetJournalInProjectById = $"{Base}/{{id}}/projects/{{projectId}}";
 
         #endregion
     }

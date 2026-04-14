@@ -134,6 +134,38 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
         return body?.Value;
     }
 
+    public async Task<bool> AddProjectConferenceJournalsAsync(
+        Guid projectId,
+        IEnumerable<Guid> conferenceJournalIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = conferenceJournalIds.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0)
+            return false;
+
+        var response = await managementServiceApi.AddProjectConferenceJournalsAsync(
+            projectId,
+            new ProjectConferenceJournalsRequest { ConferenceJournalIds = ids });
+
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> RemoveProjectConferenceJournalsAsync(
+        Guid projectId,
+        IEnumerable<Guid> conferenceJournalIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = conferenceJournalIds.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0)
+            return false;
+
+        var response = await managementServiceApi.RemoveProjectConferenceJournalsAsync(
+            projectId,
+            new ProjectConferenceJournalsRequest { ConferenceJournalIds = ids });
+
+        return response.IsSuccessStatusCode;
+    }
+
     public async Task<List<SubProjectMemberInfo>> GetSubProjectMembersByPaperIdAsync(
         Guid paperId,
         CancellationToken cancellationToken = default)

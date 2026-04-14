@@ -46,7 +46,7 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
             .AnyAsync(p => p.Code == dto.Code, cancellationToken);
         if (checkCode)
             throw new ClientValidationException(MessageCode.ProjectCodeAlreadyExists, dto.Code!);
-        
+
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = ProjectEntity.Create(
@@ -59,7 +59,7 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
             endDate: dto.EndDate,
             context: dto.Context,
             domain: dto.Domain,
-            keypoint: dto.Keypoint);    
+            keypoint: dto.Keypoint);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

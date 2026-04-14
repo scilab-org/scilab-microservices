@@ -13,6 +13,7 @@ public class JournalInfoDto : DtoId<Guid>
     public string? TexFile { get; set; }
     public string? PdfFile { get; set; }
     public string? Style { get; set; }
+    public Guid TemplateId { get; set; }
 
     #endregion
 }

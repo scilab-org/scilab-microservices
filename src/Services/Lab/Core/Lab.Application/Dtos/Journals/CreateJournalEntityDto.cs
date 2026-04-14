@@ -6,6 +6,7 @@ using Lab.Domain.Models;
 /// </summary>
 public class CreateJournalEntityDto
 {
+    public Guid ProjectId { get; set; }
     public required string Name { get; set; }
     public required DateTimeOffset StartAt { get; set; }
     public required DateTimeOffset EndAt { get; set; }

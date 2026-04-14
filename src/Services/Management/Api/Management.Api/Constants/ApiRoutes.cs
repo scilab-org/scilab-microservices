@@ -18,7 +18,7 @@ public sealed class ApiRoutes
     {
         #region Constants
         public const string Tags = "Projects";
-        
+
         private const string Base = "/projects";
         private const string BaseAdmin = "/admin/projects";
         public const string Create = $"{BaseAdmin}";
@@ -33,12 +33,12 @@ public sealed class ApiRoutes
         public const string GetMyProjectRole = $"{Base}/{{projectId}}/my-role";
         #endregion
     }
-    
+
     public static class SubProject
     {
         #region Constants
         public const string Tags = "Sub-Projects";
-        
+
         private const string Base = "/sub-projects";
         private const string BaseProjectManager = "/manager/sub-projects";
 
@@ -51,8 +51,8 @@ public sealed class ApiRoutes
         public const string GetSubProjectMembersByPaperId = $"{Base}/papers/{{paperId}}/members";
         #endregion
     }
-    
-    
+
+
     public static class ProjectPaper
     {
         public const string Tags = "Project Papers";
@@ -68,6 +68,17 @@ public sealed class ApiRoutes
         public const string GetProjectPapers = $"{Base}/{{projectId}}/papers";
         public const string DeleteProjectPaperByBankId = $"{Base}/paper-bank/{{paperBankId}}";
    }
+
+    public static class ProjectConferenceJournal
+    {
+        public const string Tags = "Project Conference Journals";
+
+        private const string BaseManager = "/manager/projects";
+
+        public const string CreateProjectConferenceJournals = $"{BaseManager}/{{projectId}}/journals";
+        public const string DeleteProjectConferenceJournals = $"{BaseManager}/{{projectId}}/journals/remove";
+    }
+
     public static class Member
     {
         #region Constants
@@ -85,19 +96,19 @@ public sealed class ApiRoutes
 
         #endregion
     }
-    
+
     public static class Dataset
     {
         #region Constants
         public const string Tags = "Datasets";
-        
+
         private const string Base = "/datasets";
         private const string BaseProjectManager = "/manager/datasets";
         public const string Create = $"{BaseProjectManager}";
         public const string Update = $"{BaseProjectManager}/{{datasetId}}";
         public const string Delete = $"{BaseProjectManager}/{{datasetId}}";
         public const string GetDatasets = $"{Base}";
-        
+
         #endregion
     }
 }

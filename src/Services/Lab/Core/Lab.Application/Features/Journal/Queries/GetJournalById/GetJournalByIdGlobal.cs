@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Lab.Application.Dtos.Template;
 using Lab.Application.Dtos.Journals;
+using Lab.Application.Dtos.Template;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 using Marten;
@@ -8,33 +8,26 @@ using MediatR;
 
 namespace Lab.Application.Features.Journal.Queries.GetJournalById;
 
-public record GetJournalInProjectByIdQuery(Guid Id, Guid ProjectId) : ICommand<GetJournalByIdResult>;
+public record GetJournalByIdQuery(Guid Id) : ICommand<GetJournalByIdResult>;
 
-public class GetJournalInProjectByIdQueryValidator : AbstractValidator<GetJournalInProjectByIdQuery>
+public class GetJournalByIdQueryValidator : AbstractValidator<GetJournalByIdQuery>
 {
-    public GetJournalInProjectByIdQueryValidator()
+    public GetJournalByIdQueryValidator()
     {
         RuleFor(x => x.Id)
             .NotNull()
             .WithMessage(MessageCode.JournalIdIsRequired)
             .NotEmpty()
             .WithMessage(MessageCode.JournalIdIsRequired);
-
-        RuleFor(x => x.ProjectId)
-            .NotEmpty()
-            .WithMessage(MessageCode.JournalProjectIdIsRequired);
     }
 }
 
-public class GetJournalInProjectByIdQueryHandler(IDocumentSession session, IMapper mapper)
-    : IRequestHandler<GetJournalInProjectByIdQuery, GetJournalByIdResult>
+public class GetJournalByIdQueryHandler(IDocumentSession session, IMapper mapper)
+    : IRequestHandler<GetJournalByIdQuery, GetJournalByIdResult>
 {
-    #region Implementations
-
-    public async Task<GetJournalByIdResult> Handle(GetJournalInProjectByIdQuery request, CancellationToken cancellationToken)
+    public async Task<GetJournalByIdResult> Handle(GetJournalByIdQuery request, CancellationToken cancellationToken)
     {
-        var journal = await session.Query<ConferenceJournalEntity>()
-            .FirstOrDefaultAsync(x => x.Id == request.Id && x.ProjectId == request.ProjectId, cancellationToken);
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(request.Id, cancellationToken);
 
         if (journal == null)
             throw new NotFoundException(MessageCode.JournalIsNotExists, request.Id.ToString());
@@ -51,6 +44,4 @@ public class GetJournalInProjectByIdQueryHandler(IDocumentSession session, IMapp
 
         return new GetJournalByIdResult(response, templateDtos);
     }
-
-    #endregion
 }

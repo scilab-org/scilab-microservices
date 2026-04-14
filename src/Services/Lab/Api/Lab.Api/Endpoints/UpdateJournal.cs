@@ -36,7 +36,6 @@ public sealed class UpdateJournal : ICarterModule
         ISender sender,
         IHttpContextAccessor httpContext,
         [FromRoute] Guid id,
-        [FromRoute] Guid projectId,
         [FromForm] UpdateJournalRequest req)
     {
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
@@ -56,7 +55,7 @@ public sealed class UpdateJournal : ICarterModule
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
         };
 
-        var command = new UpdateJournalCommand(dto, projectId, currentUser.UserName);
+        var command = new UpdateJournalCommand(dto, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Ok(new ApiUpdatedResponse<Guid>(result));

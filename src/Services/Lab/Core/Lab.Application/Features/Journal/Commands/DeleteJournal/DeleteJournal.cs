@@ -16,9 +16,6 @@ public class DeleteJournalCommandValidator : AbstractValidator<DeleteJournalComm
             .NotEmpty()
             .WithMessage(MessageCode.JournalIdIsRequired);
 
-        RuleFor(x => x.ProjectId)
-            .NotEmpty()
-            .WithMessage(MessageCode.JournalProjectIdIsRequired);
     }
 }
 
@@ -29,16 +26,23 @@ public class DeleteJournalCommandHandler(IDocumentSession session, IManagementAp
 
     public async Task<Unit> Handle(DeleteJournalCommand request, CancellationToken cancellationToken)
     {
-        var role = await managementApiService.GetMyProjectRoleAsync(request.ProjectId, cancellationToken);
+        var journal = await session.Query<ConferenceJournalEntity>()
+                          .FirstOrDefaultAsync(x => x.Id == request.Id,
+                              cancellationToken)
+                      ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Id.ToString());
+
+        var role = await managementApiService.GetMyProjectRoleAsync(journal.ProjectId, cancellationToken);
         if (string.IsNullOrEmpty(role) && !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role!))
         {
             throw new UnauthorizedException(MessageCode.Unauthorized);
         }
 
-        var journal = await session.Query<ConferenceJournalEntity>()
-                          .FirstOrDefaultAsync(x => x.Id == request.Id && x.ProjectId == request.ProjectId,
-                              cancellationToken)
-                      ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Id.ToString());
+        var synced = await managementApiService.RemoveProjectConferenceJournalsAsync(
+            journal.ProjectId,
+            [journal.Id],
+            cancellationToken);
+        if (!synced)
+            throw new ClientValidationException(MessageCode.ProjectIsNotExists, journal.ProjectId.ToString());
 
         journal.Update(lastModifiedBy: request.UserName);
 

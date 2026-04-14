@@ -54,6 +54,22 @@ public interface IManagementServiceApi
     [Post("/projects/paper-bank/{paperBankId}")]
     Task<HttpResponseMessage> DeleteProjectPaperByBankIdAsync(
         [AliasAs("paperBankId")] Guid paperBankId);
+
+    /// <summary>
+    /// POST /manager/projects/{projectId}/journals - adds conference journal ids into project.
+    /// </summary>
+    [Post("/manager/projects/{projectId}/journals")]
+    Task<HttpResponseMessage> AddProjectConferenceJournalsAsync(
+        [AliasAs("projectId")] Guid projectId,
+        [Body] ProjectConferenceJournalsRequest body);
+
+    /// <summary>
+    /// POST /manager/projects/{projectId}/journals/remove - removes conference journal ids from project.
+    /// </summary>
+    [Post("/manager/projects/{projectId}/journals/remove")]
+    Task<HttpResponseMessage> RemoveProjectConferenceJournalsAsync(
+        [AliasAs("projectId")] Guid projectId,
+        [Body] ProjectConferenceJournalsRequest body);
 }
 
 public class CreateSubProjectRequest
@@ -71,4 +87,9 @@ public sealed class AddSubProjectMemberEntry
 {
     public Guid UserId { get; set; }
     public string GroupName { get; set; } = Common.Constants.AuthorizeConstants.ProjectAuthor;
+}
+
+public sealed class ProjectConferenceJournalsRequest
+{
+    public List<Guid> ConferenceJournalIds { get; set; } = [];
 }

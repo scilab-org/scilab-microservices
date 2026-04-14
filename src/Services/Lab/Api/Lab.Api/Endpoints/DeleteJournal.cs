@@ -30,14 +30,13 @@ public sealed class DeleteJournal : ICarterModule
     private async Task<IResult> HandleDeleteJournalAsync(
         ISender sender,
         IHttpContextAccessor httpContext,
-        [FromRoute] Guid id,
-        [FromRoute] Guid projectId)
+        [FromRoute] Guid id)
     {
         var currentUser = httpContext.GetCurrentUser();
         if (currentUser == null)
             throw new UnauthorizedException(MessageCode.Unauthorized);
 
-        var command = new DeleteJournalCommand(id, projectId, currentUser.UserName);
+        var command = new DeleteJournalCommand(id, Guid.Empty, currentUser.UserName);
         await sender.Send(command);
 
         return TypedResults.Ok(new ApiDeletedResponse<Unit>());

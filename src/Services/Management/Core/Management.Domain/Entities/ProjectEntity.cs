@@ -19,6 +19,7 @@ public sealed class ProjectEntity : Entity<Guid>
     public Guid? ParentProjectId { get; set; }
     public List<Guid> DatasetIds { get; set; } = new();
     public List<Guid> PaperIds { get; set; } = new();
+    public List<Guid> ConferenceJournalIds { get; set; } = new();
     #endregion
 
     #region Factories
@@ -35,6 +36,7 @@ public sealed class ProjectEntity : Entity<Guid>
         string? domain = null,
         string? keypoint = null,
         List<Guid>? paperIds = null,
+        List<Guid>? conferenceJournalIds = null,
         string? createdBy = null)
     {
         return new ProjectEntity()
@@ -53,6 +55,7 @@ public sealed class ProjectEntity : Entity<Guid>
             Domain = domain,
             Keypoint = keypoint,
             PaperIds = paperIds?.Distinct().ToList() ?? new List<Guid>(),
+            ConferenceJournalIds = conferenceJournalIds?.Distinct().ToList() ?? new List<Guid>(),
             CreatedBy = createdBy
         };
     }
@@ -100,6 +103,33 @@ public sealed class ProjectEntity : Entity<Guid>
         foreach (var id in paperIds.Distinct())
         {
             if (PaperIds.Remove(id))
+                removed.Add(id);
+        }
+
+        if (removed.Any())
+            LastModifiedOnUtc = DateTimeOffset.UtcNow;
+
+        return removed;
+    }
+
+    public void AddConferenceJournals(IEnumerable<Guid> conferenceJournalIds)
+    {
+        foreach (var journalId in conferenceJournalIds.Distinct())
+        {
+            if (!ConferenceJournalIds.Contains(journalId))
+                ConferenceJournalIds.Add(journalId);
+        }
+
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+
+    public List<Guid> RemoveConferenceJournals(IEnumerable<Guid> conferenceJournalIds)
+    {
+        var removed = new List<Guid>();
+
+        foreach (var id in conferenceJournalIds.Distinct())
+        {
+            if (ConferenceJournalIds.Remove(id))
                 removed.Add(id);
         }
 

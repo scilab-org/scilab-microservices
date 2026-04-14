@@ -70,6 +70,22 @@ public interface IManagementApiService
     Task<List<Guid>?> DeleteProjectPaperByBankIdAsync(
         Guid paperBankId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds conference journal ids into a project in Management service.
+    /// </summary>
+    Task<bool> AddProjectConferenceJournalsAsync(
+        Guid projectId,
+        IEnumerable<Guid> conferenceJournalIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes conference journal ids from a project in Management service.
+    /// </summary>
+    Task<bool> RemoveProjectConferenceJournalsAsync(
+        Guid projectId,
+        IEnumerable<Guid> conferenceJournalIds,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record SubProjectMemberInfo(

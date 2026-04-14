@@ -35,7 +35,6 @@ public sealed class CreateJournal : ICarterModule
     private async Task<IResult> HandleCreateJournalAsync(
         ISender sender,
         IHttpContextAccessor httpContext,
-        [FromRoute] Guid projectId,
         [FromForm] CreateJournalRequest req)
     {
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
@@ -46,6 +45,7 @@ public sealed class CreateJournal : ICarterModule
 
         var dto = new CreateJournalEntityDto
         {
+            ProjectId = req.ProjectId,
             Name = req.Name,
             StartAt = req.StartAt,
             EndAt = req.EndAt,
@@ -54,7 +54,7 @@ public sealed class CreateJournal : ICarterModule
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
         };
 
-        var command = new CreateJournalCommand(dto, projectId, currentUser.UserName);
+        var command = new CreateJournalCommand(dto, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Created($"{ApiRoutes.Journal.Create}/{result}", new ApiCreatedResponse<Guid>(result));

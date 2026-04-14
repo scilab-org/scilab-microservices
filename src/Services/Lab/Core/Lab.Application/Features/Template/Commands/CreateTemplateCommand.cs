@@ -24,7 +24,6 @@ public class CreatePaperTemplateCommandHandler(IDocumentSession session)
         var template = TemplateEntity.Create(
             code: dto.Code,
             description: dto.Description,
-            conferenceJournalId: Guid.Empty,
             sections: dto.Sections
             );
 

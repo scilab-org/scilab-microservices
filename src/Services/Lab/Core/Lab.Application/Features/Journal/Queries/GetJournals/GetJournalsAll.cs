@@ -9,19 +9,16 @@ using Marten.Pagination;
 
 namespace Lab.Application.Features.Journal.Queries.GetJournals;
 
-public record GetJournalsInProjectQuery(GetJournalsFilter Filter, PaginationRequest Paging, Guid ProjectId) : IQuery<GetJournalsResult>;
+public record GetJournalsQuery(GetJournalsFilter Filter, PaginationRequest Paging) : IQuery<GetJournalsResult>;
 
-public class GetJournalsInProjectQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetJournalsInProjectQuery, GetJournalsResult>
+public class GetJournalsQueryHandler(IDocumentSession session, IMapper mapper)
+    : IQueryHandler<GetJournalsQuery, GetJournalsResult>
 {
-    #region Implementations
-
-    public async Task<GetJournalsResult> Handle(GetJournalsInProjectQuery request, CancellationToken cancellationToken)
+    public async Task<GetJournalsResult> Handle(GetJournalsQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<ConferenceJournalEntity>()
-            .Where(x => x.ProjectId == request.ProjectId)
-            .AsQueryable();
+        var query = session.Query<ConferenceJournalEntity>().AsQueryable();
 
         if (!filter.Name.IsNullOrWhiteSpace())
         {
@@ -42,10 +39,6 @@ public class GetJournalsInProjectQueryHandler(IDocumentSession session, IMapper 
         var journals = results.ToList();
         var items = mapper.Map<List<JournalDto>>(journals);
 
-        var response = new GetJournalsResult(items, totalCount, paging);
-
-        return response;
+        return new GetJournalsResult(items, totalCount, paging);
     }
-
-    #endregion
 }
