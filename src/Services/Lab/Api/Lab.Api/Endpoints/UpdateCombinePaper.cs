@@ -12,7 +12,7 @@ public class UpdateCombinePaper : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPut(ApiRoutes.Paper.GetCombine, HandleUpdateCombinePaperByIdQueryAsync)
+        app.MapPut(ApiRoutes.Paper.GetVersionById, HandleUpdateCombinePaperByIdQueryAsync)
             .WithTags(ApiRoutes.Paper.Tags)
             .WithName(nameof(UpdateCombinePaper))
             .Produces<ApiUpdatedResponse<Guid>>()

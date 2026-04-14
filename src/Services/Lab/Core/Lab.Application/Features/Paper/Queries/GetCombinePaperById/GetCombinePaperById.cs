@@ -32,22 +32,22 @@ public class GetCombinePaperByIdQueryHandler(IDocumentSession session) : IComman
         var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
                     ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
 
-        var combine = paper.Combines.FirstOrDefault(x => x.Id == request.VersionId)
+        var version = paper.Versions.FirstOrDefault(x => x.Id == request.VersionId)
                       ?? throw new NotFoundException(MessageCode.PaperCombineIsNotExists, request.VersionId.ToString());
 
         return new CombineSectionsToPaperResult
         {
-            Combine = new PaperCombineInfo()
+            Version = new PaperVersionInfo()
             {
-                Id = combine.Id,
-                Name = combine.Name,
-                Content = combine.Content,
-                References = combine.References,
-                IsSave = true,
-                CreatedBy = combine.CreatedBy,
-                CreatedOnUtc = combine.CreatedOnUtc,
-                LastModifiedBy = combine.LastModifiedBy,
-                LastModifiedOnUtc = combine.LastModifiedOnUtc
+                Id = version.Id,
+                Name = version.Name,
+                Content = version.Content,
+                References = version.References,
+                Files = version.Files,
+                CreatedBy = version.CreatedBy,
+                CreatedOnUtc = version.CreatedOnUtc,
+                LastModifiedBy = version.LastModifiedBy,
+                LastModifiedOnUtc = version.LastModifiedOnUtc ?? version.CreatedOnUtc
             }
         };
     }

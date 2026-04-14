@@ -57,9 +57,10 @@ public sealed class ApiRoutes
         public const string GetAssignedPaperSections = $"{Base}/{{id}}/assigned-sections";
         public const string GetAssignedPaperSectionsHistory = $"{Base}/{{id}}/assigned-sections/history";
         public const string GetSectionsByPaperId = $"{Base}/{{id}}/sections";
+        public const string GetVersionsByPaperId = $"{Base}/{{id}}/versions";
         public const string GetPaperById = $"{Base}/{{id}}";
-        public const string Combine = $"{Base}/{{id}}/combine";
-        public const string GetCombine = $"{Base}/{{paperId}}/versions/{{versionId}}/combine";
+        public const string Versions = $"{Base}/{{id}}/combine";
+        public const string GetVersionById = $"{Base}/{{paperId}}/versions/{{versionId}}/combine";
 
         #endregion
     }

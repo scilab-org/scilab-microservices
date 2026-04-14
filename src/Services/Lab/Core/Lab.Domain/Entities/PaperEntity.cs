@@ -1,6 +1,7 @@
 ﻿using Lab.Domain.Abstractions;
 using Lab.Domain.Enums;
 using Lab.Domain.Models;
+using System.Text.Json.Serialization;
 
 namespace Lab.Domain.Entities;
 
@@ -22,7 +23,8 @@ public sealed class PaperEntity : Entity<Guid>
     public string? StyleDescription { get; set; }
     public string? StyleRule { get; set; }
     public PaperStatus? Status { get; set; }
-    public List<Combine> Combines { get; set; } = new();
+    [JsonPropertyName("Combines")]
+    public List<PaperVersionEntity> Versions { get; set; } = new();
     public List<Reference>? References { get; set; } = new();
 
     #endregion
@@ -43,7 +45,7 @@ public sealed class PaperEntity : Entity<Guid>
         string? styleDescription = null,
         string? styleRule = null,
         PaperStatus? status = null,
-        List<Combine>? combines = null,
+        List<PaperVersionEntity>? versions = null,
         List<Reference>? references = null,
         string? createdBy = null)
     {
@@ -63,7 +65,7 @@ public sealed class PaperEntity : Entity<Guid>
             StyleDescription = styleDescription,
             StyleRule = styleRule,
             Status = status ?? PaperStatus.Processing,
-            Combines = combines ?? [],
+            Versions = versions ?? [],
             References = references ?? [],
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -115,35 +117,36 @@ public sealed class PaperEntity : Entity<Guid>
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
-    public Combine AddCombineVersion(string? name, string? content, List<Guid>? reference, string? createdBy)
+    public PaperVersionEntity AddPaperVersion(string? name, string? content, List<Guid>? reference, List<string>? files,
+        string? createdBy)
     {
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(content)) return null!;
 
-        var combine = new Combine()
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Content = content,
-            References = reference,
-            CreatedBy = createdBy,
-            CreatedOnUtc = DateTimeOffset.UtcNow,
-            LastModifiedBy = createdBy,
-            LastModifiedOnUtc = DateTimeOffset.UtcNow
-        };
-        Combines.Add(combine);
+        var version = PaperVersionEntity.Create(
+            id: Guid.NewGuid(),
+            paperId: Id,
+            name: name,
+            content: content,
+            references: reference,
+            files: files,
+            createdBy: createdBy);
+
+        Versions.Add(version);
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
-        return combine;
+        return version;
     }
 
-    public void UpdateCombineVersion(Guid combineId, string? content,
+    public void UpdatePaperVersion(Guid versionId, string? content,
         string? lastModifiedBy)
     {
-        var combine = Combines.FirstOrDefault(c => c.Id == combineId);
-        if (combine == null) return;
+        var version = Versions.FirstOrDefault(c => c.Id == versionId);
+        if (version == null) return;
 
-        combine.Content = content ?? combine.Content;
-        combine.LastModifiedBy = lastModifiedBy ?? combine.LastModifiedBy;
-        combine.LastModifiedOnUtc = DateTimeOffset.UtcNow;
+        version.Update(
+            content: content,
+            lastModifiedBy: lastModifiedBy,
+            paperId: Id);
+
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

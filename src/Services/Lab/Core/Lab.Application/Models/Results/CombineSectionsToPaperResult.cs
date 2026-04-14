@@ -4,5 +4,5 @@ namespace Lab.Application.Models.Results;
 
 public class CombineSectionsToPaperResult
 {
-    public PaperCombineInfo? Combine { get; set; }
+    public PaperVersionInfo? Version { get; set; }
 }

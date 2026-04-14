@@ -41,11 +41,10 @@ public sealed class LabMappingProfile : Profile
     {
         CreateMap<PaperEntity, PaperDto>();
 
-        CreateMap<Combine, PaperCombineInfo>()
-            .ForMember(dest => dest.IsSave, opt => opt.MapFrom(_ => true));
+        CreateMap<PaperVersionEntity, PaperVersionInfo>();
         CreateMap<Reference, PaperReferenceInfo>()
             .ForMember(dest => dest.PaperBankId, opt => opt.MapFrom(src => src.PaperId)); ;
-        
+
         CreateMap<PaperEntity, GetPaperBankByIdResult>()
             .ForMember(dest => dest.PaperBank, opt => opt.MapFrom(src => src));
     }
@@ -90,7 +89,7 @@ public sealed class LabMappingProfile : Profile
     }
 
     #endregion
-    
+
     #region Comment Mappings
 
     private void CreateCommentMappings()
@@ -111,7 +110,7 @@ public sealed class LabMappingProfile : Profile
     }
 
     #endregion
-    
+
     #region Task Mappings
 
     private void CreateTaskMappings()

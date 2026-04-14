@@ -97,6 +97,7 @@ public class CreatePaperCommandHandler(
                     displayOrder: template.DisplayOrder,
                     numbered: template.Numbered,
                     isMainSection: true,
+                    version: "Version Initial",
                     paperId: entity.Id,
                     parentSectionId: template.ParentSectionId,
                     createdBy: request.UserName,

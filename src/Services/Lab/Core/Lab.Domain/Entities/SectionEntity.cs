@@ -18,6 +18,7 @@ public class SectionEntity : Entity<Guid>
     public bool? Numbered { get; set; } = true;
     public bool? IsMainSection { get; set; } = false;
     public bool? IsOldMainSection { get; set; } = false;
+    public string? Version { get; set; }
     public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
     public Guid? NextVersionSectionId { get; set; }
@@ -37,6 +38,7 @@ public class SectionEntity : Entity<Guid>
         bool? numbered = true,
         bool? isMainSection = false,
         bool? isOldMainSection = false,
+        string? version = null,
         string? title = null,
         string? sectionSumary = null,
         string? description = null,
@@ -49,6 +51,7 @@ public class SectionEntity : Entity<Guid>
         string? paperRule = null,
         string? projectRule = null,
         string? sectionRule = null,
+        List<string>? files = null,
         List<string>? packages = null)
     {
         return new SectionEntity()
@@ -57,6 +60,7 @@ public class SectionEntity : Entity<Guid>
             Content = content,
             PaperId = paperId,
             Title = title,
+            Version = version,
             SectionSumary = sectionSumary,
             Description = description,
             Rule = rule,
@@ -71,6 +75,7 @@ public class SectionEntity : Entity<Guid>
             PreviousVersionSectionId = previousVersionSectionId,
             NextVersionSectionId = nextVersionSectionId,
             CreatedBy = createdBy,
+            Files = files,
             References = references,
             Packages = packages,
             CreatedOnUtc = DateTimeOffset.UtcNow,
@@ -91,6 +96,7 @@ public class SectionEntity : Entity<Guid>
         bool? numbered = true,
         bool? isMainSection = null,
         bool? isOldMainSection = null,
+        string? version = null,
         Guid? parentSectionId = null,
         Guid? previousVersionSectionId = null,
         Guid? nextVersionSectionId = null,
@@ -99,6 +105,7 @@ public class SectionEntity : Entity<Guid>
         string? paperRule = null,
         string? projectRule = null,
         string? sectionRule = null,
+        List<string>? files = null,
         List<string>? packages = null)
     {
         Content = content ?? Content;
@@ -113,10 +120,12 @@ public class SectionEntity : Entity<Guid>
         Numbered = numbered ?? Numbered;
         IsMainSection = isMainSection ?? IsMainSection;
         IsOldMainSection = isOldMainSection ?? IsOldMainSection;
+        Version = version ?? Version;
         ParentSectionId = parentSectionId ?? ParentSectionId;
         PreviousVersionSectionId = previousVersionSectionId ?? PreviousVersionSectionId;
         NextVersionSectionId = nextVersionSectionId ?? NextVersionSectionId;
         PaperId = paperId ?? PaperId;
+        Files = files ?? Files;
         References = references ?? References;
         Packages = packages ?? Packages;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;

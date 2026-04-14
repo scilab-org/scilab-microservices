@@ -72,9 +72,9 @@ public class UpsertSectionCommandHandler(
                     .FirstOrDefaultAsync(cancellationToken);
                 if (contributorWithVersion != null)
                     throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, section.Id);
-
             }
 
+            var version = BuildNextDraftVersion(section.Version);
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
                 content: dto.Content,
@@ -83,6 +83,7 @@ public class UpsertSectionCommandHandler(
                 numbered: dto.Numbered,
                 isMainSection: false,
                 isOldMainSection: false,
+                version: version,
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,
@@ -195,6 +196,25 @@ public class UpsertSectionCommandHandler(
             refSection.Update(packages: referencesPackages);
             session.Update(refSection);
         }
+    }
+
+    private static string BuildNextDraftVersion(string? currentVersion)
+    {
+        if (currentVersion.IsNullOrEmpty())
+            return "Version 1 Draft";
+
+        var normalized = currentVersion.Trim();
+        if (normalized.EqualsIgnoreCase("Version Initial") || normalized.EqualsIgnoreCase("Initial"))
+            return "Version 1 Draft";
+
+        var numericToken = normalized
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault(token => int.TryParse(token, out _));
+
+        if (numericToken != null && int.TryParse(numericToken, out var currentNumber))
+            return $"Version {currentNumber + 1} Draft";
+
+        return "Version 1 Draft";
     }
 
     #endregion

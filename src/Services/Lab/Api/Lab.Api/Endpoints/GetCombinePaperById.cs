@@ -9,7 +9,7 @@ public class GetCombinePaperById : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet(ApiRoutes.Paper.GetCombine, HandleGetCombinePaperByIdQueryAsync)
+        app.MapGet(ApiRoutes.Paper.GetVersionById, HandleGetCombinePaperByIdQueryAsync)
             .WithTags(ApiRoutes.Paper.Tags)
             .WithName(nameof(GetCombinePaperById))
             .Produces<ApiGetResponse<CombineSectionsToPaperResult>>()

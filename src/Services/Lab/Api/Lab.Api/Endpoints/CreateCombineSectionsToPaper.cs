@@ -15,7 +15,7 @@ public class CreateCombineSectionsToPaper : ICarterModule
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost(ApiRoutes.Paper.Combine, HandleCreateCombineSectionsToPaper)
+        app.MapPost(ApiRoutes.Paper.Versions, HandleCreateCombineSectionsToPaper)
             .WithTags(ApiRoutes.Paper.Tags)
             .WithName(nameof(CreateCombineSectionsToPaper))
             .Produces<ApiCreatedResponse<CombineSectionsToPaperResult>>(StatusCodes.Status201Created)
@@ -41,7 +41,7 @@ public class CreateCombineSectionsToPaper : ICarterModule
         var command = new CombineSectionsToPaperCommand(id, request, currentUser.UserName);
         var result = await sender.Send(command);
 
-        return TypedResults.Created($"{ApiRoutes.Paper.Combine}/{result}",
+        return TypedResults.Created($"/papers/{id}/versions/{result.Version?.Id}/combine",
             new ApiCreatedResponse<CombineSectionsToPaperResult>(result));
     }
 

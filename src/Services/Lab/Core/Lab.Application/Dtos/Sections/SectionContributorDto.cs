@@ -7,10 +7,11 @@ public class SectionContributorDto
     public string SectionRole { get; set; } = null!;
     public Guid? SectionId { get; set; }
     public Guid MarkSectionId { get; set; }
-    
+
     //Section info
     public string? Title { get; set; }
     public bool IsMainSection { get; set; }
+    public string? Version { get; set; }
     public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
     public Guid? NextVersionSectionId { get; set; }
@@ -18,12 +19,12 @@ public class SectionContributorDto
     public DateTimeOffset CreatedOnUtc { get; set; }
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
     public bool? IsOldMainSection { get; set; } = false;
-    
-    
+
+
     //User info
     public string? Name { get; set; }
     public string? Email { get; set; }
-    
+
     public string? Content { get; set; } = null!;
     public List<string>? Packages { get; set; }
 }

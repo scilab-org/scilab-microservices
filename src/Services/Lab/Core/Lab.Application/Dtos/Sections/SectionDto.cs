@@ -19,6 +19,7 @@ public class SectionDto : DtoId<Guid>
     public bool? IsOldMainSection { get; set; } = false;
     public bool? IsMainSection { get; set; } = false;
     public string? Rule { get; set; }
+    public string? Version { get; set; }
     public List<string>? Packages { get; set; }
 }
 
@@ -28,4 +29,3 @@ public class AssignedSectionDto : SectionDto
     public Guid MemberId { get; set; }
     public Guid MarkSectionId { get; set; }
 }
-
