@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Journal.Queries.GetJournalById;
 
-public record GetJournalByIdQuery(Guid Id) : ICommand<GetJournalByIdResult>;
+public record GetJournalByIdQuery(Guid Id, Guid ProjectId) : ICommand<GetJournalByIdResult>;
 
 public class GetJournalByIdQueryValidator : AbstractValidator<GetJournalByIdQuery>
 {
@@ -19,6 +19,10 @@ public class GetJournalByIdQueryValidator : AbstractValidator<GetJournalByIdQuer
             .WithMessage(MessageCode.JournalIdIsRequired)
             .NotEmpty()
             .WithMessage(MessageCode.JournalIdIsRequired);
+
+        RuleFor(x => x.ProjectId)
+            .NotEmpty()
+            .WithMessage(MessageCode.JournalProjectIdIsRequired);
     }
 }
 
@@ -29,7 +33,8 @@ public class GetJournalByIdQueryHandler(IDocumentSession session, IMapper mapper
 
     public async Task<GetJournalByIdResult> Handle(GetJournalByIdQuery request, CancellationToken cancellationToken)
     {
-        var journal = await session.LoadAsync<ConferenceJournalEntity>(request.Id, cancellationToken);
+        var journal = await session.Query<ConferenceJournalEntity>()
+            .FirstOrDefaultAsync(x => x.Id == request.Id && x.ProjectId == request.ProjectId, cancellationToken);
 
         if (journal == null)
             throw new NotFoundException(MessageCode.JournalIsNotExists, request.Id.ToString());

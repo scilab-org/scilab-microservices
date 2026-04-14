@@ -1,13 +1,14 @@
 ﻿using Lab.Application.Dtos.Journals;
 using Lab.Application.Services;
 using Common.Constants;
+using JasperFx.Core;
 using Lab.Domain.Entities;
 using Marten;
 using MediatR;
 
 namespace Lab.Application.Features.Journal.Commands.UpdateJournal;
 
-public record UpdateJournalCommand(UpdateJournalEntityDto Dto) : ICommand<Guid>;
+public record UpdateJournalCommand(UpdateJournalEntityDto Dto, Guid ProjectId, string UserName) : ICommand<Guid>;
 
 public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalCommand>
 {
@@ -21,6 +22,9 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
                 RuleFor(x => x.Dto.Id)
                     .NotEmpty().WithMessage(MessageCode.JournalIdIsRequired);
 
+                RuleFor(x => x.ProjectId)
+                    .NotEmpty().WithMessage(MessageCode.JournalProjectIdIsRequired);
+
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
                     .WithMessage(MessageCode.JournalTexFileInvalidExtension);
@@ -32,17 +36,26 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
     }
 }
 
-public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudService minIo) : IRequestHandler<UpdateJournalCommand, Guid>
+public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudService minIo, IManagementApiService managementApiService) : IRequestHandler<UpdateJournalCommand, Guid>
 {
     #region Implementations
 
     public async Task<Guid> Handle(UpdateJournalCommand request, CancellationToken cancellationToken)
     {
+        var role = await managementApiService.GetMyProjectRoleAsync(request.ProjectId, cancellationToken);
+        if (string.IsNullOrEmpty(role) && !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role!))
+        {
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+        }
+
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = await session.LoadAsync<ConferenceJournalEntity>(request.Dto.Id, cancellationToken);
 
         if (entity == null)
+            throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Dto.Id);
+
+        if (entity.ProjectId != request.ProjectId)
             throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Dto.Id);
 
         var normalizedName = "";
@@ -52,7 +65,7 @@ public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
         if (!string.IsNullOrEmpty(normalizedName) && normalizedName != entity.Name)
         {
             var existingJournalName = await session.Query<ConferenceJournalEntity>()
-                .FirstOrDefaultAsync(x => x.Name == normalizedName && x.Id != request.Dto.Id, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Name == normalizedName && x.ProjectId == request.ProjectId && x.Id != request.Dto.Id, cancellationToken);
 
             if (existingJournalName != null)
                 throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, normalizedName);
@@ -60,12 +73,12 @@ public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
 
         entity.Update(
             name: normalizedName != "" ? normalizedName : null,
-            projectId: request.Dto.ProjectId,
             startAt: request.Dto.StartAt,
             endAt: request.Dto.EndAt,
             style: request.Dto.Style,
             texFile: null,
-            pdfFile: null);
+            pdfFile: null,
+            lastModifiedBy: request.UserName);
 
         var (texFile, pdfFile) = await UploadFilesAsync(request.Dto, cancellationToken);
         entity.UpdateFilePath(texFile, pdfFile);

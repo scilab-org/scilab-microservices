@@ -1,4 +1,5 @@
-﻿using BuildingBlocks.Exceptions;
+﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
 using BuildingBlocks.Swagger.Extensions;
 using Common.Constants;
 using Common.Models;
@@ -23,8 +24,8 @@ public sealed class UpdateJournal : ICarterModule
             .Produces<ApiUpdatedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .DisableAntiforgery();
-        // .RequireAuthorization();
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     #endregion
@@ -33,16 +34,21 @@ public sealed class UpdateJournal : ICarterModule
 
     private async Task<IResult> HandleUpdateJournalAsync(
         ISender sender,
-        Guid id,
+        IHttpContextAccessor httpContext,
+        [FromRoute] Guid id,
+        [FromRoute] Guid projectId,
         [FromForm] UpdateJournalRequest req)
     {
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
+
+        var currentUser = httpContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedException(MessageCode.Unauthorized);
 
         var dto = new UpdateJournalEntityDto
         {
             Id = id,
             Name = req.Name,
-            ProjectId = req.ProjectId,
             StartAt = req.StartAt,
             EndAt = req.EndAt,
             Style = req.Style,
@@ -50,7 +56,7 @@ public sealed class UpdateJournal : ICarterModule
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
         };
 
-        var command = new UpdateJournalCommand(dto);
+        var command = new UpdateJournalCommand(dto, projectId, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Ok(new ApiUpdatedResponse<Guid>(result));

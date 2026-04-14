@@ -43,7 +43,7 @@ public sealed class LabMappingProfile : Profile
 
         CreateMap<PaperVersionEntity, PaperVersionInfo>();
         CreateMap<Reference, PaperReferenceInfo>()
-            .ForMember(dest => dest.PaperBankId, opt => opt.MapFrom(src => src.PaperId)); ;
+            .ForMember(dest => dest.PaperBankId, opt => opt.MapFrom(src => src.PaperId));
 
         CreateMap<PaperEntity, GetPaperBankByIdResult>()
             .ForMember(dest => dest.PaperBank, opt => opt.MapFrom(src => src));

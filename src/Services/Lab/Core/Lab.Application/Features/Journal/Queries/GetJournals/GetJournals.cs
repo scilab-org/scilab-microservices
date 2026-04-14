@@ -9,7 +9,7 @@ using Marten.Pagination;
 
 namespace Lab.Application.Features.Journal.Queries.GetJournals;
 
-public record GetJournalsQuery(GetJournalsFilter Filter, PaginationRequest Paging) : IQuery<GetJournalsResult>;
+public record GetJournalsQuery(GetJournalsFilter Filter, PaginationRequest Paging, Guid ProjectId) : IQuery<GetJournalsResult>;
 
 public class GetJournalsQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetJournalsQuery, GetJournalsResult>
 {
@@ -19,7 +19,9 @@ public class GetJournalsQueryHandler(IDocumentSession session, IMapper mapper) :
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<ConferenceJournalEntity>().AsQueryable();
+        var query = session.Query<ConferenceJournalEntity>()
+            .Where(x => x.ProjectId == request.ProjectId)
+            .AsQueryable();
 
         if (!filter.Name.IsNullOrWhiteSpace())
         {

@@ -1,7 +1,7 @@
 ﻿using Lab.Api.Constants;
 using Lab.Application.Features.Journal.Queries.GetJournalById;
 using Lab.Application.Models.Results;
-using Common.Models.Reponses;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Lab.Api.Endpoints;
 
@@ -26,9 +26,10 @@ public class GetJournalById : ICarterModule
 
     private async Task<ApiGetResponse<GetJournalByIdResult>> HandleGetJournalByIdAsync(
         ISender sender,
-        Guid id)
+        [FromRoute] Guid id,
+        [FromRoute] Guid projectId)
     {
-        var query = new GetJournalByIdQuery(id);
+        var query = new GetJournalByIdQuery(id, projectId);
         var result = await sender.Send(query);
 
         return new ApiGetResponse<GetJournalByIdResult>(result);

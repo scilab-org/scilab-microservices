@@ -1,4 +1,5 @@
-﻿using Common.Models.Reponses;
+﻿using BuildingBlocks.Authentication.Extensions;
+using Common.Models.Reponses;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Swagger.Extensions;
 using Common.Constants;
@@ -23,8 +24,8 @@ public sealed class CreateJournal : ICarterModule
             .WithMultipartForm<CreateJournalRequest>()
             .Produces<ApiCreatedResponse<Guid>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .DisableAntiforgery();
-        // .RequireAuthorization();
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     #endregion
@@ -33,14 +34,19 @@ public sealed class CreateJournal : ICarterModule
 
     private async Task<IResult> HandleCreateJournalAsync(
         ISender sender,
+        IHttpContextAccessor httpContext,
+        [FromRoute] Guid projectId,
         [FromForm] CreateJournalRequest req)
     {
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
 
+        var currentUser = httpContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+
         var dto = new CreateJournalEntityDto
         {
             Name = req.Name,
-            ProjectId = req.ProjectId,
             StartAt = req.StartAt,
             EndAt = req.EndAt,
             Style = req.Style,
@@ -48,7 +54,7 @@ public sealed class CreateJournal : ICarterModule
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
         };
 
-        var command = new CreateJournalCommand(dto);
+        var command = new CreateJournalCommand(dto, projectId, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Created($"{ApiRoutes.Journal.Create}/{result}", new ApiCreatedResponse<Guid>(result));

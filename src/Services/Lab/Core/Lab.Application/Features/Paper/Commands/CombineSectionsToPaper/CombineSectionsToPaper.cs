@@ -73,6 +73,8 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IMan
             referenceSectionContent,
             bodyContent);
 
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken);
+
         //Huy dùng content trên + template của các conference or journal để build ra final
 
         var files = mainSections

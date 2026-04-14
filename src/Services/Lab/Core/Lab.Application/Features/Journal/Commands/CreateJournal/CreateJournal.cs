@@ -1,4 +1,5 @@
-﻿using Lab.Application.Dtos.Journals;
+﻿using JasperFx.Core;
+using Lab.Application.Dtos.Journals;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
@@ -6,7 +7,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Journal.Commands.CreateJournal;
 
-public record CreateJournalCommand(CreateJournalEntityDto Dto) : ICommand<Guid>;
+public record CreateJournalCommand(CreateJournalEntityDto Dto, Guid ProjectId, string UserName) : ICommand<Guid>;
 
 public class CreateJournalCommandValidator : AbstractValidator<CreateJournalCommand>
 {
@@ -21,7 +22,7 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
                     .NotEmpty().WithMessage(MessageCode.JournalNameIsRequired)
                     .NotNull().WithMessage(MessageCode.JournalNameIsRequired);
 
-                RuleFor(x => x.Dto.ProjectId)
+                RuleFor(x => x.ProjectId)
                     .NotEmpty().WithMessage(MessageCode.JournalProjectIdIsRequired);
 
                 RuleFor(x => x.Dto.StartAt)
@@ -46,12 +47,18 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
     }
 }
 
-public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudService minIo) : IRequestHandler<CreateJournalCommand, Guid>
+public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudService minIo, IManagementApiService managementApiService) : IRequestHandler<CreateJournalCommand, Guid>
 {
     #region Implementations
 
     public async Task<Guid> Handle(CreateJournalCommand request, CancellationToken cancellationToken)
     {
+        var role = await managementApiService.GetMyProjectRoleAsync(request.ProjectId, cancellationToken);
+        if (string.IsNullOrEmpty(role) && !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role!))
+        {
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+        }
+
         await session.BeginTransactionAsync(cancellationToken);
         var id = Guid.NewGuid();
 
@@ -59,7 +66,7 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
 
         var existingJournal = await session.Query<ConferenceJournalEntity>()
             .FirstOrDefaultAsync(x => x.Name == normalizedName &&
-                                      x.ProjectId == request.Dto.ProjectId, cancellationToken);
+                                      x.ProjectId == request.ProjectId, cancellationToken);
 
         if (existingJournal != null)
             throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, request.Dto.Name);
@@ -67,12 +74,13 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
         var entity = ConferenceJournalEntity.Create(
             id: id,
             name: normalizedName,
-            projectId: request.Dto.ProjectId,
+            projectId: request.ProjectId,
             startAt: request.Dto.StartAt,
             endAt: request.Dto.EndAt,
             style: request.Dto.Style,
             texFile: null,
-            pdfFile: null);
+            pdfFile: null,
+            createdBy: request.UserName);
 
         var (texFile, pdfFile) = await UploadFilesAsync(request.Dto, cancellationToken);
         entity.UpdateFilePath(texFile, pdfFile);
@@ -83,7 +91,8 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
             code: request.Dto.TemplateCode ?? $"TEMPLATE-{id:N}",
             description: request.Dto.TemplateDescription ?? $"Default template for {normalizedName}",
             conferenceJournalId: id,
-            sections: request.Dto.Sections);
+            sections: request.Dto.Sections,
+            createdBy: request.UserName);
 
         session.Store(template);
 

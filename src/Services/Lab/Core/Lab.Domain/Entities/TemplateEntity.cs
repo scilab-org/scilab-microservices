@@ -18,7 +18,7 @@ public sealed class TemplateEntity : Entity<Guid>
     #region Factories
 
     public static TemplateEntity Create(string? code, string? description, Guid conferenceJournalId,
-        List<Section>? sections)
+        List<Section>? sections, string? createdBy = null)
     {
         return new TemplateEntity()
         {
@@ -27,6 +27,7 @@ public sealed class TemplateEntity : Entity<Guid>
             Description = description,
             ConferenceJournalId = conferenceJournalId,
             Sections = sections,
+            CreatedBy = createdBy,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -39,12 +40,14 @@ public sealed class TemplateEntity : Entity<Guid>
     public void Update(string? code = null,
         string? description = null,
         Guid? confereneceJournalId = null,
-        List<Section>? sections = null)
+        List<Section>? sections = null,
+        string? lastModifiedBy = null)
     {
         Code = code ?? Code;
         Description = description ?? Description;
         ConferenceJournalId = confereneceJournalId ?? ConferenceJournalId;
         Sections = sections ?? Sections;
+        LastModifiedBy = lastModifiedBy ?? LastModifiedBy;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

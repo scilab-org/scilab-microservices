@@ -3,7 +3,6 @@
 public class UpdateJournalRequest
 {
     public string? Name { get; set; }
-    public Guid? ProjectId { get; set; }
     public DateTimeOffset? StartAt { get; set; }
     public DateTimeOffset? EndAt { get; set; }
     public string? Style { get; set; }

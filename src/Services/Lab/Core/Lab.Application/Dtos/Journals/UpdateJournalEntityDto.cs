@@ -7,7 +7,6 @@ public class UpdateJournalEntityDto
 {
     public Guid Id { get; set; }
     public string? Name { get; set; }
-    public Guid? ProjectId { get; set; }
     public DateTimeOffset? StartAt { get; set; }
     public DateTimeOffset? EndAt { get; set; }
     public string? Style { get; set; }

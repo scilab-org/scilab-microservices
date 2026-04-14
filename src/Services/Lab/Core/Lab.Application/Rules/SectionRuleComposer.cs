@@ -26,6 +26,7 @@ public static class SectionRuleComposer
     {
         return BuildPaperRule(
             paperDto.Context,
+            paperDto.Abstract,
             paperDto.ResearchGap,
             paperDto.GapType,
             paperDto.ResearchAim);
@@ -35,6 +36,7 @@ public static class SectionRuleComposer
     {
         return BuildPaperRule(
             paper.Context,
+            paper.Abstract,
             paper.ResearchGap,
             paper.GapType,
             paper.ResearchAim);
@@ -75,6 +77,7 @@ public static class SectionRuleComposer
 
     private static string BuildPaperRule(
         string? context,
+        string? abstractText,
         string? researchGap,
         string? gapType,
         string? researchAim)
@@ -85,6 +88,7 @@ public static class SectionRuleComposer
         contentBuilder.AppendLine();
 
         AppendBlock(contentBuilder, "Context", context);
+        AppendBlock(contentBuilder, "Abstract", abstractText);
         AppendBlock(contentBuilder, "Research Gap", researchGap);
         AppendBlock(contentBuilder, "Gap Type", gapType);
         AppendBlock(contentBuilder, "Research Aim", researchAim);

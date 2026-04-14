@@ -26,7 +26,8 @@ public class ConferenceJournalEntity : Entity<Guid>
         DateTimeOffset endAt,
         string? style,
         string? texFile,
-        string? pdfFile)
+        string? pdfFile,
+        string? createdBy = null)
     {
         return new ConferenceJournalEntity()
         {
@@ -38,6 +39,7 @@ public class ConferenceJournalEntity : Entity<Guid>
             Style = style,
             TexFile = texFile,
             PdfFile = pdfFile,
+            CreatedBy = createdBy,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -54,7 +56,8 @@ public class ConferenceJournalEntity : Entity<Guid>
         DateTimeOffset? endAt = null,
         string? style = null,
         string? texFile = null,
-        string? pdfFile = null)
+        string? pdfFile = null,
+        string? lastModifiedBy = null)
     {
         Name = name ?? Name;
         ProjectId = projectId ?? ProjectId;
@@ -63,6 +66,7 @@ public class ConferenceJournalEntity : Entity<Guid>
         Style = style ?? Style;
         TexFile = texFile ?? TexFile;
         PdfFile = pdfFile ?? PdfFile;
+        LastModifiedBy = lastModifiedBy ?? LastModifiedBy;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
