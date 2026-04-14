@@ -20,12 +20,7 @@ public class GetTemplatesQueryHandler(IDocumentSession session, IMapper mapper)
         var filter = request.Filter;
         var paging = request.Paging;
         var query = session.Query<TemplateEntity>().AsQueryable();
-       
-        if (!filter.Name.IsNullOrWhiteSpace())
-        {
-            var name = filter.Name.Trim();
-            query = query.Where(x => x.Name.Contains(name));
-        }
+
 
         if (!filter.Code.IsNullOrWhiteSpace())
         {
@@ -48,5 +43,3 @@ public class GetTemplatesQueryHandler(IDocumentSession session, IMapper mapper)
 
     #endregion
 }
-
-

@@ -1,4 +1,6 @@
 ﻿using Lab.Application.Dtos.Journals;
+using Lab.Application.Services;
+using Common.Constants;
 using Lab.Domain.Entities;
 using Marten;
 using MediatR;
@@ -18,11 +20,19 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
             {
                 RuleFor(x => x.Dto.Id)
                     .NotEmpty().WithMessage(MessageCode.JournalIdIsRequired);
+
+                RuleFor(x => x.Dto.TexUploadFile)
+                    .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
+                    .WithMessage(MessageCode.JournalTexFileInvalidExtension);
+
+                RuleFor(x => x.Dto.PdfUploadFile)
+                    .Must(file => file == null || file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                    .WithMessage(MessageCode.JournalPdfFileInvalidExtension);
             });
     }
 }
 
-public class UpdateJournalCommandHandler(IDocumentSession session) : IRequestHandler<UpdateJournalCommand, Guid>
+public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudService minIo) : IRequestHandler<UpdateJournalCommand, Guid>
 {
     #region Implementations
 
@@ -30,7 +40,7 @@ public class UpdateJournalCommandHandler(IDocumentSession session) : IRequestHan
     {
         await session.BeginTransactionAsync(cancellationToken);
 
-        var entity = await session.LoadAsync<JournalEntity>(request.Dto.Id, cancellationToken);
+        var entity = await session.LoadAsync<ConferenceJournalEntity>(request.Dto.Id, cancellationToken);
 
         if (entity == null)
             throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Dto.Id);
@@ -41,7 +51,7 @@ public class UpdateJournalCommandHandler(IDocumentSession session) : IRequestHan
 
         if (!string.IsNullOrEmpty(normalizedName) && normalizedName != entity.Name)
         {
-            var existingJournalName = await session.Query<JournalEntity>()
+            var existingJournalName = await session.Query<ConferenceJournalEntity>()
                 .FirstOrDefaultAsync(x => x.Name == normalizedName && x.Id != request.Dto.Id, cancellationToken);
 
             if (existingJournalName != null)
@@ -50,12 +60,49 @@ public class UpdateJournalCommandHandler(IDocumentSession session) : IRequestHan
 
         entity.Update(
             name: normalizedName != "" ? normalizedName : null,
-            styles: request.Dto.Styles);
+            projectId: request.Dto.ProjectId,
+            startAt: request.Dto.StartAt,
+            endAt: request.Dto.EndAt,
+            style: request.Dto.Style,
+            texFile: null,
+            pdfFile: null);
+
+        var (texFile, pdfFile) = await UploadFilesAsync(request.Dto, cancellationToken);
+        entity.UpdateFilePath(texFile, pdfFile);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
+    }
+
+    private async Task<(string? TexFile, string? PdfFile)> UploadFilesAsync(
+        UpdateJournalEntityDto dto,
+        CancellationToken cancellationToken)
+    {
+        var texFile = await UploadFileAsync(dto.TexUploadFile, cancellationToken);
+        var pdfFile = await UploadFileAsync(dto.PdfUploadFile, cancellationToken);
+
+        return (texFile, pdfFile);
+    }
+
+    private async Task<string?> UploadFileAsync(UploadFileBytes? file, CancellationToken cancellationToken)
+    {
+        if (file == null) return null;
+
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+        var extension = Path.GetExtension(file.FileName);
+        var shortId = Guid.NewGuid().ToString("N")[..8];
+        var name = $"{fileNameWithoutExtension}-{shortId}{extension}";
+
+        var result = await minIo.UploadFilesAsync(
+            name,
+            [file],
+            AppConstants.Bucket.ConferenceJournals,
+            true,
+            cancellationToken);
+
+        return result.FirstOrDefault()?.PublicURL;
     }
 
     #endregion

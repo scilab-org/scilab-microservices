@@ -80,21 +80,20 @@ public class UpsertSectionCommandHandler(
                 content: dto.Content,
                 paperId: section.PaperId,
                 displayOrder: section.DisplayOrder,
-                numbered: dto.Numbered,
                 isMainSection: false,
                 isOldMainSection: false,
                 version: version,
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,
+                mainIdea: section.MainIdea,
                 rule: section.Rule,
-                parentSectionId: dto.ParentSectionId,
                 //Mark new section as new version of main section
                 previousVersionSectionId: section.Id,
                 createdBy: request.UserName,
                 paperRule: section.PaperRule,
                 projectRule: section.ProjectRule,
-                sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description),
+                sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description, dto.MainIdea ?? section.MainIdea),
                 packages: dto.CurrentSectionPackages
             );
 
@@ -115,13 +114,12 @@ public class UpsertSectionCommandHandler(
         }
 
         // If the section is not main section, it means the section is already a new version of main section, so just update the section directly
-        var sectionRule = SectionRuleComposer.BuildSectionRule(dto.Title ?? section.Title, section.Description);
+        var sectionRule = SectionRuleComposer.BuildSectionRule(dto.Title ?? section.Title, section.Description, dto.MainIdea ?? section.MainIdea);
         section.Update(
             content: dto.Content,
-            numbered: dto.Numbered,
             title: dto.Title,
             sectionSumary: dto.SectionSumary,
-            parentSectionId: dto.ParentSectionId,
+            mainIdea: dto.MainIdea,
             sectionRule: sectionRule,
             packages: dto.CurrentSectionPackages,
             rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule)
@@ -168,14 +166,13 @@ public class UpsertSectionCommandHandler(
                 content: refSection.Content,
                 paperId: refSection.PaperId,
                 displayOrder: refSection.DisplayOrder,
-                numbered: refSection.Numbered,
                 isMainSection: false,
                 isOldMainSection: false,
                 title: refSection.Title,
                 sectionSumary: refSection.SectionSumary,
                 description: refSection.Description,
+                mainIdea: refSection.MainIdea,
                 rule: refSection.Rule,
-                parentSectionId: refSection.ParentSectionId,
                 previousVersionSectionId: refSection.Id,
                 createdBy: createdBy,
                 paperRule: refSection.PaperRule,

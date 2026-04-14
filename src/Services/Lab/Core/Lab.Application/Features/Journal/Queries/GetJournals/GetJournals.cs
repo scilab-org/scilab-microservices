@@ -19,7 +19,7 @@ public class GetJournalsQueryHandler(IDocumentSession session, IMapper mapper) :
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<JournalEntity>().AsQueryable();
+        var query = session.Query<ConferenceJournalEntity>().AsQueryable();
 
         if (!filter.Name.IsNullOrWhiteSpace())
         {

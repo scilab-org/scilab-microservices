@@ -103,9 +103,9 @@ public sealed class LabMappingProfile : Profile
 
     private void CreateJournalMappings()
     {
-        CreateMap<JournalEntity, JournalDto>();
+        CreateMap<ConferenceJournalEntity, JournalDto>();
 
-        CreateMap<JournalEntity, GetJournalByIdResult>()
+        CreateMap<ConferenceJournalEntity, GetJournalByIdResult>()
             .ForMember(dest => dest.Journal, opt => opt.MapFrom(src => src));
     }
 

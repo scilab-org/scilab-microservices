@@ -22,7 +22,7 @@ public class DeleteJournalCommandHandler(IDocumentSession session) : IRequestHan
 
     public async Task<Unit> Handle(DeleteJournalCommand request, CancellationToken cancellationToken)
     {
-        var journal = await session.LoadAsync<JournalEntity>(request.Id, cancellationToken)
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(request.Id, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Id.ToString());
 
         session.Delete(journal);

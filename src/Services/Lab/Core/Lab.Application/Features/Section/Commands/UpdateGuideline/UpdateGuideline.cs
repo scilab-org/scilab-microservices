@@ -62,7 +62,7 @@ public class UpdateGuidelineCommandHandler(
 
         foreach (var currentSection in sections)
         {
-            var sectionRule = SectionRuleComposer.BuildSectionRule(currentSection.Title, dto.Description);
+            var sectionRule = SectionRuleComposer.BuildSectionRule(currentSection.Title, dto.Description, currentSection.MainIdea);
             var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(
                 currentSection.ProjectRule,
                 currentSection.PaperRule,

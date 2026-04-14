@@ -118,12 +118,12 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             IsMainSection            = section?.IsMainSection ?? false,
             IsOldMainSection         = section?.IsOldMainSection ?? false,
             Version                  = section?.Version,
-            ParentSectionId          = section?.ParentSectionId,
             PreviousVersionSectionId = section?.PreviousVersionSectionId,
             NextVersionSectionId     = section?.NextVersionSectionId,
             CreatedBy                = section?.CreatedBy,
             CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = section?.LastModifiedOnUtc,
+            MainIdea                 = section?.MainIdea,
 
             Name     = user != null ? $"{user.FirstName} {user.LastName}".Trim() : member?.Username,
             Email    = user?.Email ?? member?.Email,

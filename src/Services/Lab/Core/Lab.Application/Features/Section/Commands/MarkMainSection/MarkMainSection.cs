@@ -9,7 +9,7 @@ using Marten;
 
 namespace Lab.Application.Features.Section.Commands.MarkMainSection;
 
-public record MarkMainSectionCommand(MarkMainSectionDto Dto, string UserName, Guid Id) : ICommand<Guid>;
+public record MarkMainSectionCommand(MarkMainSectionDto Dto, Guid Id) : ICommand<Guid>;
 
 public class MarkMainSectionCommandValidator : AbstractValidator<MarkMainSectionCommand>
 {
@@ -58,15 +58,14 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             content: section.Content,
             paperId: section.PaperId,
             displayOrder: section.DisplayOrder,
-            numbered: section.Numbered,
             isMainSection: true,
             isOldMainSection: false,
             version: $"Version {count + 1}",
             title: section.Title,
             sectionSumary: section.SectionSumary,
             description: section.Description,
+            mainIdea: section.MainIdea,
             rule: section.Rule,
-            parentSectionId: section.ParentSectionId,
             previousVersionSectionId: section.Id,
             references: section.References,
             createdBy: section.CreatedBy,
@@ -74,7 +73,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             projectRule: section.ProjectRule,
             packages: section.Packages,
             files: section.Files,
-            sectionRule: section.SectionRule ?? SectionRuleComposer.BuildSectionRule(section.Title, section.Description)
+            sectionRule: section.SectionRule ?? SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea)
         );
 
         section.Update(nextVersionSectionId: newMainSection.Id, isOldMainSection: true);
@@ -356,15 +355,14 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             content: generatedReferenceContent,
             paperId: mainReferenceSection.PaperId,
             displayOrder: mainReferenceSection.DisplayOrder,
-            numbered: mainReferenceSection.Numbered,
             isMainSection: false,
             isOldMainSection: false,
             version: mainReferenceSection.Version,
             title: mainReferenceSection.Title,
             sectionSumary: mainReferenceSection.SectionSumary,
             description: mainReferenceSection.Description,
+            mainIdea: mainReferenceSection.MainIdea,
             rule: mainReferenceSection.Rule,
-            parentSectionId: mainReferenceSection.ParentSectionId,
             previousVersionSectionId: mainReferenceSection.Id,
             references: distinctReferenceIds,
             createdBy: createdBy,

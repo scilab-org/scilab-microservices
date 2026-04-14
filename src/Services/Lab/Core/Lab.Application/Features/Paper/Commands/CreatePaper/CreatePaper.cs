@@ -1,8 +1,6 @@
 ﻿using Lab.Application.Dtos.Papers;
-using Lab.Application.Dtos.Sections;
 using Lab.Application.Rules;
 using Lab.Application.Services;
-using Lab.Domain.Constants;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
@@ -31,7 +29,7 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .WithMessage(MessageCode.PaperContextIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperContextIsRequired);
-                RuleFor(x => x.Dto.Journal)
+                RuleFor(x => x.Dto.ConferenceJournalName)
                     .NotEmpty()
                     .WithMessage(MessageCode.PaperJournalIsRequired)
                     .NotNull()
@@ -70,11 +68,10 @@ public class CreatePaperCommandHandler(
             abstractText: dto.Abstract,
             researchGap: dto.ResearchGap,
             mainContribution: dto.MainContribution,
+            researchAim: dto.ResearchAim,
             gapType: dto.GapType,
-            journal: dto.Journal.Name,
-            styleName: dto.Journal.StyleName,
-            styleDescription: dto.Journal.StyleDescription,
-            styleRule: dto.Journal.StyleRule,
+            conferenceJournalName: dto.ConferenceJournalName,
+            conferenceJournalId: dto.ConferenceJournalId,
             rule: DomainRules.Paper,
             status: dto.Status ?? PaperStatus.Processing,
             createdBy: request.UserName
@@ -84,27 +81,25 @@ public class CreatePaperCommandHandler(
         {
             foreach (var template in dto.Sections)
             {
-                var sectionRule = SectionRuleComposer.BuildSectionRule(template.Title, template.Description);
+                var sectionRule = SectionRuleComposer.BuildSectionRule(template.Title, template.Description, template.MainIdea);
                 var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(projectRule, paperRule, sectionRule);
 
                 var section = SectionEntity.Create(
-                    id: template.Id,
-                    content: template.Content,
+                    id: Guid.NewGuid(),
+                    content: "",
                     title: template.Title,
-                    sectionSumary: template.SectionSumary,
                     description: template.Description,
+                    mainIdea: template.MainIdea,
                     rule: normalizedRule,
                     displayOrder: template.DisplayOrder,
-                    numbered: template.Numbered,
                     isMainSection: true,
                     version: "Version Initial",
                     paperId: entity.Id,
-                    parentSectionId: template.ParentSectionId,
                     createdBy: request.UserName,
                     paperRule: paperRule,
                     projectRule: projectRule,
                     sectionRule: sectionRule,
-                    packages: template.Packages
+                    packages: []
                 );
                 session.Store(section);
             }
@@ -122,7 +117,7 @@ public class CreatePaperCommandHandler(
             {
                 await managementApiService.AddSubProjectMembersAsync(
                     subProjectId.Value,
-                    new[] { (request.UserId, AuthorizeConstants.PaperAuthor) },
+                    [(request.UserId, AuthorizeConstants.PaperAuthor)],
                     cancellationToken);
             }
         }

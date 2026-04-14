@@ -72,7 +72,7 @@ public sealed class UpdateProjectRulesCommandHandler(
                 : section.PaperRule;
 
             var sectionRule = string.IsNullOrWhiteSpace(section.SectionRule)
-                ? SectionRuleComposer.BuildSectionRule(section.Title, section.Description)
+                ? SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea)
                 : section.SectionRule;
 
             var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(

@@ -1,13 +1,19 @@
-﻿using Lab.Domain.Models;
-
-namespace Lab.Application.Dtos.Journals;
+﻿namespace Lab.Application.Dtos.Journals;
+using Lab.Domain.Models;
 
 /// <summary>
 /// DTO for creating a new Journal Entity
-/// Note: Different from Papers.CreateJournalDto which is for journal styles within a paper
 /// </summary>
 public class CreateJournalEntityDto
 {
-    public string Name { get; set; } = null!;
-    public List<Style>? Styles { get; set; }
+    public required string Name { get; set; }
+    public required Guid ProjectId { get; set; }
+    public required DateTimeOffset StartAt { get; set; }
+    public required DateTimeOffset EndAt { get; set; }
+    public string? Style { get; set; }
+    public UploadFileBytes? TexUploadFile { get; set; }
+    public UploadFileBytes? PdfUploadFile { get; set; }
+    public string? TemplateCode { get; set; }
+    public string? TemplateDescription { get; set; }
+    public List<Section>? Sections { get; set; }
 }

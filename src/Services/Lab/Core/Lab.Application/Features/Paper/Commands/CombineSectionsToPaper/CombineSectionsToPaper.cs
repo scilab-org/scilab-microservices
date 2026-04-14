@@ -83,21 +83,23 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IMan
             .Distinct()
             .ToList();
 
-        var versionNumber = paper.Versions.Count(x => x.PaperId == paper.Id) + 1;
+        var versionNumber = await session.Query<PaperVersionEntity>()
+            .CountAsync(x => x.PaperId == paper.Id, cancellationToken) + 1;
         var name = $"Version {versionNumber}";
         var savedContent = content;
         if (request.Dto.Content != null)
             savedContent = request.Dto.Content.Trim();
 
-        var version = paper.AddPaperVersion(
+        var version = PaperVersionEntity.Create(
+            id: Guid.NewGuid(),
+            paperId: paper.Id,
             name: name,
             content: savedContent,
-            reference: referenceSection!.References,
+            references: referenceSection!.References,
             files: files,
-            createdBy: request.UserName
-        );
+            createdBy: request.UserName);
 
-        session.Update(paper);
+        session.Store(version);
         await session.SaveChangesAsync(cancellationToken);
 
         return new CombineSectionsToPaperResult

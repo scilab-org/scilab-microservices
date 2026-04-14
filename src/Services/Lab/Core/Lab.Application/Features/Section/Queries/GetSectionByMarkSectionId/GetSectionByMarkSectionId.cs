@@ -1,5 +1,4 @@
-﻿using Lab.Application.Dtos.PaperContributors;
-using Lab.Application.Dtos.Sections;
+﻿using Lab.Application.Dtos.Sections;
 using Lab.Application.Models.Results;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
@@ -43,12 +42,12 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             IsMainSection            = mainSection?.IsMainSection ?? true,
             IsOldMainSection         = mainSection?.IsOldMainSection ?? false,
             Version                  = mainSection?.Version,
-            ParentSectionId          = mainSection?.ParentSectionId,
             PreviousVersionSectionId = mainSection?.PreviousVersionSectionId,
             NextVersionSectionId     = mainSection?.NextVersionSectionId,
             CreatedBy                = mainSection?.CreatedBy,
             CreatedOnUtc             = mainSection?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = mainSection?.LastModifiedOnUtc,
+            MainIdea                 = mainSection?.MainIdea,
 
             Name     = null,
             Email    = null,
@@ -63,7 +62,6 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         var currentMemberInfo = await managementApiService
             .GetMemberByPaperIdAsync(paperId, request.CurrentUserId, cancellationToken);
 
-        var currentMemberId = currentMemberInfo?.MemberId;
         // var currentEditingSectionIds = currentMemberId.HasValue
         //     ? allContributors
         //         .Where(c => c.MemberId == currentMemberId.Value
@@ -142,12 +140,12 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
                 IsMainSection            = section?.IsMainSection ?? false,
                 IsOldMainSection         = section?.IsOldMainSection ?? false,
                 Version                  = section?.Version,
-                ParentSectionId          = section?.ParentSectionId,
                 PreviousVersionSectionId = section?.PreviousVersionSectionId,
                 NextVersionSectionId     = section?.NextVersionSectionId,
                 CreatedBy                = section?.CreatedBy,
                 CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
                 LastModifiedOnUtc        = section?.LastModifiedOnUtc,
+                MainIdea                 = section?.MainIdea,
 
                 Name     = name,
                 Email    = user?.Email ?? member?.Email,

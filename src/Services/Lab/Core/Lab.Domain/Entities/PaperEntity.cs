@@ -1,7 +1,6 @@
 ﻿using Lab.Domain.Abstractions;
 using Lab.Domain.Enums;
 using Lab.Domain.Models;
-using System.Text.Json.Serialization;
 
 namespace Lab.Domain.Entities;
 
@@ -16,15 +15,12 @@ public sealed class PaperEntity : Entity<Guid>
     public string? Abstract { get; set; }
     public string? ResearchGap { get; set; }
     public string? MainContribution { get; set; }
+    public string? ResearchAim { get; set; }
     public string? Rule { get; set; }
     public string? GapType { get; set; }
-    public string? Journal { get; set; }
-    public string? StyleName { get; set; }
-    public string? StyleDescription { get; set; }
-    public string? StyleRule { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
     public PaperStatus? Status { get; set; }
-    [JsonPropertyName("Combines")]
-    public List<PaperVersionEntity> Versions { get; set; } = new();
     public List<Reference>? References { get; set; } = new();
 
     #endregion
@@ -38,14 +34,12 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText = null,
         string? researchGap = null,
         string? mainContribution = null,
+        string? researchAim = null,
         string? rule = null,
         string? gapType = null,
-        string? journal = null,
-        string? styleName = null,
-        string? styleDescription = null,
-        string? styleRule = null,
+        string? conferenceJournalName = null,
+        Guid? conferenceJournalId  = null,
         PaperStatus? status = null,
-        List<PaperVersionEntity>? versions = null,
         List<Reference>? references = null,
         string? createdBy = null)
     {
@@ -58,14 +52,12 @@ public sealed class PaperEntity : Entity<Guid>
             Abstract = abstractText,
             ResearchGap = researchGap,
             MainContribution = mainContribution,
+            ResearchAim = researchAim,
             Rule = rule,
             GapType = gapType,
-            Journal = journal,
-            StyleName = styleName,
-            StyleDescription = styleDescription,
-            StyleRule = styleRule,
+            ConferenceJournalName = conferenceJournalName,
+            ConferenceJournalId = conferenceJournalId,
             Status = status ?? PaperStatus.Processing,
-            Versions = versions ?? [],
             References = references ?? [],
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -83,14 +75,14 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText = null,
         string? researchGap = null,
         string? mainContribution = null,
+        string? researchAim = null,
         string? rule = null,
-        string? journal = null,
-        string? styleName = null,
-        string? styleDescription = null,
-        string? styleRule = null,
+        string? conferenceJournalName = null,
+        Guid? conferenceJournalId = null,
         PaperStatus? status = null,
         string? gapType = null,
-        List<Reference>? references = null)
+        List<Reference>? references = null,
+        string? lastModifiedBy = null)
     {
         Title = title ?? Title;
         Template = template ?? Template;
@@ -98,14 +90,14 @@ public sealed class PaperEntity : Entity<Guid>
         Abstract = abstractText ?? Abstract;
         ResearchGap = researchGap ?? ResearchGap;
         MainContribution = mainContribution ?? MainContribution;
+        ResearchAim = researchAim ?? ResearchAim;
         Rule = rule ?? Rule;
         GapType = gapType ?? GapType;
-        Journal = journal ?? Journal;
-        StyleName = styleName ?? StyleName;
-        StyleDescription = styleDescription ?? StyleDescription;
-        StyleRule = styleRule ?? StyleRule;
+        ConferenceJournalName = conferenceJournalName ?? ConferenceJournalName;
+        ConferenceJournalId = conferenceJournalId ?? ConferenceJournalId;
         Status = status ?? Status;
         References = references ?? References;
+        LastModifiedBy = lastModifiedBy ?? LastModifiedBy;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
@@ -114,39 +106,6 @@ public sealed class PaperEntity : Entity<Guid>
         if (string.IsNullOrWhiteSpace(url)) return;
 
         FilePath = url;
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-    }
-
-    public PaperVersionEntity AddPaperVersion(string? name, string? content, List<Guid>? reference, List<string>? files,
-        string? createdBy)
-    {
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(content)) return null!;
-
-        var version = PaperVersionEntity.Create(
-            id: Guid.NewGuid(),
-            paperId: Id,
-            name: name,
-            content: content,
-            references: reference,
-            files: files,
-            createdBy: createdBy);
-
-        Versions.Add(version);
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-        return version;
-    }
-
-    public void UpdatePaperVersion(Guid versionId, string? content,
-        string? lastModifiedBy)
-    {
-        var version = Versions.FirstOrDefault(c => c.Id == versionId);
-        if (version == null) return;
-
-        version.Update(
-            content: content,
-            lastModifiedBy: lastModifiedBy,
-            paperId: Id);
-
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

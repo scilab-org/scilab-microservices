@@ -47,21 +47,16 @@ public class UpdateCombinePaperCommandHandler(IDocumentSession session, IManagem
 
         await session.BeginTransactionAsync(cancellationToken);
 
-        var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
-                    ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
+        _ = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
+            ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
 
-        var version = paper.Versions.FirstOrDefault(x => x.Id == request.VersionId)
+        var version = await session.LoadAsync<PaperVersionEntity>(request.VersionId, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.PaperCombineIsNotExists, request.VersionId.ToString());
 
         version.Content = dto.Content;
         version.LastModifiedBy = request.UserName;
 
-        paper.UpdatePaperVersion(
-            versionId: version.Id,
-            content: version.Content,
-            lastModifiedBy: version.LastModifiedBy);
-
-        session.Update(paper);
+        session.Update(version);
         await session.SaveChangesAsync(cancellationToken);
 
         return version.Id;

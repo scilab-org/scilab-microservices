@@ -24,10 +24,11 @@ public sealed class GetVersionsByPaperIdQueryHandler(IDocumentSession session)
         GetVersionsByPaperIdQuery request,
         CancellationToken cancellationToken)
     {
-        var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
-                    ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
+        var paperExists = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
+                          ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
 
-        var items = paper.Versions
+        var items = await session.Query<PaperVersionEntity>()
+            .Where(x => x.PaperId == paperExists.Id)
             .OrderByDescending(x => x.CreatedOnUtc)
             .Select(version => new PaperVersionInfo
             {
@@ -41,8 +42,8 @@ public sealed class GetVersionsByPaperIdQueryHandler(IDocumentSession session)
                 LastModifiedBy = version.LastModifiedBy,
                 LastModifiedOnUtc = version.LastModifiedOnUtc ?? version.CreatedOnUtc
             })
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return new GetVersionsByPaperIdResult(items);
+        return new GetVersionsByPaperIdResult(items.ToList());
     }
 }

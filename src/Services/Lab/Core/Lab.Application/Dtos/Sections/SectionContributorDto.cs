@@ -12,13 +12,13 @@ public class SectionContributorDto
     public string? Title { get; set; }
     public bool IsMainSection { get; set; }
     public string? Version { get; set; }
-    public Guid? ParentSectionId { get; set; }
     public Guid? PreviousVersionSectionId { get; set; }
     public Guid? NextVersionSectionId { get; set; }
     public string? CreatedBy { get; set; }
     public DateTimeOffset CreatedOnUtc { get; set; }
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
     public bool? IsOldMainSection { get; set; } = false;
+    public string? MainIdea { get; set; }
 
 
     //User info

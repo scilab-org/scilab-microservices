@@ -29,10 +29,10 @@ public class GetCombinePaperByIdQueryHandler(IDocumentSession session) : IComman
 {
     public async Task<CombineSectionsToPaperResult> Handle(GetCombinePaperByIdQuery request, CancellationToken cancellationToken)
     {
-        var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
-                    ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
+        _ = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken)
+            ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.PaperId.ToString());
 
-        var version = paper.Versions.FirstOrDefault(x => x.Id == request.VersionId)
+        var version = await session.LoadAsync<PaperVersionEntity>(request.VersionId, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.PaperCombineIsNotExists, request.VersionId.ToString());
 
         return new CombineSectionsToPaperResult

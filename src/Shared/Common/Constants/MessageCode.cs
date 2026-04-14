@@ -216,6 +216,20 @@ public sealed class MessageCode
 
     public const string JournalNameAlreadyExists = "JOURNAL_NAME_ALREADY_EXISTS";
 
+    public const string JournalTexFileInvalidExtension = "JOURNAL_TEX_FILE_INVALID_EXTENSION";
+
+    public const string JournalPdfFileInvalidExtension = "JOURNAL_PDF_FILE_INVALID_EXTENSION";
+
+    public const string JournalProjectIdIsRequired = "JOURNAL_PROJECT_ID_IS_REQUIRED";
+
+    public const string JournalStartDateIsRequired = "JOURNAL_START_DATE_IS_REQUIRED";
+
+    public const string JournalEndDateIsRequired = "JOURNAL_END_DATE_IS_REQUIRED";
+
+    public const string JournalStartDateMustBeforeEndDate = "JOURNAL_START_DATE_MUST_BE_BEFORE_END_DATE";
+
+    public const string JournalSectionsAreRequired = "JOURNAL_SECTIONS_ARE_REQUIRED";
+
     #endregion
 
     #region Task Management

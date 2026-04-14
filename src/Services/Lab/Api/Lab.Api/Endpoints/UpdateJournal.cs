@@ -1,4 +1,9 @@
-﻿using Lab.Api.Constants;
+﻿using BuildingBlocks.Exceptions;
+using BuildingBlocks.Swagger.Extensions;
+using Common.Constants;
+using Common.Models;
+using Lab.Api.Constants;
+using Lab.Api.Models.Journal;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Features.Journal.Commands.UpdateJournal;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +19,7 @@ public sealed class UpdateJournal : ICarterModule
         app.MapPut(ApiRoutes.Journal.Update, HandleUpdateJournalAsync)
             .WithTags(ApiRoutes.Journal.Tags)
             .WithName(nameof(UpdateJournal))
+            .WithMultipartForm<UpdateJournalRequest>()
             .Produces<ApiUpdatedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -28,13 +34,41 @@ public sealed class UpdateJournal : ICarterModule
     private async Task<IResult> HandleUpdateJournalAsync(
         ISender sender,
         Guid id,
-        [FromBody] UpdateJournalEntityDto dto)
+        [FromForm] UpdateJournalRequest req)
     {
-        dto.Id = id;
+        if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
+
+        var dto = new UpdateJournalEntityDto
+        {
+            Id = id,
+            Name = req.Name,
+            ProjectId = req.ProjectId,
+            StartAt = req.StartAt,
+            EndAt = req.EndAt,
+            Style = req.Style,
+            TexUploadFile = await ToUploadFileAsync(req.TexFile),
+            PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
+        };
+
         var command = new UpdateJournalCommand(dto);
         var result = await sender.Send(command);
 
         return TypedResults.Ok(new ApiUpdatedResponse<Guid>(result));
+    }
+
+    private static async Task<UploadFileBytes?> ToUploadFileAsync(IFormFile? file)
+    {
+        if (file == null) return null;
+
+        await using var ms = new MemoryStream();
+        await file.CopyToAsync(ms);
+
+        return new UploadFileBytes
+        {
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            Bytes = ms.ToArray()
+        };
     }
 
     #endregion

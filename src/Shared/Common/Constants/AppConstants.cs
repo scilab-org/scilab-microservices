@@ -18,6 +18,8 @@ public sealed class AppConstants
 
         public const string Sections = "sections";
 
+        public const string ConferenceJournals = "conference-journals";
+
         public const string UserAvatars = "user-avatars";
 
         public const string DefaultAvatar = "user-avatars/default.png";

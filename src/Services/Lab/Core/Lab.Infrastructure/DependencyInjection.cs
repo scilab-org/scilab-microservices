@@ -4,7 +4,6 @@ using Lab.Domain.Entities;
 using Lab.Infrastructure.ApiClients;
 using Marten;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Minio;
@@ -36,7 +35,7 @@ public static class DependencyInjection
             opts.Schema.For<TagEntity>()
                 .SoftDeleted()
                 .Index(t => t.Name, idx => { idx.IsUnique = true; });
-            opts.Schema.For<JournalEntity>()
+            opts.Schema.For<ConferenceJournalEntity>()
                 .SoftDeleted();
             opts.Schema.For<PaperContributorEntity>()
                 .SoftDeleted();

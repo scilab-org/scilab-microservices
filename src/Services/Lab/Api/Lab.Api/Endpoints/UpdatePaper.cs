@@ -32,10 +32,10 @@ public class UpdatePaper : ICarterModule
         [FromBody] UpdatePaperDto dto)
     {
         var currentUser = httpContext.GetCurrentUser();
-        if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
+        if (string.IsNullOrWhiteSpace(currentUser.Id))
             return Results.Unauthorized();
-        
-        var command = new UpdatePaperCommand(dto, id, userId);
+
+        var command = new UpdatePaperCommand(dto, id, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Created($"{ApiRoutes.Paper.Create}/{result}", new ApiCreatedResponse<Guid>(result));

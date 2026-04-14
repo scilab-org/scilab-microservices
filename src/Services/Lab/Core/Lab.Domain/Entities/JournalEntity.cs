@@ -1,26 +1,43 @@
 ﻿using Lab.Domain.Abstractions;
-using Lab.Domain.Models;
 
 namespace Lab.Domain.Entities;
 
-public class JournalEntity : Entity<Guid>
+public class ConferenceJournalEntity : Entity<Guid>
 {
     #region Fields, Properties and Indexers
 
     public string Name { get; set; } = null!;
-    public List<Style> Styles { get; set; } = [];
+    public Guid ProjectId { get; set; }
+    public DateTimeOffset StartAt { get; set; }
+    public DateTimeOffset EndAt { get; set; }
+    public string? TexFile { get; set; }
+    public string? PdfFile { get; set; }
+    public string? Style { get; set; }
 
     #endregion
 
     #region Factories
 
-    public static JournalEntity Create(Guid id, string name, List<Style>? styles = null)
+    public static ConferenceJournalEntity Create(
+        Guid id,
+        string name,
+        Guid projectId,
+        DateTimeOffset startAt,
+        DateTimeOffset endAt,
+        string? style,
+        string? texFile,
+        string? pdfFile)
     {
-        return new JournalEntity()
+        return new ConferenceJournalEntity()
         {
             Id = id,
             Name = name,
-            Styles = styles ?? [],
+            ProjectId = projectId,
+            StartAt = startAt,
+            EndAt = endAt,
+            Style = style,
+            TexFile = texFile,
+            PdfFile = pdfFile,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -30,11 +47,30 @@ public class JournalEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string? name, List<Style>? styles = null)
+    public void Update(
+        string? name = null,
+        Guid? projectId = null,
+        DateTimeOffset? startAt = null,
+        DateTimeOffset? endAt = null,
+        string? style = null,
+        string? texFile = null,
+        string? pdfFile = null)
     {
         Name = name ?? Name;
-        if (styles != null)
-            Styles = styles;
+        ProjectId = projectId ?? ProjectId;
+        StartAt = startAt ?? StartAt;
+        EndAt = endAt ?? EndAt;
+        Style = style ?? Style;
+        TexFile = texFile ?? TexFile;
+        PdfFile = pdfFile ?? PdfFile;
+        LastModifiedOnUtc = DateTimeOffset.UtcNow;
+    }
+
+    public void UpdateFilePath(string? texFileUrl, string? pdfFileUrl)
+    {
+        if (string.IsNullOrWhiteSpace(texFileUrl) && string.IsNullOrWhiteSpace(pdfFileUrl)) return;
+        TexFile = texFileUrl;
+        PdfFile = pdfFileUrl;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
