@@ -7,6 +7,7 @@ using Lab.Domain.Models;
 public class CreateJournalEntityDto
 {
     public Guid ProjectId { get; set; }
+    public Guid? TemplateId { get; set; }
     public required string Name { get; set; }
     public required DateTimeOffset StartAt { get; set; }
     public required DateTimeOffset EndAt { get; set; }

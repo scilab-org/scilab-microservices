@@ -1,6 +1,5 @@
 ﻿using Lab.Application.Dtos.Journals;
 using Lab.Application.Services;
-using Common.Constants;
 using JasperFx.Core;
 using Lab.Domain.Entities;
 using Marten;
@@ -21,6 +20,10 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
             {
                 RuleFor(x => x.Dto.Id)
                     .NotEmpty().WithMessage(MessageCode.JournalIdIsRequired);
+
+                RuleFor(x => x.Dto.TemplateId)
+                    .Must(id => !id.HasValue || id.Value != Guid.Empty)
+                    .WithMessage(MessageCode.BadRequest);
 
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
@@ -65,11 +68,19 @@ public class UpdateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
                 throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, normalizedName);
         }
 
+        if (request.Dto.TemplateId.HasValue)
+        {
+            var template = await session.LoadAsync<TemplateEntity>(request.Dto.TemplateId.Value, cancellationToken);
+            if (template == null)
+                throw new NotFoundException(MessageCode.NotFound, request.Dto.TemplateId.Value.ToString());
+        }
+
         entity.Update(
             name: normalizedName != "" ? normalizedName : null,
             startAt: request.Dto.StartAt,
             endAt: request.Dto.EndAt,
             style: request.Dto.Style,
+            templateId: request.Dto.TemplateId,
             texFile: null,
             pdfFile: null,
             lastModifiedBy: request.UserName);

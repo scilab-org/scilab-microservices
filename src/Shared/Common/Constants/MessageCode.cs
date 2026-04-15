@@ -122,8 +122,6 @@ public sealed class MessageCode
 
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
 
-    public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
-
     public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
     public const string PaperContextIsRequired = "PAPER_CONTEXT_IS_REQUIRED";
@@ -249,6 +247,30 @@ public sealed class MessageCode
     public const string PaperContributorNotFound = "PAPER_CONTRIBUTOR_NOT_FOUND";
 
     public const string ContributorIsNotExists = "CONTRIBUTOR_IS_NOT_EXISTS";
+
+    #endregion
+
+    #region Template Management
+
+    public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
+
+    public const string TemplateCodeIsRequired = "TEMPLATE_CODE_IS_REQUIRED";
+
+    public const string TemplateSectionsAreRequired = "TEMPLATE_SECTIONS_ARE_REQUIRED";
+
+    public const string SectionIsRequired = "SECTION_IS_REQUIRED";
+
+    public const string SectionTitleIsRequired = "SECTION_TITLE_IS_REQUIRED";
+
+    public const string SectionRuleIsRequired = "SECTION_RULE_IS_REQUIRED";
+
+    public const string SectionDisplayOrderIsRequired = "SECTION_DISPLAY_ORDER_IS_REQUIRED";
+
+    public const string TemplateIdIsRequired = "TEMPLATE_ID_IS_REQUIRED";
+
+    public const string TemplateIsNotExists = "TEMPLATE_IS_NOT_EXISTS";
+
+    public const string TemplateCodeIsAlreadyExists = "TEMPLATE_CODE_IS_ALREADY_EXISTS";
 
     #endregion
 }

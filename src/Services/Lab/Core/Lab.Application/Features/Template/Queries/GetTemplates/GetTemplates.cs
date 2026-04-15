@@ -22,6 +22,12 @@ public class GetTemplatesQueryHandler(IDocumentSession session, IMapper mapper)
         var query = session.Query<TemplateEntity>().AsQueryable();
 
 
+        if (!filter.Description.IsNullOrWhiteSpace())
+        {
+            var description = filter.Description.Trim();
+            query = query.Where(x => x.Description != null && x.Description.Contains(description));
+        }
+
         if (!filter.Code.IsNullOrWhiteSpace())
         {
             var code = filter.Code.Trim();

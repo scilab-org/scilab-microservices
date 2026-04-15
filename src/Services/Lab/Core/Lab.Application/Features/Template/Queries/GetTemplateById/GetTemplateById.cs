@@ -28,7 +28,7 @@ public class GetTemplateByIdQueryHandler(IDocumentSession session, IMapper mappe
         var template = await session.LoadAsync<TemplateEntity>(request.Id, cancellationToken);
 
         if (template is null)
-            throw new NotFoundException($"Template with id {request.Id} not found.");
+            throw new NotFoundException(MessageCode.TemplateIsNotExists, request.Id.ToString());
 
         var dto = mapper.Map<TemplateDto>(template);
 
@@ -37,4 +37,3 @@ public class GetTemplateByIdQueryHandler(IDocumentSession session, IMapper mappe
 
     #endregion
 }
-

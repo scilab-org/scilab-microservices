@@ -1,5 +1,4 @@
 ﻿using BuildingBlocks.Authentication.Extensions;
-using Common.Models.Reponses;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Swagger.Extensions;
 using Common.Constants;
@@ -46,10 +45,14 @@ public sealed class CreateJournal : ICarterModule
         var dto = new CreateJournalEntityDto
         {
             ProjectId = req.ProjectId,
+            TemplateId = req.TemplateId,
             Name = req.Name,
             StartAt = req.StartAt,
             EndAt = req.EndAt,
             Style = req.Style,
+            TemplateCode = req.TemplateCode,
+            TemplateDescription = req.TemplateDescription,
+            Sections = req.Sections,
             TexUploadFile = await ToUploadFileAsync(req.TexFile),
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
         };

@@ -34,7 +34,12 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
 
                 RuleFor(x => x.Dto.Sections)
                     .NotNull().WithMessage(MessageCode.JournalSectionsAreRequired)
-                    .NotEmpty().WithMessage(MessageCode.JournalSectionsAreRequired);
+                    .NotEmpty().WithMessage(MessageCode.JournalSectionsAreRequired)
+                    .When(x => !x.Dto.TemplateId.HasValue || x.Dto.TemplateId == Guid.Empty);
+
+                RuleFor(x => x.Dto.TemplateId)
+                    .Must(id => !id.HasValue || id.Value != Guid.Empty)
+                    .WithMessage(MessageCode.BadRequest);
 
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
@@ -71,11 +76,29 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
         if (existingJournal != null)
             throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, request.Dto.Name);
 
-        var template = TemplateEntity.Create(
-            code: request.Dto.TemplateCode ?? $"TEMPLATE-{id:N}",
-            description: request.Dto.TemplateDescription ?? $"Default template for {normalizedName}",
-            sections: request.Dto.Sections,
-            createdBy: request.UserName);
+        var existingTemplateId = request.Dto.TemplateId;
+        var useExistingTemplate = existingTemplateId.HasValue && existingTemplateId.Value != Guid.Empty;
+
+        var templateToStore = default(TemplateEntity);
+        Guid templateId;
+        if (useExistingTemplate)
+        {
+            var template = await session.LoadAsync<TemplateEntity>(existingTemplateId!.Value, cancellationToken);
+            if (template == null)
+                throw new NotFoundException(MessageCode.NotFound, existingTemplateId.Value.ToString());
+
+            templateId = template.Id;
+        }
+        else
+        {
+            templateToStore = TemplateEntity.Create(
+                code: request.Dto.TemplateCode ?? $"TEMPLATE-{id:N}",
+                description: request.Dto.TemplateDescription ?? $"Default template for {normalizedName}",
+                sections: request.Dto.Sections,
+                createdBy: request.UserName);
+
+            templateId = templateToStore.Id;
+        }
 
         var entity = ConferenceJournalEntity.Create(
             id: id,
@@ -84,7 +107,7 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
             startAt: request.Dto.StartAt,
             endAt: request.Dto.EndAt,
             style: request.Dto.Style,
-            templateId: template.Id,
+            templateId: templateId,
             texFile: null,
             pdfFile: null,
             createdBy: request.UserName);
@@ -95,7 +118,8 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
 
         session.Store(entity);
 
-        session.Store(template);
+        if (!useExistingTemplate)
+            session.Store(templateToStore!);
 
         await session.SaveChangesAsync(cancellationToken);
 

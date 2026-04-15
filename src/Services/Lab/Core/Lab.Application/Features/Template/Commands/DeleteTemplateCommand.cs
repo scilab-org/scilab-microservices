@@ -15,7 +15,7 @@ public class DeleteTemplateCommandHandler(IDocumentSession session)
     {
         var template = await session.LoadAsync<TemplateEntity>(command.Id, cancellationToken);
         if (template is null)
-            throw new NotFoundException($"Template with id {command.Id} not found.");
+            throw new NotFoundException(MessageCode.TemplateIsNotExists, command.Id.ToString());
 
         session.Delete(template);
         await session.SaveChangesAsync(cancellationToken);
@@ -25,4 +25,3 @@ public class DeleteTemplateCommandHandler(IDocumentSession session)
 
     #endregion
 }
-

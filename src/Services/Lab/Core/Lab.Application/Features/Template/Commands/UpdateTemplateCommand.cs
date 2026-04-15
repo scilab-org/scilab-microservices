@@ -15,7 +15,7 @@ public class UpdateTemplateCommandCommandHandler(IDocumentSession session)
     {
         var current = await session.LoadAsync<TemplateEntity>(command.Id, cancellationToken);
         if (current == null)
-            throw new ("Template not found.");
+            throw new NotFoundException(MessageCode.TemplateIsNotExists, command.Id.ToString());
 
         current.Update(
             description: command.Dto.Description ?? current.Description,

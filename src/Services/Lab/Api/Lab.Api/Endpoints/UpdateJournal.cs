@@ -47,6 +47,7 @@ public sealed class UpdateJournal : ICarterModule
         var dto = new UpdateJournalEntityDto
         {
             Id = id,
+            TemplateId = req.TemplateId,
             Name = req.Name,
             StartAt = req.StartAt,
             EndAt = req.EndAt,
