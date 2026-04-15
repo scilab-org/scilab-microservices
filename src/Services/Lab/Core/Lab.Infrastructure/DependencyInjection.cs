@@ -82,6 +82,14 @@ public static class DependencyInjection
                 c.Timeout = TimeSpan.FromSeconds(30);
             });
 
+        services.AddRefitClient<IAiServiceApi>()
+            .AddHttpMessageHandler<ManagementAuthHeaderHandler>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(cfg[$"{ApiClientCfg.AiService.Section}:{ApiClientCfg.AiService.BaseUrl}"]!);
+                c.Timeout = TimeSpan.FromMinutes(5);
+            });
+
         //services.InitializeMartenWith<InitialData>();
 
         return services;

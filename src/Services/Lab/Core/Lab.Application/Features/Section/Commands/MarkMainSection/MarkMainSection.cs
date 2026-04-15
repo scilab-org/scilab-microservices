@@ -4,6 +4,7 @@ using Lab.Application.Rules;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using PaperReference = Lab.Domain.Models.Reference;
 using Marten;
 
@@ -58,6 +59,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             content: section.Content,
             paperId: section.PaperId,
             displayOrder: section.DisplayOrder,
+            status: SectionStatus.Completed,
             isMainSection: true,
             isOldMainSection: false,
             version: $"Version {count + 1}",
@@ -355,6 +357,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             content: generatedReferenceContent,
             paperId: mainReferenceSection.PaperId,
             displayOrder: mainReferenceSection.DisplayOrder,
+            status: SectionStatus.InProgress,
             isMainSection: false,
             isOldMainSection: false,
             version: mainReferenceSection.Version,

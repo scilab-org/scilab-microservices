@@ -67,8 +67,12 @@ public sealed class UpdateProjectRulesCommandHandler(
             if (!paperMap.TryGetValue(section.PaperId, out var paper))
                 continue;
 
+            var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken)
+                          ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
+                              paper.ConferenceJournalId.ToString());
+
             var paperRule = string.IsNullOrWhiteSpace(section.PaperRule)
-                ? SectionRuleComposer.BuildPaperRule(paper)
+                ? SectionRuleComposer.BuildPaperRule(paper, journal.Style!)
                 : section.PaperRule;
 
             var sectionRule = string.IsNullOrWhiteSpace(section.SectionRule)

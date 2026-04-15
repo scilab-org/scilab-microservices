@@ -101,15 +101,7 @@ public interface IManagementApiService
     /// </summary>
     Task<bool> AddProjectConferenceJournalsAsync(
         Guid projectId,
-        IEnumerable<Guid> conferenceJournalIds,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Removes conference journal ids from a project in Management service.
-    /// </summary>
-    Task<bool> RemoveProjectConferenceJournalsAsync(
-        Guid projectId,
-        IEnumerable<Guid> conferenceJournalIds,
+        Guid journalId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

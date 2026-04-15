@@ -1,4 +1,5 @@
 ﻿using Lab.Domain.Abstractions;
+using Lab.Domain.Enums;
 
 namespace Lab.Domain.Entities;
 
@@ -10,6 +11,7 @@ public class SectionEntity : Entity<Guid>
     public string? Title { get; set; }
     public string? SectionSumary { get; set; }
     public string? Description { get; set; }
+    public SectionStatus Status { get; set; }
     public string? MainIdea { get; set; }
     public string? Rule { get; set; }
     public string? PaperRule { get; set; }
@@ -34,6 +36,7 @@ public class SectionEntity : Entity<Guid>
         string? content,
         Guid paperId,
         float displayOrder,
+        SectionStatus status,
         bool? isMainSection = false,
         bool? isOldMainSection = false,
         string? version = null,
@@ -58,6 +61,7 @@ public class SectionEntity : Entity<Guid>
             Content = content,
             PaperId = paperId,
             Title = title,
+            Status = status,
             Version = version,
             SectionSumary = sectionSumary,
             Description = description,
@@ -89,6 +93,7 @@ public class SectionEntity : Entity<Guid>
         float? displayOrder = null,
         string? sectionSumary = null,
         string? description = null,
+        SectionStatus? status = null,
         string? mainIdea = null,
         string? rule = null,
         bool? isMainSection = null,
@@ -109,6 +114,7 @@ public class SectionEntity : Entity<Guid>
         DisplayOrder = displayOrder ?? DisplayOrder;
         SectionSumary = sectionSumary ?? SectionSumary;
         Description = description ?? Description;
+        Status = status ?? Status;
         MainIdea = mainIdea ?? MainIdea;
         Rule = rule ?? Rule;
         PaperRule = paperRule ?? PaperRule;

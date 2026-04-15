@@ -189,34 +189,26 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
 
     public async Task<bool> AddProjectConferenceJournalsAsync(
         Guid projectId,
-        IEnumerable<Guid> conferenceJournalIds,
+        Guid journalId,
         CancellationToken cancellationToken = default)
     {
-        var ids = conferenceJournalIds.Where(x => x != Guid.Empty).Distinct().ToList();
-        if (ids.Count == 0)
-            return false;
-
-        var response = await managementServiceApi.AddProjectConferenceJournalsAsync(
+        var body = await managementServiceApi.AddProjectConferenceJournalsAsync(
             projectId,
-            new ProjectConferenceJournalsRequest { ConferenceJournalIds = ids });
+            journalId);
 
-        return response.IsSuccessStatusCode;
+        return body.IsSuccessStatusCode;
     }
 
     public async Task<bool> RemoveProjectConferenceJournalsAsync(
         Guid projectId,
-        IEnumerable<Guid> conferenceJournalIds,
+        Guid journalId,
         CancellationToken cancellationToken = default)
     {
-        var ids = conferenceJournalIds.Where(x => x != Guid.Empty).Distinct().ToList();
-        if (ids.Count == 0)
-            return false;
-
-        var response = await managementServiceApi.RemoveProjectConferenceJournalsAsync(
+        var body = await managementServiceApi.RemoveProjectConferenceJournalsAsync(
             projectId,
-            new ProjectConferenceJournalsRequest { ConferenceJournalIds = ids });
+            journalId);
 
-        return response.IsSuccessStatusCode;
+        return body.IsSuccessStatusCode;
     }
 
     public async Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(

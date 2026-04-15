@@ -4,6 +4,7 @@ using Lab.Application.Rules;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 using PaperReference = Lab.Domain.Models.Reference;
 
@@ -117,6 +118,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 content: generatedReferenceContent,
                 paperId: referenceMainSection.PaperId,
                 displayOrder: referenceMainSection.DisplayOrder,
+                status: SectionStatus.InProgress,
                 isMainSection: null,
                 isOldMainSection: null,
                 title: referenceMainSection.Title,
@@ -156,6 +158,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 content: currentEditSection.Content,
                 paperId: currentEditSection.PaperId,
                 displayOrder: currentEditSection.DisplayOrder,
+                status: SectionStatus.InProgress,
                 isMainSection: null,
                 isOldMainSection: null,
                 title: currentEditSection.Title,

@@ -57,8 +57,18 @@ public class CreatePaperCommandHandler(
         var project = await managementApiService.GetProjectByIdAsync(dto.ProjectId, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.ProjectIsNotExists, dto.ProjectId.ToString());
 
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+                      ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
+                          dto.ConferenceJournalId.ToString());
+
+        var projectIds = journal.ProjectIds ?? [];
+        projectIds.Add(dto.ProjectId);
+        projectIds = projectIds.Distinct().ToList();
+        journal.Update(projectIds: projectIds);
+        session.Update(journal);
+
         var projectRule = SectionRuleComposer.BuildProjectRule(project);
-        var paperRule = SectionRuleComposer.BuildPaperRule(dto);
+        var paperRule = SectionRuleComposer.BuildPaperRule(dto, journal.Style!);
 
         var entity = PaperEntity.Create(
             id: Guid.NewGuid(),
@@ -81,14 +91,16 @@ public class CreatePaperCommandHandler(
         {
             foreach (var template in dto.Sections)
             {
-                var sectionRule = SectionRuleComposer.BuildSectionRule(template.Title, template.Description, template.MainIdea);
+                var sectionRule =
+                    SectionRuleComposer.BuildSectionRule(template.Title, template.SectionRule, template.MainIdea);
                 var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(projectRule, paperRule, sectionRule);
 
                 var section = SectionEntity.Create(
                     id: Guid.NewGuid(),
                     content: "",
                     title: template.Title,
-                    description: template.Description,
+                    description: template.SectionRule,
+                    status: SectionStatus.NotStarted,
                     mainIdea: template.MainIdea,
                     rule: normalizedRule,
                     displayOrder: template.DisplayOrder,
@@ -120,6 +132,12 @@ public class CreatePaperCommandHandler(
                     [(request.UserId, AuthorizeConstants.PaperAuthor)],
                     cancellationToken);
             }
+
+            var result = await managementApiService.AddProjectConferenceJournalsAsync(
+                dto.ProjectId, dto.ConferenceJournalId, cancellationToken);
+
+            if (!result)
+                throw new NotFoundException(MessageCode.ProjectIsNotExists, dto.ProjectId.ToString());
         }
 
         return entity.Id;

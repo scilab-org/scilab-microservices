@@ -2,6 +2,7 @@
 using Lab.Application.Rules;
 using Lab.Application.Dtos.Sections;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 
 namespace Lab.Application.Features.Section.Commands.UpsertSection;
@@ -80,6 +81,7 @@ public class UpsertSectionCommandHandler(
                 content: dto.Content,
                 paperId: section.PaperId,
                 displayOrder: section.DisplayOrder,
+                status: SectionStatus.InProgress,
                 isMainSection: false,
                 isOldMainSection: false,
                 version: version,
@@ -119,6 +121,7 @@ public class UpsertSectionCommandHandler(
             content: dto.Content,
             title: dto.Title,
             sectionSumary: dto.SectionSumary,
+            status: SectionStatus.InProgress,
             mainIdea: dto.MainIdea,
             sectionRule: sectionRule,
             packages: dto.CurrentSectionPackages,
@@ -166,6 +169,7 @@ public class UpsertSectionCommandHandler(
                 content: refSection.Content,
                 paperId: refSection.PaperId,
                 displayOrder: refSection.DisplayOrder,
+                status: SectionStatus.InProgress,
                 isMainSection: false,
                 isOldMainSection: false,
                 title: refSection.Title,
