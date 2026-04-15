@@ -1,6 +1,4 @@
-﻿using Lab.Domain.Enums;
-
-namespace Lab.Api.Models.PaperBank;
+﻿namespace Lab.Api.Models.PaperBank;
 
 public class UpdatePaperBankRequest
 {
@@ -11,7 +9,6 @@ public class UpdatePaperBankRequest
     public string? Publisher { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
-    public PaperStatus? Status { get; set; }
     public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }

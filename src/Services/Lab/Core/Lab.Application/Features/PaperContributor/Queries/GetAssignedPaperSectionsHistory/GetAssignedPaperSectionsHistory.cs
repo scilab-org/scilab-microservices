@@ -14,7 +14,7 @@ public record GetAssignedPaperSectionsHistoryQuery(
     PaginationRequest Paging)
     : IQuery<GetAssignedPaperSectionsHistoryResult>;
 
-public sealed class GetAssignedPaperSectionsHistoryQueryValidator 
+public sealed class GetAssignedPaperSectionsHistoryQueryValidator
     : AbstractValidator<GetAssignedPaperSectionsHistoryQuery>
 {
     public GetAssignedPaperSectionsHistoryQueryValidator()
@@ -44,7 +44,7 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
 {
     var paging = request.Paging;
     var filter = request.Filter;
-    
+
     var memberInfo = await managementApiService.GetMemberByPaperIdAsync(
         request.PaperId, request.UserId, cancellationToken);
 
@@ -69,7 +69,7 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
             .ToList();
     }
 
- 
+
     var contributorGroups = contributors
         .GroupBy(x => x.MarkSectionId)
         .Select(g => g.OrderByDescending(x => x.CreatedOnUtc).First())
@@ -115,15 +115,14 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
                         Title = section.Title,
                         Content = section.Content,
                         Description = section.Description,
+                        MainIdea = section.MainIdea,
                         SectionSumary = section.SectionSumary,
                         CreatedOnUtc = section.CreatedOnUtc,
                         LastModifiedOnUtc = section.LastModifiedOnUtc,
                         DisplayOrder = section.DisplayOrder,
-                        Numbered = section.Numbered,
-                        ParentSectionId = section.ParentSectionId,
                         PaperContributorId = contributor.Id,
                         MemberId = memberId,
-                        MarkSectionId = section.Id, 
+                        MarkSectionId = section.Id,
                         SectionRole = contributor.SectionRole,
                         IsOldMainSection = section.IsOldMainSection,
                         IsMainSection = section.IsMainSection
@@ -138,7 +137,7 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
         .GroupBy(x => x.Id)
         .Select(g => g.First())
         .ToList();
-    
+
     var sortedItems = historyItems
         .OrderBy(x => x.DisplayOrder)
         .ThenByDescending(x => x.CreatedOnUtc)

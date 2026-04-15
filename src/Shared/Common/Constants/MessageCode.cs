@@ -34,6 +34,10 @@ public sealed class MessageCode
 
     public const string ProjectCodeAlreadyExists = "PROJECT_CODE_ALREADY_EXISTS";
 
+    public const string ConferenceJournalIdIsRequired = "CONFERENCE_JOURNAL_ID_IS_REQUIRED";
+
+    public const string ConferenceJournalNotFoundInProject = "CONFERENCE_JOURNAL_NOT_FOUND_IN_PROJECT";
+
     #endregion
 
     #region Dataset Management
@@ -117,8 +121,6 @@ public sealed class MessageCode
     public const string PaperFileIsRequired = "PAPER_FILE_IS_REQUIRED";
 
     public const string PaperNotFoundInProject = "PAPER_NOT_FOUND_IN_PROJECT";
-
-    public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
 
     public const string SectionRoleIsRequired = "SECTION_ROLE_IS_REQUIRED";
 
@@ -216,6 +218,22 @@ public sealed class MessageCode
 
     public const string JournalNameAlreadyExists = "JOURNAL_NAME_ALREADY_EXISTS";
 
+    public const string JournalTexFileInvalidExtension = "JOURNAL_TEX_FILE_INVALID_EXTENSION";
+
+    public const string JournalPdfFileInvalidExtension = "JOURNAL_PDF_FILE_INVALID_EXTENSION";
+
+    public const string JournalProjectIdIsRequired = "JOURNAL_PROJECT_ID_IS_REQUIRED";
+
+    public const string JournalStartDateIsRequired = "JOURNAL_START_DATE_IS_REQUIRED";
+
+    public const string JournalEndDateIsRequired = "JOURNAL_END_DATE_IS_REQUIRED";
+
+    public const string JournalStartDateMustBeforeEndDate = "JOURNAL_START_DATE_MUST_BE_BEFORE_END_DATE";
+
+    public const string JournalSectionsAreRequired = "JOURNAL_SECTIONS_ARE_REQUIRED";
+
+    public const string JournalEndAtInvalid = "JOURNAL_END_AT_INVALID";
+
     #endregion
 
     #region Task Management
@@ -231,6 +249,30 @@ public sealed class MessageCode
     public const string PaperContributorNotFound = "PAPER_CONTRIBUTOR_NOT_FOUND";
 
     public const string ContributorIsNotExists = "CONTRIBUTOR_IS_NOT_EXISTS";
+
+    #endregion
+
+    #region Template Management
+
+    public const string TemplateIsRequired = "TEMPLATE_IS_REQUIRED";
+
+    public const string TemplateCodeIsRequired = "TEMPLATE_CODE_IS_REQUIRED";
+
+    public const string TemplateSectionsAreRequired = "TEMPLATE_SECTIONS_ARE_REQUIRED";
+
+    public const string SectionIsRequired = "SECTION_IS_REQUIRED";
+
+    public const string SectionTitleIsRequired = "SECTION_TITLE_IS_REQUIRED";
+
+    public const string SectionRuleIsRequired = "SECTION_RULE_IS_REQUIRED";
+
+    public const string SectionDisplayOrderIsRequired = "SECTION_DISPLAY_ORDER_IS_REQUIRED";
+
+    public const string TemplateIdIsRequired = "TEMPLATE_ID_IS_REQUIRED";
+
+    public const string TemplateIsNotExists = "TEMPLATE_IS_NOT_EXISTS";
+
+    public const string TemplateCodeIsAlreadyExists = "TEMPLATE_CODE_IS_ALREADY_EXISTS";
 
     #endregion
 }

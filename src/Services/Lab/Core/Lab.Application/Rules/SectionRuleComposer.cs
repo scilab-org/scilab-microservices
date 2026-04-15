@@ -22,25 +22,29 @@ public static class SectionRuleComposer
         return contentBuilder.ToString().TrimEnd();
     }
 
-    public static string BuildPaperRule(CreatePaperDto paperDto)
+    public static string BuildPaperRule(CreatePaperDto paperDto, ConferenceJournalEntity journal)
     {
         return BuildPaperRule(
             paperDto.Context,
+            paperDto.Abstract,
             paperDto.ResearchGap,
             paperDto.GapType,
-            paperDto.Journal.StyleRule);
+            paperDto.ResearchAim,
+            journal);
     }
 
-    public static string BuildPaperRule(PaperEntity paper)
+    public static string BuildPaperRule(PaperEntity paper, ConferenceJournalEntity journal)
     {
         return BuildPaperRule(
             paper.Context,
+            paper.Abstract,
             paper.ResearchGap,
             paper.GapType,
-            paper.StyleRule);
+            paper.ResearchAim,
+            journal);
     }
 
-    public static string BuildSectionRule(string? title, string? guideline)
+    public static string BuildSectionRule(string? title, string? guideline, string? mainIdea = null)
     {
         var contentBuilder = new StringBuilder();
 
@@ -48,6 +52,7 @@ public static class SectionRuleComposer
         contentBuilder.AppendLine();
 
         AppendBlock(contentBuilder, "Rule", guideline);
+        AppendBlock(contentBuilder, "Main Idea", mainIdea);
 
         return contentBuilder.ToString().TrimEnd();
     }
@@ -74,9 +79,11 @@ public static class SectionRuleComposer
 
     private static string BuildPaperRule(
         string? context,
+        string? abstractText,
         string? researchGap,
         string? gapType,
-        string? journalStyleRule)
+        string? researchAim,
+        ConferenceJournalEntity journal)
     {
         var contentBuilder = new StringBuilder();
 
@@ -84,10 +91,13 @@ public static class SectionRuleComposer
         contentBuilder.AppendLine();
 
         AppendBlock(contentBuilder, "Context", context);
+        AppendBlock(contentBuilder, "Abstract", abstractText);
         AppendBlock(contentBuilder, "Research Gap", researchGap);
         AppendBlock(contentBuilder, "Gap Type", gapType);
+        AppendBlock(contentBuilder, "Research Aim", researchAim);
+        AppendBlock(contentBuilder, "Journal Name", journal.Name);
+        AppendBlock(contentBuilder, "Journal Style", journal.Style);
         AppendBlock(contentBuilder, "Rule", PaperRules.Paper);
-        AppendBlock(contentBuilder, "Journal Style", journalStyleRule);
 
         return contentBuilder.ToString().TrimEnd();
     }

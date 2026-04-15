@@ -4,12 +4,13 @@ using Lab.Application.Rules;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using PaperReference = Lab.Domain.Models.Reference;
 using Marten;
 
 namespace Lab.Application.Features.Section.Commands.MarkMainSection;
 
-public record MarkMainSectionCommand(MarkMainSectionDto Dto, string UserName, Guid Id) : ICommand<Guid>;
+public record MarkMainSectionCommand(MarkMainSectionDto Dto, Guid Id) : ICommand<Guid>;
 
 public class MarkMainSectionCommandValidator : AbstractValidator<MarkMainSectionCommand>
 {
@@ -46,27 +47,35 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
         if (section.IsMainSection == true)
             throw new ClientValidationException(MessageCode.SectionIsAlreadyMainSection, request.Id);
 
+        var count = await session.Query<SectionEntity>()
+            .Where(x => x.PaperId == section.PaperId &&
+                        x.IsOldMainSection == true &&
+                        x.Title!.EqualsIgnoreCase(section.Title!))
+            .CountAsync(cancellationToken);
+
         // Clone main section to new record
         var newMainSection = SectionEntity.Create(
             id: Guid.NewGuid(),
             content: section.Content,
             paperId: section.PaperId,
             displayOrder: section.DisplayOrder,
-            numbered: section.Numbered,
+            status: SectionStatus.Completed,
             isMainSection: true,
             isOldMainSection: false,
+            version: $"Version {count + 1}",
             title: section.Title,
             sectionSumary: section.SectionSumary,
             description: section.Description,
+            mainIdea: section.MainIdea,
             rule: section.Rule,
-            parentSectionId: section.ParentSectionId,
             previousVersionSectionId: section.Id,
             references: section.References,
-            createdBy: request.UserName,
+            createdBy: section.CreatedBy,
             paperRule: section.PaperRule,
             projectRule: section.ProjectRule,
             packages: section.Packages,
-            sectionRule: section.SectionRule ?? SectionRuleComposer.BuildSectionRule(section.Title, section.Description)
+            files: section.Files,
+            sectionRule: section.SectionRule ?? SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea)
         );
 
         section.Update(nextVersionSectionId: newMainSection.Id, isOldMainSection: true);
@@ -135,6 +144,9 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
                 memberId: oldContributor.MemberId,
                 markSectionId: newMainSection.Id // Mark new contributor to new main section
             );
+            await UpsertReferenceSectionAsync(otherVersionSection.PaperId, oldContributor.MemberId,
+                newMainSection.References,
+                otherVersionSection.CreatedBy, cancellationToken);
             session.Update(oldContributor);
             session.Store(newContributor);
         }
@@ -199,7 +211,8 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
                                        .FirstOrDefaultAsync(cancellationToken)
                                    ?? throw new NotFoundException(MessageCode.SectionIsNotExists);
 
-        var (distinctReferences, referenceContent) = await BuildReferenceContentAsync(referenceMainSection, cancellationToken);
+        var (distinctReferences, referenceContent) =
+            await BuildReferenceContentAsync(referenceMainSection, cancellationToken);
 
         referenceMainSection.Update(references: distinctReferences, content: referenceContent);
         session.Update(referenceMainSection);
@@ -245,5 +258,146 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
               combinedReferenceContent +
               $"{Environment.NewLine}{Environment.NewLine}\\end{{filecontents*}}{Environment.NewLine}{Environment.NewLine}" +
               "\\addbibresource{references.bib}");
+    }
+
+    private async Task UpsertReferenceSectionAsync(
+        Guid paperId,
+        Guid memberId,
+        List<Guid>? mainSectionReferences,
+        string? createdBy,
+        CancellationToken cancellationToken)
+    {
+        var mainSectionIds = await session.Query<SectionEntity>()
+            .Where(x => x.PaperId == paperId && x.IsMainSection == true)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        if (mainSectionIds.Count == 0) return;
+
+        var memberContributors = await session.Query<PaperContributorEntity>()
+            .Where(x => x.PaperId == paperId &&
+                        x.MemberId == memberId &&
+                        mainSectionIds.Contains(x.MarkSectionId))
+            .ToListAsync(cancellationToken);
+
+        if (memberContributors.Count == 0) return;
+
+        var assignedSectionIds = memberContributors
+            .Where(x => x.SectionId != null)
+            .Select(x => x.SectionId!.Value)
+            .Distinct()
+            .ToList();
+
+        var assignedSections = assignedSectionIds.Count == 0
+            ? []
+            : await session.Query<SectionEntity>()
+                .Where(x => assignedSectionIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        var sectionMap = assignedSections.ToDictionary(x => x.Id, x => x);
+
+        // Build references only from sections assigned to this member, excluding reference sections.
+        var nonReferenceAssignedSections = assignedSections
+            .Where(x => !x.Title!.ToLower().Contains("reference"))
+            .ToList();
+
+        var distinctReferenceIds = nonReferenceAssignedSections
+            .Where(x => x.References != null)
+            .SelectMany(x => x.References!)
+            .Concat(mainSectionReferences ?? [])
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var paperBanks = distinctReferenceIds.Count == 0
+            ? []
+            : await session.Query<PaperBankEntity>()
+                .Where(x => distinctReferenceIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        var paperBankContentMap = paperBanks.ToDictionary(x => x.Id, x => x.ReferenceContent);
+        var generatedReferenceContent = BuildReferenceSectionContent(
+            distinctReferenceIds
+                .Where(paperBankContentMap.ContainsKey)
+                .Select(id => paperBankContentMap[id]));
+
+        var mainReferenceSection = assignedSections.FirstOrDefault(x =>
+                                       x.IsMainSection == true &&
+                                       SectionConstants.IsReferenceSection(x.Title))
+                                   ?? await session.Query<SectionEntity>()
+                                       .Where(x => x.PaperId == paperId &&
+                                                   x.IsMainSection == true &&
+                                                   (x.Title!.EqualsIgnoreCase(SectionConstants.ReferencesTitle) ||
+                                                    x.Title!.EqualsIgnoreCase(SectionConstants.ReferenceTitle)))
+                                       .FirstOrDefaultAsync(cancellationToken);
+
+        if (mainReferenceSection == null) return;
+
+        var referenceContributor = memberContributors.FirstOrDefault(x =>
+            x.SectionId != null &&
+            sectionMap.TryGetValue(x.SectionId.Value, out var memberSection) &&
+            SectionConstants.IsReferenceSection(memberSection.Title));
+
+        referenceContributor ??= memberContributors
+            .FirstOrDefault(x => x.MarkSectionId == mainReferenceSection.Id);
+
+        SectionEntity? currentReferenceSection = null;
+        if (referenceContributor?.SectionId is { } currentReferenceSectionId)
+            sectionMap.TryGetValue(currentReferenceSectionId, out currentReferenceSection);
+
+        if (currentReferenceSection != null && currentReferenceSection.IsMainSection != true)
+        {
+            currentReferenceSection.Update(content: generatedReferenceContent, references: distinctReferenceIds);
+            session.Update(currentReferenceSection);
+            return;
+        }
+
+        var newRefSection = SectionEntity.Create(
+            id: Guid.NewGuid(),
+            content: generatedReferenceContent,
+            paperId: mainReferenceSection.PaperId,
+            displayOrder: mainReferenceSection.DisplayOrder,
+            status: SectionStatus.InProgress,
+            isMainSection: false,
+            isOldMainSection: false,
+            version: mainReferenceSection.Version,
+            title: mainReferenceSection.Title,
+            sectionSumary: mainReferenceSection.SectionSumary,
+            description: mainReferenceSection.Description,
+            mainIdea: mainReferenceSection.MainIdea,
+            rule: mainReferenceSection.Rule,
+            previousVersionSectionId: mainReferenceSection.Id,
+            references: distinctReferenceIds,
+            createdBy: createdBy,
+            paperRule: mainReferenceSection.PaperRule,
+            projectRule: mainReferenceSection.ProjectRule,
+            sectionRule: mainReferenceSection.SectionRule,
+            packages: mainReferenceSection.Packages
+        );
+        session.Store(newRefSection);
+
+        if (referenceContributor != null)
+        {
+            referenceContributor.Update(sectionId: newRefSection.Id, markSectionId: mainReferenceSection.Id);
+            session.Update(referenceContributor);
+        }
+    }
+
+    private static string BuildReferenceSectionContent(IEnumerable<string?> referenceEntries)
+    {
+        var combinedReferenceContent = string.Join(
+            $"{Environment.NewLine}{Environment.NewLine}",
+            referenceEntries
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x!.Trim())
+                .Distinct());
+
+        if (string.IsNullOrWhiteSpace(combinedReferenceContent))
+            return string.Empty;
+
+        return $"\\begin{{filecontents*}}{{references.bib}}{Environment.NewLine}" +
+               combinedReferenceContent +
+               $"{Environment.NewLine}\\end{{filecontents*}}{Environment.NewLine}" +
+               "\\addbibresource{references.bib}";
     }
 }

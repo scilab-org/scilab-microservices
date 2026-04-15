@@ -55,4 +55,15 @@ public sealed class ApiClientCfg
 
         #endregion
     }
+
+    public static class AiService
+    {
+        #region Constants
+
+        public const string Section = "ApiClients:AiService";
+
+        public const string BaseUrl = "BaseUrl";
+
+        #endregion
+    }
 }

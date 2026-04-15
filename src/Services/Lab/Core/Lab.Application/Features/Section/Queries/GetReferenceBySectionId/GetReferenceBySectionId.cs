@@ -131,7 +131,6 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             FilePath = paperBank.FilePath,
-            Status = paperBank.Status,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,

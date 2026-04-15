@@ -1,6 +1,7 @@
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 
 namespace Lab.Application.Features.Section.Queries.GetInUseReferenceBySectionId;
@@ -88,7 +89,6 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             FilePath = paperBank.FilePath,
-            Status = paperBank.Status,
             ParsedText = paperBank.ParsedText,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
@@ -100,7 +100,8 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             Volume = paperBank.Volume,
             ConferenceName = paperBank.ConferenceName,
             ReferenceContent = paperBank.ReferenceContent,
-            TagNames = paperBank.TagNames
+            TagNames = paperBank.TagNames,
+            IngestStatus = paperBank.IngestStatus ?? IngestStatus.Pending
         };
     }
 }

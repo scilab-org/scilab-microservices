@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Journal.Commands.UpdateJournal;
 
-public record UpdateJournalCommand(UpdateJournalEntityDto Dto) : ICommand<Guid>;
+public record UpdateJournalCommand(UpdateJournalEntityDto Dto, Guid Id, string UserName) : ICommand<Guid>;
 
 public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalCommand>
 {
@@ -16,13 +16,17 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
             .WithMessage(MessageCode.BadRequest)
             .DependentRules(() =>
             {
-                RuleFor(x => x.Dto.Id)
+                RuleFor(x => x.Id)
                     .NotEmpty().WithMessage(MessageCode.JournalIdIsRequired);
             });
+
+        RuleFor(x => x.Dto.StartAt)
+            .LessThan(x => x.Dto.EndAt).WithMessage(MessageCode.JournalStartDateMustBeforeEndDate);
     }
 }
 
-public class UpdateJournalCommandHandler(IDocumentSession session) : IRequestHandler<UpdateJournalCommand, Guid>
+public class UpdateJournalCommandHandler(
+    IDocumentSession session) : IRequestHandler<UpdateJournalCommand, Guid>
 {
     #region Implementations
 
@@ -30,29 +34,15 @@ public class UpdateJournalCommandHandler(IDocumentSession session) : IRequestHan
     {
         await session.BeginTransactionAsync(cancellationToken);
 
-        var entity = await session.LoadAsync<JournalEntity>(request.Dto.Id, cancellationToken);
-
-        if (entity == null)
-            throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Dto.Id);
-
-        var normalizedName = "";
-        if (request.Dto.Name != null)
-            normalizedName = request.Dto.Name.Trim();
-
-        if (!string.IsNullOrEmpty(normalizedName) && normalizedName != entity.Name)
-        {
-            var existingJournalName = await session.Query<JournalEntity>()
-                .FirstOrDefaultAsync(x => x.Name == normalizedName && x.Id != request.Dto.Id, cancellationToken);
-
-            if (existingJournalName != null)
-                throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, normalizedName);
-        }
+        var entity = await session.LoadAsync<ConferenceJournalEntity>(request.Id, cancellationToken)
+                     ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Id);
 
         entity.Update(
-            name: normalizedName != "" ? normalizedName : null,
-            styles: request.Dto.Styles);
+            startAt: request.Dto.StartAt,
+            endAt: request.Dto.EndAt,
+            lastModifiedBy: request.UserName);
 
-        session.Store(entity);
+        session.Update(entity);
         await session.SaveChangesAsync(cancellationToken);
 
         return entity.Id;

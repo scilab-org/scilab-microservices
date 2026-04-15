@@ -4,7 +4,6 @@ using Lab.Application.Models.Results;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
-using Lab.Domain.Models;
 using Marten;
 
 namespace Lab.Application.Features.Paper.Commands.CombineSectionsToPaper;
@@ -29,7 +28,11 @@ public class CombineSectionsToPaperCommandValidator : AbstractValidator<CombineS
     }
 }
 
-public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IManagementApiService managementApiService)
+public class CombineSectionsToPaperCommandHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService,
+    IAiApiService aiApiService,
+    IHttpClientFactory httpClientFactory)
     : ICommandHandler<CombineSectionsToPaperCommand, CombineSectionsToPaperResult>
 {
     public async Task<CombineSectionsToPaperResult> Handle(CombineSectionsToPaperCommand request,
@@ -70,60 +73,57 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IMan
                 .Select(x => x?.Trim())
                 .Where(x => !string.IsNullOrWhiteSpace(x)));
 
-        var content = BuildTemplateContent(combineSectionPackages, referenceSectionContent,
+        var content = BuildTemplateContent(paper.Title, author: string.Empty, combineSectionPackages,
+            referenceSectionContent,
             bodyContent);
 
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken);
 
-        Combine? combine = null;
-
-        if (!request.Dto.IsPreview)
+        // Format the paper content to match the conference/journal template style using AI
+        var savedContent = content;
+        if (!string.IsNullOrWhiteSpace(journal?.TexFile))
         {
-            var name = $"Version {paper.Combines.Count + 1}";
-            var savedContent = content;
-            if (request.Dto.Content != null)
-                savedContent = request.Dto.Content.Trim();
-
-            combine = paper.AddCombineVersion(
-                name: name,
-                content: savedContent,
-                reference: referenceSection!.References,
-                createdBy: request.UserName
-            );
-
-            session.Update(paper);
-            await session.SaveChangesAsync(cancellationToken);
+            var httpClient = httpClientFactory.CreateClient();
+            var templateContent = await httpClient.GetStringAsync(journal.TexFile, cancellationToken);
+            savedContent = await aiApiService.FormatPaperToStyleAsync(content, templateContent, cancellationToken);
         }
+        var files = mainSections
+            .Where(x => x.Files != null)
+            .SelectMany(x => x.Files!)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct()
+            .ToList();
 
-        if (combine == null)
-            return new CombineSectionsToPaperResult
-            {
-                Combine = new PaperCombineInfo
-                {
-                    Id = Guid.Empty,
-                    Name = "Preview Version",
-                    Content = content,
-                    References = referenceSection?.References,
-                    IsSave = false,
-                    CreatedBy = request.UserName,
-                    CreatedOnUtc = DateTimeOffset.UtcNow,
-                    LastModifiedBy = request.UserName,
-                    LastModifiedOnUtc = DateTimeOffset.UtcNow
-                }
-            };
+        var versionNumber = await session.Query<PaperVersionEntity>()
+            .CountAsync(x => x.PaperId == paper.Id, cancellationToken) + 1;
+        var name = $"Version {versionNumber}";
+
+        var version = PaperVersionEntity.Create(
+            id: Guid.NewGuid(),
+            paperId: paper.Id,
+            name: name,
+            content: savedContent,
+            references: referenceSection!.References,
+            files: files,
+            createdBy: request.UserName);
+
+        session.Store(version);
+        await session.SaveChangesAsync(cancellationToken);
 
         return new CombineSectionsToPaperResult
         {
-            Combine = new PaperCombineInfo
+            Version = new PaperVersionInfo
             {
-                Id = combine.Id,
-                Name = combine.Name,
-                Content = combine.Content,
-                References = combine.References,
-                IsSave = true,
-                CreatedBy = combine.CreatedBy,
-                CreatedOnUtc = combine.CreatedOnUtc,
-                LastModifiedBy = combine.LastModifiedBy,
-                LastModifiedOnUtc = combine.LastModifiedOnUtc
+                Id = version.Id,
+                Name = version.Name,
+                Content = version.Content,
+                References = version.References,
+                Files = version.Files,
+                CreatedBy = version.CreatedBy,
+                CreatedOnUtc = version.CreatedOnUtc,
+                LastModifiedBy = version.LastModifiedBy,
+                LastModifiedOnUtc = version.LastModifiedOnUtc ?? version.CreatedOnUtc
             }
         };
     }
@@ -141,17 +141,25 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IMan
     }
 
     private static string BuildTemplateContent(
+        string title,
+        string author,
         string combineSectionPackages,
         string referenceSectionContent,
         string bodyContent)
     {
+        var titleBlock = $"\\title{{{title}}}";
+        var authorBlock = $"\\author{{{author}}}";
+
         var blocks = new List<string>
         {
             "\\documentclass{article}",
             combineSectionPackages,
-            referenceSectionContent,
+            titleBlock,
+            authorBlock,
             "\\begin{document}",
+            "\\maketitle",
             bodyContent,
+            referenceSectionContent,
             "\\printbibliography",
             "\\end{document}"
         };

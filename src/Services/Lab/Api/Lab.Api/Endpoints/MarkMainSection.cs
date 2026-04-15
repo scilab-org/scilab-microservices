@@ -30,7 +30,7 @@ public class MarkMainSection : ICarterModule
         var currentUser = httpContext.GetCurrentUser();
         if (currentUser == null)
             throw new UnauthorizedException(MessageCode.Unauthorized);
-        var command = new MarkMainSectionCommand(dto, currentUser.UserName, id);
+        var command = new MarkMainSectionCommand(dto, id);
         var result = await sender.Send(command);
         return new ApiUpdatedResponse<Guid>(result);
     }

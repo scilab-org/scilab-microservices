@@ -4,16 +4,10 @@ public class CreateSectionDto
 {
     #region Fields, Properties and Indexers
 
-    public Guid Id { get; init; }
     public string? Title { get; init; }
-    public string? Content { get; init; } = null!;
-    public bool? Numbered { get; init; } = true;
     public float DisplayOrder { get; init; }
-    public string? SectionSumary { get; init; }
-    public string? Description { get; init; }
-    public string? Rule { get; init; }
-    public Guid? ParentSectionId { get; init; }
-    public List<string>? Packages { get; init; }
+    public string? SectionRule { get; init; }
+    public string? MainIdea { get; init; }
 
     #endregion
 }

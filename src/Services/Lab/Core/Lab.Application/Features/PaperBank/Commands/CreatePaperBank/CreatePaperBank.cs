@@ -63,7 +63,6 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             publisher: dto.Publisher,
             abstractText: dto.Abstract,
             doi: dto.Doi,
-            status: dto.Status ?? PaperStatus.Sampled,
             parsedText: dto.ParsedText,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
@@ -75,7 +74,8 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             volume: dto.Volume,
             conferenceName: dto.ConferenceName,
             referenceContent: dto.ReferenceContent,
-            tagNames: tagNames);
+            tagNames: tagNames,
+            ingestStatus: IngestStatus.Pending);
 
         await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
 

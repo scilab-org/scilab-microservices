@@ -1,13 +1,13 @@
 ﻿using Lab.Application.Dtos.Papers;
 using Lab.Application.Rules;
-using Lab.Domain.Constants;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
 using DomainRules = Lab.Domain.Constants.Rules;
 
 namespace Lab.Application.Features.Paper.Commands.UpdatePaper;
-public record UpdatePaperCommand(UpdatePaperDto Dto, Guid Id, Guid UserId) : ICommand<Guid>;
+
+public record UpdatePaperCommand(UpdatePaperDto Dto, Guid Id, string UserName) : ICommand<Guid>;
 
 public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
 {
@@ -23,7 +23,7 @@ public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
                     .WithMessage(MessageCode.PaperContextIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperContextIsRequired);
-                RuleFor(x => x.Dto.Journal)
+                RuleFor(x => x.Dto.ConferenceJournalName)
                     .NotEmpty()
                     .WithMessage(MessageCode.PaperJournalIsRequired)
                     .NotNull()
@@ -42,33 +42,38 @@ public class UpdatePaperCommandHandler(
         var dto = request.Dto;
 
         var paper = await session.Query<PaperEntity>()
-            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
-            ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
+                        .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+                    ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         await session.BeginTransactionAsync(cancellationToken);
-        
+
         paper.Update(
             context: dto.Context,
             abstractText: dto.Abstract,
             researchGap: dto.ResearchGap,
             mainContribution: dto.MainContribution,
+            researchAim: dto.ResearchAim,
             gapType: dto.GapType,
-            journal: dto.Journal.Name,
-            styleName: dto.Journal.StyleName,
-            styleDescription: dto.Journal.StyleDescription,
-            styleRule: dto.Journal.StyleRule,
+            conferenceJournalName: dto.ConferenceJournalName,
+            conferenceJournalId: dto.ConferenceJournalId,
             rule: DomainRules.Paper,
-            status: dto.Status ?? PaperStatus.Processing
+            status: dto.Status ?? PaperStatus.Processing,
+            lastModifiedBy: request.UserName
         );
 
-        var paperRule = SectionRuleComposer.BuildPaperRule(paper);
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+                      ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
+                          dto.ConferenceJournalId.ToString());
+
+        var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal);
         var sections = await session.Query<SectionEntity>()
             .Where(x => x.PaperId == paper.Id)
             .ToListAsync(cancellationToken);
 
         foreach (var section in sections)
         {
-            var sectionRule = SectionRuleComposer.BuildSectionRule(section.Title, section.Description);
+            var sectionRule =
+                SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea);
             var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(
                 section.ProjectRule,
                 paperRule,

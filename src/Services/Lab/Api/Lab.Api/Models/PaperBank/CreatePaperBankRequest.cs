@@ -12,7 +12,6 @@ public class CreatePaperBankRequest
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public IFormFile? File { get; set; }
-    public PaperStatus? Status { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }

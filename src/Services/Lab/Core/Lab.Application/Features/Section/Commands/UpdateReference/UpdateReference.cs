@@ -4,6 +4,7 @@ using Lab.Application.Rules;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 using PaperReference = Lab.Domain.Models.Reference;
 
@@ -117,14 +118,14 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 content: generatedReferenceContent,
                 paperId: referenceMainSection.PaperId,
                 displayOrder: referenceMainSection.DisplayOrder,
-                numbered: referenceMainSection.Numbered,
+                status: SectionStatus.InProgress,
                 isMainSection: null,
                 isOldMainSection: null,
                 title: referenceMainSection.Title,
                 sectionSumary: referenceMainSection.SectionSumary,
                 description: referenceMainSection.Description,
+                mainIdea: referenceMainSection.MainIdea,
                 rule: referenceMainSection.Rule,
-                parentSectionId: referenceMainSection.ParentSectionId,
                 previousVersionSectionId: referenceMainSection.Id,
                 references: referenceSectionPaperBankIds,
                 createdBy: request.UserName,
@@ -132,7 +133,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 paperRule: referenceMainSection.PaperRule,
                 projectRule: referenceMainSection.ProjectRule,
                 sectionRule: referenceMainSection.SectionRule
-                    ?? SectionRuleComposer.BuildSectionRule(referenceMainSection.Title, referenceMainSection.Description));
+                    ?? SectionRuleComposer.BuildSectionRule(referenceMainSection.Title, referenceMainSection.Description, referenceMainSection.MainIdea));
 
             currentUserContributor.Update(sectionId: newReferenceSection.Id, markSectionId: referenceMainSection.Id);
             session.Store(newReferenceSection);
@@ -157,14 +158,14 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
                 content: currentEditSection.Content,
                 paperId: currentEditSection.PaperId,
                 displayOrder: currentEditSection.DisplayOrder,
-                numbered: currentEditSection.Numbered,
+                status: SectionStatus.InProgress,
                 isMainSection: null,
                 isOldMainSection: null,
                 title: currentEditSection.Title,
                 sectionSumary: currentEditSection.SectionSumary,
                 description: currentEditSection.Description,
+                mainIdea: currentEditSection.MainIdea,
                 rule: currentEditSection.Rule,
-                parentSectionId: currentEditSection.ParentSectionId,
                 previousVersionSectionId: currentEditSection.Id,
                 references: selectedPaperIds,
                 createdBy: request.UserName,

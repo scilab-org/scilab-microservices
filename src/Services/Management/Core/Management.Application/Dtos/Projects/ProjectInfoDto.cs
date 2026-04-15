@@ -16,5 +16,6 @@ public class ProjectInfoDto : DtoId<Guid>
     public string? Context { get; set; }
     public string? Domain { get; set; }
     public string? Keypoint { get; set; }
+    public List<Guid> ConferenceJournalIds { get; set; } = [];
     #endregion
 }

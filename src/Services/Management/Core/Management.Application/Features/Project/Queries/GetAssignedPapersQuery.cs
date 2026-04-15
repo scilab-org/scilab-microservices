@@ -1,5 +1,6 @@
 using AutoMapper;
 using Management.Application.Dtos.Papers;
+using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
 using Management.Application.Services;
 using Management.Domain.Entities;
@@ -11,7 +12,7 @@ namespace Management.Application.Features.Project.Queries;
 public sealed record GetAssignedPapersQuery(
     Guid UserId,
     PaginationRequest Paging,
-    string? Title = null) : IQuery<GetAssignedPapersResult>;
+    GetAssignedPapersFilter Filter) : IQuery<GetAssignedPapersResult>;
 
 public sealed class GetAssignedPapersValidator : AbstractValidator<GetAssignedPapersQuery>
 {
@@ -30,13 +31,39 @@ public sealed class GetAssignedPapersQueryHandler(
 {
     public async Task<GetAssignedPapersResult> Handle(GetAssignedPapersQuery request, CancellationToken cancellationToken)
     {
-        var title = request.Title;
+        var title = request.Filter.Title;
+
+        var normalizedProjectName = request.Filter.ProjectName?.Trim();
+        var normalizedProjectCode = request.Filter.ProjectCode?.Trim();
+
+        var projectQuery = session.Query<ProjectEntity>()
+            .Where(x => x.ParentProjectId == null);
+
+        if (!string.IsNullOrWhiteSpace(normalizedProjectName))
+            projectQuery = projectQuery.Where(x => x.Name != null && x.Name.Contains(normalizedProjectName, StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(normalizedProjectCode))
+            projectQuery = projectQuery.Where(x => x.Code != null && x.Code.Contains(normalizedProjectCode, StringComparison.OrdinalIgnoreCase));
+
+        var matchedParentProjectIds = await projectQuery
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        if (matchedParentProjectIds.Count == 0)
+            return new GetAssignedPapersResult([], 0, request.Paging);
 
         var projectIds = await session.Query<MemberEntity>()
             .Where(x => x.UserId == request.UserId)
             .Select(x => x.ProjectId)
             .Distinct()
             .ToListAsync(cancellationToken);
+
+        if (projectIds.Count == 0)
+            return new GetAssignedPapersResult([], 0, request.Paging);
+
+        projectIds = projectIds
+            .Where(matchedParentProjectIds.Contains)
+            .ToList();
 
         if (projectIds.Count == 0)
             return new GetAssignedPapersResult([], 0, request.Paging);

@@ -56,7 +56,10 @@ public class UploadSectionFileCommandHandler(IDocumentSession session, IMinIoClo
     {
         if (file == null) return;
 
-        var name = $"{file.FileName}-{Guid.NewGuid()}-{entity.Id}";
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+        var extension = Path.GetExtension(file.FileName);
+        var shortId = Guid.NewGuid().ToString("N")[..8];
+        var name = $"{fileNameWithoutExtension}-{shortId}{extension}";
 
         var result = await minIo.UploadFilesAsync(name, [file],
             AppConstants.Bucket.Sections,

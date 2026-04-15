@@ -2,6 +2,7 @@ using BuildingBlocks.Authentication.Extensions;
 using Common.Models;
 using Management.Api.Constants;
 using Management.Application.Features.Project.Queries;
+using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ public sealed class GetAssignedPaper : ICarterModule
     private async Task<IResult> HandleAsync(
         ISender sender,
         IHttpContextAccessor httpContext,
-        [FromQuery] string? title,
+        [AsParameters] GetAssignedPapersFilter filter,
         [AsParameters] PaginationRequest paging)
     {
         var currentUser = httpContext.GetCurrentUser();
@@ -30,7 +31,7 @@ public sealed class GetAssignedPaper : ICarterModule
         if (string.IsNullOrWhiteSpace(currentUser.Id) || !Guid.TryParse(currentUser.Id, out var userId))
             return Results.Unauthorized();
 
-        var query = new GetAssignedPapersQuery(userId, paging, title);
+        var query = new GetAssignedPapersQuery(userId, paging, filter);
         var result = await sender.Send(query);
 
         return Results.Ok(new ApiGetResponse<GetAssignedPapersResult>(result));

@@ -2,6 +2,7 @@ using Lab.Application.Dtos.Sections;
 using Lab.Application.Models.Results;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 
 namespace Lab.Application.Features.Section.Queries.GetPreviewReference;
@@ -79,7 +80,6 @@ public class
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             FilePath = paperBank.FilePath,
-            Status = paperBank.Status,
             ParsedText = paperBank.ParsedText,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
@@ -91,7 +91,8 @@ public class
             Volume = paperBank.Volume,
             ConferenceName = paperBank.ConferenceName,
             ReferenceContent = paperBank.ReferenceContent,
-            TagNames = paperBank.TagNames
+            TagNames = paperBank.TagNames,
+            IngestStatus = paperBank.IngestStatus ?? IngestStatus.Pending
         };
     }
 }

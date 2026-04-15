@@ -2,6 +2,7 @@
 using Lab.Application.Rules;
 using Lab.Application.Dtos.Sections;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 
 namespace Lab.Application.Features.Section.Commands.UpsertSection;
@@ -72,28 +73,29 @@ public class UpsertSectionCommandHandler(
                     .FirstOrDefaultAsync(cancellationToken);
                 if (contributorWithVersion != null)
                     throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, section.Id);
-
             }
 
+            var version = BuildNextDraftVersion(section.Version);
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
                 content: dto.Content,
                 paperId: section.PaperId,
                 displayOrder: section.DisplayOrder,
-                numbered: dto.Numbered,
+                status: SectionStatus.InProgress,
                 isMainSection: false,
                 isOldMainSection: false,
+                version: version,
                 title: dto.Title,
                 sectionSumary: dto.SectionSumary,
                 description: section.Description,
+                mainIdea: section.MainIdea,
                 rule: section.Rule,
-                parentSectionId: dto.ParentSectionId,
                 //Mark new section as new version of main section
                 previousVersionSectionId: section.Id,
                 createdBy: request.UserName,
                 paperRule: section.PaperRule,
                 projectRule: section.ProjectRule,
-                sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description),
+                sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description, dto.MainIdea ?? section.MainIdea),
                 packages: dto.CurrentSectionPackages
             );
 
@@ -114,13 +116,13 @@ public class UpsertSectionCommandHandler(
         }
 
         // If the section is not main section, it means the section is already a new version of main section, so just update the section directly
-        var sectionRule = SectionRuleComposer.BuildSectionRule(dto.Title ?? section.Title, section.Description);
+        var sectionRule = SectionRuleComposer.BuildSectionRule(dto.Title ?? section.Title, section.Description, dto.MainIdea ?? section.MainIdea);
         section.Update(
             content: dto.Content,
-            numbered: dto.Numbered,
             title: dto.Title,
             sectionSumary: dto.SectionSumary,
-            parentSectionId: dto.ParentSectionId,
+            status: SectionStatus.InProgress,
+            mainIdea: dto.MainIdea,
             sectionRule: sectionRule,
             packages: dto.CurrentSectionPackages,
             rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule)
@@ -167,14 +169,14 @@ public class UpsertSectionCommandHandler(
                 content: refSection.Content,
                 paperId: refSection.PaperId,
                 displayOrder: refSection.DisplayOrder,
-                numbered: refSection.Numbered,
+                status: SectionStatus.InProgress,
                 isMainSection: false,
                 isOldMainSection: false,
                 title: refSection.Title,
                 sectionSumary: refSection.SectionSumary,
                 description: refSection.Description,
+                mainIdea: refSection.MainIdea,
                 rule: refSection.Rule,
-                parentSectionId: refSection.ParentSectionId,
                 previousVersionSectionId: refSection.Id,
                 createdBy: createdBy,
                 paperRule: refSection.PaperRule,
@@ -195,6 +197,25 @@ public class UpsertSectionCommandHandler(
             refSection.Update(packages: referencesPackages);
             session.Update(refSection);
         }
+    }
+
+    private static string BuildNextDraftVersion(string? currentVersion)
+    {
+        if (currentVersion.IsNullOrEmpty())
+            return "Version 1 Draft";
+
+        var normalized = currentVersion.Trim();
+        if (normalized.EqualsIgnoreCase("Version Initial") || normalized.EqualsIgnoreCase("Initial"))
+            return "Version 1 Draft";
+
+        var numericToken = normalized
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault(token => int.TryParse(token, out _));
+
+        if (numericToken != null && int.TryParse(numericToken, out var currentNumber))
+            return $"Version {currentNumber + 1} Draft";
+
+        return "Version 1 Draft";
     }
 
     #endregion

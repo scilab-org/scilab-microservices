@@ -85,9 +85,9 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         return new GetSectionByMarkSectionIdResult(
             items.Where(dto => dto.PreviousVersionSectionId == dominantPreviousId).ToList());
     }
-    
+
     #region Helper Methods
-    
+
     private static SectionContributorDto ToDto(
         PaperContributorEntity                contributor,
         SectionEntity?                        mainSection,
@@ -117,12 +117,13 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             Title                    = section?.Title,
             IsMainSection            = section?.IsMainSection ?? false,
             IsOldMainSection         = section?.IsOldMainSection ?? false,
-            ParentSectionId          = section?.ParentSectionId,
+            Version                  = section?.Version,
             PreviousVersionSectionId = section?.PreviousVersionSectionId,
             NextVersionSectionId     = section?.NextVersionSectionId,
             CreatedBy                = section?.CreatedBy,
             CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = section?.LastModifiedOnUtc,
+            MainIdea                 = section?.MainIdea,
 
             Name     = user != null ? $"{user.FirstName} {user.LastName}".Trim() : member?.Username,
             Email    = user?.Email ?? member?.Email,
@@ -131,5 +132,5 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         };
     }
     #endregion
- 
+
 }

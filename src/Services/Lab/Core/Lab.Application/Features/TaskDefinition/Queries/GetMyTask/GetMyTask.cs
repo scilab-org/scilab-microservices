@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using AutoMapper;
 using BuildingBlocks.Pagination;
 using Lab.Application.Dtos.Tasks;
@@ -65,10 +65,10 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
         if (!tasks.Any())
             return new GetTasksPagedResult([], 0, request.Paging);
 
-        var taskIds = tasks.Select(x => x.Id).ToList();
+        var memberIds = tasks.Where(x => x.MemberId != Guid.Empty).Select(x => x.MemberId).Distinct().ToList();
 
         var paperContributorQuery = session.Query<PaperContributorEntity>()
-            .Where(x => x.TaskIds.Any(tid => taskIds.Contains(tid))); 
+            .Where(x => memberIds.Contains(x.MemberId)); 
         
         if (filter.PaperId.HasValue)
             paperContributorQuery = paperContributorQuery.Where(x => x.PaperId == filter.PaperId.Value);
@@ -76,33 +76,48 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
         var contributors = await paperContributorQuery
             .ToListAsync(cancellationToken);
 
+        // A member may map to multiple sections, but the PaperId is always the same for that member in a subproject.
+        // So we take the first contributor record for each member to get the Paper linkage.
         var contributorMap = contributors
-            .SelectMany(x => x.TaskIds
-                .Where(tid => taskIds.Contains(tid))
-                .Select(taskId => new { taskId, contributor = x }))
-            .GroupBy(x => x.taskId)
-            .ToDictionary(g => g.Key, g => g.First().contributor);
+            .GroupBy(x => x.MemberId)
+            .ToDictionary(g => g.Key, g => g.First());
 
         var paperIds = contributors.Select(x => x.PaperId).Distinct().ToList();
         var paperNameMap = await session.Query<PaperEntity>()
             .Where(x => paperIds.Contains(x.Id))
             .Select(x => new { x.Id, x.Title })
             .ToListAsync(cancellationToken);
+
+        var sectionIds = contributors
+            .Where(x => x.SectionId.HasValue)
+            .Select(x => x.SectionId!.Value)
+            .Distinct()
+            .ToList();
+        var sectionTitleMap = sectionIds.Count > 0
+            ? (await session.Query<SectionEntity>()
+                .Where(x => sectionIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.Title })
+                .ToListAsync(cancellationToken))
+              .ToDictionary(x => x.Id, x => x.Title)
+            : new Dictionary<Guid, string?>();
         
         var filteredTasks = filter.PaperId.HasValue
-            ? tasks.Where(x => contributorMap.ContainsKey(x.Id)).ToList()
+            ? tasks.Where(x => contributorMap.ContainsKey(x.MemberId)).ToList()
             : tasks;
 
         var taskDtos = mapper.Map<List<TaskDto>>(filteredTasks);
 
         foreach (var taskDto in taskDtos)
         {
-            if (!contributorMap.TryGetValue(taskDto.Id, out var contributor))
+            var taskEntity = filteredTasks.First(x => x.Id == taskDto.Id);
+            if (!contributorMap.TryGetValue(taskEntity.MemberId, out var contributor))
                 continue;
 
+            taskDto.SectionId = contributor.SectionId;
             taskDto.PaperId = contributor.PaperId;
             taskDto.PaperContributorId = contributor.Id;
             taskDto.PaperTitle = paperNameMap.FirstOrDefault(x => x.Id == contributor.PaperId)?.Title ?? string.Empty;
+            taskDto.SectionTitle = contributor.SectionId.HasValue && sectionTitleMap.TryGetValue(contributor.SectionId.Value, out var sTitle) ? sTitle : null;
         }
         
         return new GetTasksPagedResult(taskDtos, pagedTasks.TotalItemCount, request.Paging);

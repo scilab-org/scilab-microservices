@@ -1,5 +1,4 @@
-﻿using Lab.Application.Dtos.PaperContributors;
-using Lab.Application.Dtos.Sections;
+﻿using Lab.Application.Dtos.Sections;
 using Lab.Application.Models.Results;
 using Lab.Application.Services;
 using Lab.Domain.Entities;
@@ -42,12 +41,13 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             Title                    = mainSection?.Title,
             IsMainSection            = mainSection?.IsMainSection ?? true,
             IsOldMainSection         = mainSection?.IsOldMainSection ?? false,
-            ParentSectionId          = mainSection?.ParentSectionId,
+            Version                  = mainSection?.Version,
             PreviousVersionSectionId = mainSection?.PreviousVersionSectionId,
             NextVersionSectionId     = mainSection?.NextVersionSectionId,
             CreatedBy                = mainSection?.CreatedBy,
             CreatedOnUtc             = mainSection?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = mainSection?.LastModifiedOnUtc,
+            MainIdea                 = mainSection?.MainIdea,
 
             Name     = null,
             Email    = null,
@@ -62,7 +62,6 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         var currentMemberInfo = await managementApiService
             .GetMemberByPaperIdAsync(paperId, request.CurrentUserId, cancellationToken);
 
-        var currentMemberId = currentMemberInfo?.MemberId;
         // var currentEditingSectionIds = currentMemberId.HasValue
         //     ? allContributors
         //         .Where(c => c.MemberId == currentMemberId.Value
@@ -75,7 +74,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         // Get sectionIds from contributors except main section (markSectionId)
         // and exclude sections currently assigned to current user
         var childSectionIds = allContributors
-            .Where(c => c.SectionId.HasValue 
+            .Where(c => c.SectionId.HasValue
                         && c.SectionId.Value != request.MarkSectionId)
                         // && !currentEditingSectionIds.Contains(c.SectionId.Value))
             .Select(c => c.SectionId!.Value)
@@ -97,7 +96,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
 
         if (!filteredContributors.Any())
             return new GetSectionByMarkSectionIdResult([mainSectionItem]);
-        
+
         //Fetch members
         var membersTask = managementApiService
             .GetSubProjectMembersByPaperIdAsync(paperId, cancellationToken);
@@ -116,7 +115,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             .Distinct().ToList();
 
         var userMap = await userApiService.GetUsersByIdsAsync(userIds, cancellationToken);
-        
+
         var childItems = filteredContributors.Select(c =>
         {
             var section = c.SectionId.HasValue
@@ -140,12 +139,13 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
                 Title                    = section?.Title,
                 IsMainSection            = section?.IsMainSection ?? false,
                 IsOldMainSection         = section?.IsOldMainSection ?? false,
-                ParentSectionId          = section?.ParentSectionId,
+                Version                  = section?.Version,
                 PreviousVersionSectionId = section?.PreviousVersionSectionId,
                 NextVersionSectionId     = section?.NextVersionSectionId,
                 CreatedBy                = section?.CreatedBy,
                 CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
                 LastModifiedOnUtc        = section?.LastModifiedOnUtc,
+                MainIdea                 = section?.MainIdea,
 
                 Name     = name,
                 Email    = user?.Email ?? member?.Email,
@@ -158,7 +158,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
         var items = new List<SectionContributorDto> { mainSectionItem };
         items.AddRange(childItems);
 
-        
+
         return new GetSectionByMarkSectionIdResult(items);
     }
 }

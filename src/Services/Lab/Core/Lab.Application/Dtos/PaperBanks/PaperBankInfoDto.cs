@@ -13,7 +13,6 @@ public class PaperBankInfoDto : DtoId<Guid>
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
-    public PaperStatus? Status { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
@@ -26,6 +25,7 @@ public class PaperBankInfoDto : DtoId<Guid>
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
     public List<string> TagNames { get; set; } = new();
+    public IngestStatus? IngestStatus { get; set; }
 
     #endregion
 }

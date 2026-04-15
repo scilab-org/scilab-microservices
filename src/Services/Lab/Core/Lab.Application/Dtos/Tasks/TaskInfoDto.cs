@@ -15,4 +15,6 @@ public class TaskInfoDto: DtoId<Guid>
     public Guid PaperId { get; set; }
     public string PaperTitle { get; set; } = null!;
     public Guid PaperContributorId { get; set; }
+    public  Guid? SectionId { get; set; }
+    public string? SectionTitle { get; set; }
 }

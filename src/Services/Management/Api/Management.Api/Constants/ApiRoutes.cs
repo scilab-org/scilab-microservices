@@ -1,4 +1,4 @@
-﻿namespace Management.Api.Constants;
+namespace Management.Api.Constants;
 
 public sealed class ApiRoutes
 {
@@ -18,7 +18,7 @@ public sealed class ApiRoutes
     {
         #region Constants
         public const string Tags = "Projects";
-        
+
         private const string Base = "/projects";
         private const string BaseAdmin = "/admin/projects";
         public const string Create = $"{BaseAdmin}";
@@ -33,12 +33,12 @@ public sealed class ApiRoutes
         public const string GetMyProjectRole = $"{Base}/{{projectId}}/my-role";
         #endregion
     }
-    
+
     public static class SubProject
     {
         #region Constants
         public const string Tags = "Sub-Projects";
-        
+
         private const string Base = "/sub-projects";
         private const string BaseProjectManager = "/manager/sub-projects";
 
@@ -51,8 +51,8 @@ public sealed class ApiRoutes
         public const string GetSubProjectMembersByPaperId = $"{Base}/papers/{{paperId}}/members";
         #endregion
     }
-    
-    
+
+
     public static class ProjectPaper
     {
         public const string Tags = "Project Papers";
@@ -68,6 +68,16 @@ public sealed class ApiRoutes
         public const string GetProjectPapers = $"{Base}/{{projectId}}/papers";
         public const string DeleteProjectPaperByBankId = $"{Base}/paper-bank/{{paperBankId}}";
    }
+
+    public static class ProjectConferenceJournal
+    {
+        public const string Tags = "Project Conference Journals";
+        private const string Base = "/projects";
+        private const string BaseManager = "/manager/projects";
+        public const string ProjectConferenceJournals = $"{BaseManager}/{{projectId}}/conference-journals/{{journalId}}";
+        public const string DeleteProjectConferenceJournalByJournalId = $"{Base}/conference-journals/{{journalId}}";
+    }
+
     public static class Member
     {
         #region Constants
@@ -82,22 +92,25 @@ public sealed class ApiRoutes
         public const string DeleteProjectMembers = $"{BaseProjectManager}/{{projectId}}/members/remove";
         public const string GetProjectMembers    = $"{Base}/{{projectId}}/members";
         public const string UpdateProjectMemberRole = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/role";
+        public const string GetMemberById = $"{Base}/members/{{memberId}}";
+        public const string AddMemberTasks = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/tasks";
+        public const string RemoveMemberTasks = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/tasks/remove";
 
         #endregion
     }
-    
+
     public static class Dataset
     {
         #region Constants
         public const string Tags = "Datasets";
-        
+
         private const string Base = "/datasets";
         private const string BaseProjectManager = "/manager/datasets";
         public const string Create = $"{BaseProjectManager}";
         public const string Update = $"{BaseProjectManager}/{{datasetId}}";
         public const string Delete = $"{BaseProjectManager}/{{datasetId}}";
         public const string GetDatasets = $"{Base}";
-        
+
         #endregion
     }
 }

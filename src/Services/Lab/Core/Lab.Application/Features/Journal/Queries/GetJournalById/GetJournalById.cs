@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Models.Results;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using MediatR;
@@ -21,22 +22,45 @@ public class GetJournalByIdQueryValidator : AbstractValidator<GetJournalByIdQuer
     }
 }
 
-public class GetJournalByIdQueryHandler(IDocumentSession session, IMapper mapper)
+public class GetJournalByIdQueryHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService,
+    IMapper mapper)
     : IRequestHandler<GetJournalByIdQuery, GetJournalByIdResult>
 {
-    #region Implementations
-
     public async Task<GetJournalByIdResult> Handle(GetJournalByIdQuery request, CancellationToken cancellationToken)
     {
-        var journal = await session.LoadAsync<JournalEntity>(request.Id, cancellationToken);
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(request.Id, cancellationToken);
 
         if (journal == null)
             throw new NotFoundException(MessageCode.JournalIsNotExists, request.Id.ToString());
 
         var response = mapper.Map<JournalDto>(journal);
 
-        return new GetJournalByIdResult(response);
-    }
+        var template = await session.LoadAsync<TemplateEntity>(journal.TemplateId, cancellationToken);
 
-    #endregion
+        response.TemplateCode = template?.Code ?? "N/A";
+
+        var projects = new List<ProjectJournalInfo>();
+        if (journal.ProjectIds != null && journal.ProjectIds.Count != 0)
+        {
+            var availableProjects =
+                await managementApiService.GetProjectsByIdsAsync(journal.ProjectIds, cancellationToken);
+
+            var projectMap = availableProjects.ToDictionary(x => x.Id, x => x);
+
+            projects = journal.ProjectIds
+                .Where(projectMap.ContainsKey)
+                .Select(id => projectMap[id])
+                .Select(project => new ProjectJournalInfo
+                {
+                    Id = project.Id,
+                    Name = project.Name ?? string.Empty,
+                    Code = project.Code ?? string.Empty
+                })
+                .ToList();
+        }
+
+        return new GetJournalByIdResult(response, projects);
+    }
 }

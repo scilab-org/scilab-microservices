@@ -11,7 +11,6 @@ public class UpdatePaperBankDto
     public string? Publisher { get; set; }
     public string? Abstract { get; init; }
     public string? Doi { get; init; }
-    public PaperStatus? Status { get; init; }
     public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; init; }
     public DateTimeOffset? PublicationDate { get; set; }

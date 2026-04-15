@@ -31,6 +31,24 @@ public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper)
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         var response = mapper.Map<PaperDto>(paper);
+        var versions = await session.Query<PaperVersionEntity>()
+            .Where(x => x.PaperId == paper.Id)
+            .OrderByDescending(x => x.CreatedOnUtc)
+            .Select(version => new PaperVersionInfo
+            {
+                Id = version.Id,
+                Name = version.Name,
+                Content = version.Content,
+                References = version.References,
+                Files = version.Files,
+                CreatedBy = version.CreatedBy,
+                CreatedOnUtc = version.CreatedOnUtc,
+                LastModifiedBy = version.LastModifiedBy,
+                LastModifiedOnUtc = version.LastModifiedOnUtc ?? version.CreatedOnUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        response.Versions = versions.ToList();
 
         return new GetPaperByIdResult(response);
     }

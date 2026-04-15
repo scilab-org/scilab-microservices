@@ -1,4 +1,10 @@
-﻿using Lab.Api.Constants;
+﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Exceptions;
+using BuildingBlocks.Swagger.Extensions;
+using Common.Constants;
+using Common.Models;
+using Lab.Api.Constants;
+using Lab.Api.Models.Journal;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Features.Journal.Commands.UpdateJournal;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +23,8 @@ public sealed class UpdateJournal : ICarterModule
             .Produces<ApiUpdatedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .DisableAntiforgery();
-        // .RequireAuthorization();
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     #endregion
@@ -27,11 +33,17 @@ public sealed class UpdateJournal : ICarterModule
 
     private async Task<IResult> HandleUpdateJournalAsync(
         ISender sender,
-        Guid id,
-        [FromBody] UpdateJournalEntityDto dto)
+        IHttpContextAccessor httpContext,
+        [FromRoute] Guid id,
+        [FromBody] UpdateJournalEntityDto request)
     {
-        dto.Id = id;
-        var command = new UpdateJournalCommand(dto);
+        if (request == null) throw new ClientValidationException(MessageCode.BadRequest);
+
+        var currentUser = httpContext.GetCurrentUser();
+        if (currentUser == null)
+            throw new UnauthorizedException(MessageCode.Unauthorized);
+
+        var command = new UpdateJournalCommand(request, id, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Ok(new ApiUpdatedResponse<Guid>(result));

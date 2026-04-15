@@ -12,14 +12,13 @@ public  class PaperInfoDto : DtoId<Guid>
     public string? Abstract { get; set; }
     public string? ResearchGap { get; set; }
     public string? MainContribution { get; set; }
+    public string? ResearchAim { get; set; }
     public string? Rule { get; set; }
     public string? GapType { get; set; }
-    public string? Journal { get; set; }
-    public string? StyleName { get; set; }
-    public string? StyleDescription { get; set; }
-    public string? StyleRule { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
     public PaperStatus? Status { get; set; }
     public List<string> TagNames { get; set; } = new();
-    public List<PaperCombineInfo> Combines { get; set; } = new();
+    public List<PaperVersionInfo> Versions { get; set; } = new();
     public List<PaperReferenceInfo> References { get; set; } = new();
 }

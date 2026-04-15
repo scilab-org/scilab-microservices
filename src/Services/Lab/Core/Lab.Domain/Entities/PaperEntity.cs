@@ -15,14 +15,12 @@ public sealed class PaperEntity : Entity<Guid>
     public string? Abstract { get; set; }
     public string? ResearchGap { get; set; }
     public string? MainContribution { get; set; }
+    public string? ResearchAim { get; set; }
     public string? Rule { get; set; }
     public string? GapType { get; set; }
-    public string? Journal { get; set; }
-    public string? StyleName { get; set; }
-    public string? StyleDescription { get; set; }
-    public string? StyleRule { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
     public PaperStatus? Status { get; set; }
-    public List<Combine> Combines { get; set; } = new();
     public List<Reference>? References { get; set; } = new();
 
     #endregion
@@ -36,14 +34,12 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText = null,
         string? researchGap = null,
         string? mainContribution = null,
+        string? researchAim = null,
         string? rule = null,
         string? gapType = null,
-        string? journal = null,
-        string? styleName = null,
-        string? styleDescription = null,
-        string? styleRule = null,
+        string? conferenceJournalName = null,
+        Guid? conferenceJournalId  = null,
         PaperStatus? status = null,
-        List<Combine>? combines = null,
         List<Reference>? references = null,
         string? createdBy = null)
     {
@@ -56,14 +52,12 @@ public sealed class PaperEntity : Entity<Guid>
             Abstract = abstractText,
             ResearchGap = researchGap,
             MainContribution = mainContribution,
+            ResearchAim = researchAim,
             Rule = rule,
             GapType = gapType,
-            Journal = journal,
-            StyleName = styleName,
-            StyleDescription = styleDescription,
-            StyleRule = styleRule,
+            ConferenceJournalName = conferenceJournalName,
+            ConferenceJournalId = conferenceJournalId,
             Status = status ?? PaperStatus.Processing,
-            Combines = combines ?? [],
             References = references ?? [],
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -81,14 +75,14 @@ public sealed class PaperEntity : Entity<Guid>
         string? abstractText = null,
         string? researchGap = null,
         string? mainContribution = null,
+        string? researchAim = null,
         string? rule = null,
-        string? journal = null,
-        string? styleName = null,
-        string? styleDescription = null,
-        string? styleRule = null,
+        string? conferenceJournalName = null,
+        Guid? conferenceJournalId = null,
         PaperStatus? status = null,
         string? gapType = null,
-        List<Reference>? references = null)
+        List<Reference>? references = null,
+        string? lastModifiedBy = null)
     {
         Title = title ?? Title;
         Template = template ?? Template;
@@ -96,14 +90,14 @@ public sealed class PaperEntity : Entity<Guid>
         Abstract = abstractText ?? Abstract;
         ResearchGap = researchGap ?? ResearchGap;
         MainContribution = mainContribution ?? MainContribution;
+        ResearchAim = researchAim ?? ResearchAim;
         Rule = rule ?? Rule;
         GapType = gapType ?? GapType;
-        Journal = journal ?? Journal;
-        StyleName = styleName ?? StyleName;
-        StyleDescription = styleDescription ?? StyleDescription;
-        StyleRule = styleRule ?? StyleRule;
+        ConferenceJournalName = conferenceJournalName ?? ConferenceJournalName;
+        ConferenceJournalId = conferenceJournalId ?? ConferenceJournalId;
         Status = status ?? Status;
         References = references ?? References;
+        LastModifiedBy = lastModifiedBy ?? LastModifiedBy;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
@@ -112,38 +106,6 @@ public sealed class PaperEntity : Entity<Guid>
         if (string.IsNullOrWhiteSpace(url)) return;
 
         FilePath = url;
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-    }
-
-    public Combine AddCombineVersion(string? name, string? content, List<Guid>? reference, string? createdBy)
-    {
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(content)) return null!;
-
-        var combine = new Combine()
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Content = content,
-            References = reference,
-            CreatedBy = createdBy,
-            CreatedOnUtc = DateTimeOffset.UtcNow,
-            LastModifiedBy = createdBy,
-            LastModifiedOnUtc = DateTimeOffset.UtcNow
-        };
-        Combines.Add(combine);
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-        return combine;
-    }
-
-    public void UpdateCombineVersion(Guid combineId, string? content,
-        string? lastModifiedBy)
-    {
-        var combine = Combines.FirstOrDefault(c => c.Id == combineId);
-        if (combine == null) return;
-
-        combine.Content = content ?? combine.Content;
-        combine.LastModifiedBy = lastModifiedBy ?? combine.LastModifiedBy;
-        combine.LastModifiedOnUtc = DateTimeOffset.UtcNow;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

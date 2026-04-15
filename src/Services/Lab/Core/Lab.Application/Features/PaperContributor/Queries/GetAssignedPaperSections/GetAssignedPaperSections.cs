@@ -104,12 +104,11 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     Title              = s.Title,
                     Content            = s.Content,
                     Description        = s.Description,
+                    MainIdea           = s.MainIdea,
                     SectionSumary      = s.SectionSumary,
                     CreatedOnUtc       = s.CreatedOnUtc,
                     LastModifiedOnUtc  = s.LastModifiedOnUtc,
                     DisplayOrder       = s.DisplayOrder,
-                    Numbered           = s.Numbered,
-                    ParentSectionId    = s.ParentSectionId,
                     PaperContributorId = c.Id,
                     SectionRole        = c.SectionRole,
                     MemberId           = c.MemberId,
@@ -117,6 +116,7 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     IsMainSection       = s.IsMainSection,
                     IsOldMainSection    = s.IsOldMainSection,
                     Rule                = s.Rule,
+                    Version             = s.Version,
                     Packages            = s.Packages
                 };
             })

@@ -65,7 +65,6 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
             publisher: dto.Publisher,
             abstractText: dto.Abstract,
             doi: dto.Doi,
-            status: dto.Status,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,

@@ -1,4 +1,4 @@
-﻿using Lab.Domain.Abstractions;
+using Lab.Domain.Abstractions;
 using Lab.Domain.Enums;
 
 namespace Lab.Domain.Entities;
@@ -14,13 +14,14 @@ public sealed class TaskEntity: Entity<Guid>
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? NextReviewDate { get; set; }
     public DateTimeOffset? CompleteDate { get; set; }
-    
+    public Guid MemberId { get; set; }
 
     #endregion
 
     #region Factories
 
     public static TaskEntity Create(Guid id,
+        Guid memberId,
         string name,
         string? description = null,
         string? assignedToUserName  = null,
@@ -33,6 +34,7 @@ public sealed class TaskEntity: Entity<Guid>
         return new TaskEntity()
         {
             Id = id,
+            MemberId = memberId,
             Name = name,
             Description = description,
             AssignedToUserName  = assignedToUserName ,

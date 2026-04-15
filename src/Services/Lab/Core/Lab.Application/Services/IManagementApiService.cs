@@ -11,6 +11,23 @@ public interface IManagementApiService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Calls the Management service to search projects by name/code and returns the matching projects.
+    /// </summary>
+    Task<List<ManagementProjectInfo>> GetProjectsAsync(
+        string? name = null,
+        string? code = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resolves project details for a list of project ids.
+    /// </summary>
+    Task<List<ManagementProjectInfo>> GetProjectsByIdsAsync(
+        IEnumerable<Guid> projectIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Calls the Management service to create a sub-project under the given project,
     /// linking it to the specified paper.
     /// Returns the newly created sub-project Id.
@@ -36,6 +53,14 @@ public interface IManagementApiService
     Task<(Guid SubProjectId, Guid MemberId)?> GetMemberByPaperIdAsync(
         Guid paperId,
         Guid userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a member by their Id. Returns SubProjectMemberInfo (since the caller usually wants UserId/Role etc or ProjectId)
+    /// WAIT: I need an object that returns ProjectId!
+    /// </summary>
+    Task<ManagementMemberInfo?> GetMemberByIdAsync(
+        Guid memberId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -70,6 +95,39 @@ public interface IManagementApiService
     Task<List<Guid>?> DeleteProjectPaperByBankIdAsync(
         Guid paperBankId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds conference journal ids into a project in Management service.
+    /// </summary>
+    Task<bool> AddProjectConferenceJournalsAsync(
+        Guid projectId,
+        Guid journalId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a conference journal id from all projects that reference it in Management service.
+    /// </summary>
+    Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(
+        Guid journalId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds tasks to a member in Management service.
+    /// </summary>
+    Task<bool> AddMemberTasksAsync(
+        Guid projectId,
+        Guid memberId,
+        List<Guid> taskIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes tasks from a member in Management service.
+    /// </summary>
+    Task<bool> RemoveMemberTasksAsync(
+        Guid projectId,
+        Guid memberId,
+        List<Guid> taskIds,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record SubProjectMemberInfo(
@@ -80,6 +138,12 @@ public sealed record SubProjectMemberInfo(
     string? Email = null,
     string? FirstName = null,
     string? LastName = null);
+
+public sealed record ManagementMemberInfo(
+    Guid Id,
+    Guid UserId,
+    Guid ProjectId,
+    string ProjectRole);
 
 public sealed record ManagementProjectInfo(
     Guid Id,
