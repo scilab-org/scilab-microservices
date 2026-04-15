@@ -29,6 +29,8 @@ public static class DependencyInjection
 
             opts.Schema.For<PaperEntity>()
                 .SoftDeleted();
+            opts.Schema.For<SectionEntity>()
+                .SoftDeleted();
             opts.Schema.For<PaperBankEntity>()
                 .SoftDeleted()
                 .Index(pb => pb.TagNames);

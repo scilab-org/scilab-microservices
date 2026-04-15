@@ -68,7 +68,7 @@ public class CreatePaperCommandHandler(
         session.Update(journal);
 
         var projectRule = SectionRuleComposer.BuildProjectRule(project);
-        var paperRule = SectionRuleComposer.BuildPaperRule(dto, journal.Style!);
+        var paperRule = SectionRuleComposer.BuildPaperRule(dto, journal);
 
         var entity = PaperEntity.Create(
             id: Guid.NewGuid(),

@@ -65,7 +65,7 @@ public class UpdatePaperCommandHandler(
                       ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
                           dto.ConferenceJournalId.ToString());
 
-        var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal.Style);
+        var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal);
         var sections = await session.Query<SectionEntity>()
             .Where(x => x.PaperId == paper.Id)
             .ToListAsync(cancellationToken);

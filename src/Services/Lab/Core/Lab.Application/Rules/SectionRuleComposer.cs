@@ -22,7 +22,7 @@ public static class SectionRuleComposer
         return contentBuilder.ToString().TrimEnd();
     }
 
-    public static string BuildPaperRule(CreatePaperDto paperDto, string journalStyle)
+    public static string BuildPaperRule(CreatePaperDto paperDto, ConferenceJournalEntity journal)
     {
         return BuildPaperRule(
             paperDto.Context,
@@ -30,10 +30,10 @@ public static class SectionRuleComposer
             paperDto.ResearchGap,
             paperDto.GapType,
             paperDto.ResearchAim,
-            journalStyle);
+            journal);
     }
 
-    public static string BuildPaperRule(PaperEntity paper, string journalStyle)
+    public static string BuildPaperRule(PaperEntity paper, ConferenceJournalEntity journal)
     {
         return BuildPaperRule(
             paper.Context,
@@ -41,7 +41,7 @@ public static class SectionRuleComposer
             paper.ResearchGap,
             paper.GapType,
             paper.ResearchAim,
-            journalStyle);
+            journal);
     }
 
     public static string BuildSectionRule(string? title, string? guideline, string? mainIdea = null)
@@ -83,7 +83,7 @@ public static class SectionRuleComposer
         string? researchGap,
         string? gapType,
         string? researchAim,
-        string? journalStyle)
+        ConferenceJournalEntity journal)
     {
         var contentBuilder = new StringBuilder();
 
@@ -95,7 +95,8 @@ public static class SectionRuleComposer
         AppendBlock(contentBuilder, "Research Gap", researchGap);
         AppendBlock(contentBuilder, "Gap Type", gapType);
         AppendBlock(contentBuilder, "Research Aim", researchAim);
-        AppendBlock(contentBuilder, "Journal Style", journalStyle);
+        AppendBlock(contentBuilder, "Journal Name", journal.Name);
+        AppendBlock(contentBuilder, "Journal Style", journal.Style);
         AppendBlock(contentBuilder, "Rule", PaperRules.Paper);
 
         return contentBuilder.ToString().TrimEnd();

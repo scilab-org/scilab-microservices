@@ -72,7 +72,7 @@ public sealed class UpdateProjectRulesCommandHandler(
                               paper.ConferenceJournalId.ToString());
 
             var paperRule = string.IsNullOrWhiteSpace(section.PaperRule)
-                ? SectionRuleComposer.BuildPaperRule(paper, journal.Style!)
+                ? SectionRuleComposer.BuildPaperRule(paper, journal)
                 : section.PaperRule;
 
             var sectionRule = string.IsNullOrWhiteSpace(section.SectionRule)
