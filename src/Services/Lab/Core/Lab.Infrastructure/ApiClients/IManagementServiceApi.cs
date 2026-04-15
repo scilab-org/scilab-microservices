@@ -66,12 +66,12 @@ public interface IManagementServiceApi
         [AliasAs("paperBankId")] Guid paperBankId);
 
     /// <summary>
-    /// POST /manager/projects/{projectId}/journals - adds conference journal ids into project.
+    /// POST /manager/projects/{projectId}/conference-journals/{journalId} - adds a conference journal to a project.
     /// </summary>
-    [Post("/manager/projects/{projectId}/journals")]
+    [Post("/manager/projects/{projectId}/conference-journals/{journalId}")]
     Task<HttpResponseMessage> AddProjectConferenceJournalsAsync(
         [AliasAs("projectId")] Guid projectId,
-        [Body] ProjectConferenceJournalsRequest body);
+        [AliasAs("journalId")] Guid journalId);
 
     /// <summary>
     /// POST /manager/projects/{projectId}/journals/remove - removes conference journal ids from project.
@@ -79,7 +79,7 @@ public interface IManagementServiceApi
     [Post("/manager/projects/{projectId}/journals/remove")]
     Task<HttpResponseMessage> RemoveProjectConferenceJournalsAsync(
         [AliasAs("projectId")] Guid projectId,
-        [Body] ProjectConferenceJournalsRequest body);
+        [AliasAs("journalId")] Guid journalId);
 
     /// <summary>
     /// POST /projects/journal/{journalId} - removes this journal id from all projects.

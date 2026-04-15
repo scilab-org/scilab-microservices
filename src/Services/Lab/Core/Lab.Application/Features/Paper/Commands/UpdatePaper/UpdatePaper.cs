@@ -6,6 +6,7 @@ using Marten;
 using DomainRules = Lab.Domain.Constants.Rules;
 
 namespace Lab.Application.Features.Paper.Commands.UpdatePaper;
+
 public record UpdatePaperCommand(UpdatePaperDto Dto, Guid Id, string UserName) : ICommand<Guid>;
 
 public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
@@ -41,8 +42,8 @@ public class UpdatePaperCommandHandler(
         var dto = request.Dto;
 
         var paper = await session.Query<PaperEntity>()
-            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
-            ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
+                        .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+                    ?? throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         await session.BeginTransactionAsync(cancellationToken);
 
@@ -60,14 +61,19 @@ public class UpdatePaperCommandHandler(
             lastModifiedBy: request.UserName
         );
 
-        var paperRule = SectionRuleComposer.BuildPaperRule(paper);
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+                      ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
+                          dto.ConferenceJournalId.ToString());
+
+        var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal.Style);
         var sections = await session.Query<SectionEntity>()
             .Where(x => x.PaperId == paper.Id)
             .ToListAsync(cancellationToken);
 
         foreach (var section in sections)
         {
-            var sectionRule = SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea);
+            var sectionRule =
+                SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea);
             var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(
                 section.ProjectRule,
                 paperRule,
