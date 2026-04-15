@@ -9,21 +9,22 @@ public class CreateProjectConferenceJournals : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost(ApiRoutes.ProjectConferenceJournal.CreateProjectConferenceJournals, HandleCreateProjectConferenceJournalsAsync)
+        app.MapPost(ApiRoutes.ProjectConferenceJournal.ProjectConferenceJournals,
+                HandleCreateProjectConferenceJournalsAsync)
             .WithTags(ApiRoutes.ProjectConferenceJournal.Tags)
             .WithName(nameof(CreateProjectConferenceJournals))
-            .Produces<ApiCreatedResponse<List<Guid>>>(StatusCodes.Status201Created)
+            .Produces<ApiCreatedResponse<Guid>>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
-    private async Task<ApiCreatedResponse<List<Guid>>> HandleCreateProjectConferenceJournalsAsync(
+    private async Task<ApiCreatedResponse<Guid>> HandleCreateProjectConferenceJournalsAsync(
         ISender sender,
         [FromRoute] Guid projectId,
-        [FromBody] CreateProjectConferenceJournalDto req)
+        [FromRoute] Guid journalId)
     {
-        var command = new CreateProjectConferenceJournalCommand(projectId, req);
+        var command = new CreateProjectConferenceJournalCommand(projectId, journalId);
         var result = await sender.Send(command);
-        return new ApiCreatedResponse<List<Guid>>(result);
+        return new ApiCreatedResponse<Guid>(result);
     }
 }

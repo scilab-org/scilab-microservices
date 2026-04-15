@@ -8,7 +8,6 @@ public class GetJournalByIdResult
 
     public JournalDto Journal { get; init; }
     public List<ProjectJournalInfo> Projects { get; init; }
-    public ProjectJournalInfo? Project => Projects.Count > 0 ? Projects[0] : null;
 
     #endregion
 
@@ -18,11 +17,6 @@ public class GetJournalByIdResult
     {
         Journal = journal;
         Projects = projects ?? [];
-    }
-
-    public GetJournalByIdResult(JournalDto journal, ProjectJournalInfo? project)
-        : this(journal, project is null ? [] : [project])
-    {
     }
 
     #endregion

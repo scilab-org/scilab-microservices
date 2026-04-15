@@ -20,15 +20,8 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
                     .NotEmpty().WithMessage(MessageCode.JournalIdIsRequired);
             });
 
-        RuleFor(x => x.Dto.EndAt)
-            .LessThanOrEqualTo(DateTimeOffset.UtcNow)
-            .When(x => x.Dto.EndAt.HasValue)
-            .WithMessage(MessageCode.JournalEndAtInvalid);
-
-        RuleFor(x => x.Dto.EndAt)
-            .LessThanOrEqualTo(x => x.Dto.StartAt)
-            .When(x => x.Dto is { EndAt: not null, StartAt: not null })
-            .WithMessage(MessageCode.JournalEndAtInvalid);
+        RuleFor(x => x.Dto.StartAt)
+            .LessThan(x => x.Dto.EndAt).WithMessage(MessageCode.JournalStartDateMustBeforeEndDate);
     }
 }
 

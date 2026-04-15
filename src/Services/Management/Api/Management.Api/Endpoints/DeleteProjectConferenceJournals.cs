@@ -9,10 +9,10 @@ public class DeleteProjectConferenceJournals : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost(ApiRoutes.ProjectConferenceJournal.DeleteProjectConferenceJournals, HandleDeleteProjectConferenceJournalsAsync)
+        app.MapPost(ApiRoutes.ProjectConferenceJournal.ProjectConferenceJournals, HandleDeleteProjectConferenceJournalsAsync)
             .WithTags(ApiRoutes.ProjectConferenceJournal.Tags)
             .WithName(nameof(DeleteProjectConferenceJournals))
-            .Produces<ApiDeletedResponse<List<Guid>>>()
+            .Produces<ApiDeletedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
@@ -20,11 +20,11 @@ public class DeleteProjectConferenceJournals : ICarterModule
     private async Task<IResult> HandleDeleteProjectConferenceJournalsAsync(
         ISender sender,
         [FromRoute] Guid projectId,
-        [FromBody] DeleteProjectConferenceJournalDto req)
+        [FromRoute] Guid journalId)
     {
-        var command = new DeleteProjectConferenceJournalsCommand(projectId, req);
+        var command = new DeleteProjectConferenceJournalsCommand(projectId, journalId);
         var result = await sender.Send(command);
 
-        return TypedResults.Ok(new ApiDeletedResponse<List<Guid>>(result));
+        return TypedResults.Ok(new ApiDeletedResponse<Guid>(result));
     }
 }

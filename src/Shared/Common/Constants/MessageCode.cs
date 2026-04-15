@@ -34,7 +34,7 @@ public sealed class MessageCode
 
     public const string ProjectCodeAlreadyExists = "PROJECT_CODE_ALREADY_EXISTS";
 
-    public const string ConferenceJournalIdsAreRequired = "CONFERENCE_JOURNAL_IDS_ARE_REQUIRED";
+    public const string ConferenceJournalIdIsRequired = "CONFERENCE_JOURNAL_ID_IS_REQUIRED";
 
     public const string ConferenceJournalNotFoundInProject = "CONFERENCE_JOURNAL_NOT_FOUND_IN_PROJECT";
 

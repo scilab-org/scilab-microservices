@@ -20,6 +20,7 @@ public sealed class ProjectEntity : Entity<Guid>
     public List<Guid> DatasetIds { get; set; } = new();
     public List<Guid> PaperIds { get; set; } = new();
     public List<Guid> ConferenceJournalIds { get; set; } = new();
+
     #endregion
 
     #region Factories
@@ -64,27 +65,31 @@ public sealed class ProjectEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string name,
-        string? description,
-        string? code,
-        string? context,
-        string? domain,
-        string? keypoint,
-        ProjectStatus? status,
-        DateTimeOffset? startDate,
-        DateTimeOffset? endDate)
+    public void Update(string? name = null,
+        string? description = null,
+        string? code = null,
+        string? context = null,
+        string? domain = null,
+        string? keypoint = null,
+        ProjectStatus? status = null,
+        DateTimeOffset? startDate = null,
+        DateTimeOffset? endDate = null,
+        List<Guid>? conferenceJournalIds = null
+    )
     {
-        Name = name;
-        Description = description;
-        Code = code;
-        Context = context;
-        Domain = domain;
-        Keypoint = keypoint;
-        StartDate = startDate;
-        Status = status;
-        EndDate = endDate;
+        Name = name ?? Name;
+        Description = description ?? Description;
+        Code = code ?? Code;
+        Context = context ?? Context;
+        Domain = domain ?? Domain;
+        Keypoint = keypoint ?? Keypoint;
+        StartDate = startDate ?? StartDate;
+        Status = status ?? Status;
+        EndDate = endDate ?? endDate;
+        ConferenceJournalIds = conferenceJournalIds ?? ConferenceJournalIds;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
+
     public void AddPapers(IEnumerable<Guid> paperIds)
     {
         foreach (var paperId in paperIds.Distinct())
@@ -95,7 +100,7 @@ public sealed class ProjectEntity : Entity<Guid>
 
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
-    
+
     public List<Guid> RemovePapers(IEnumerable<Guid> paperIds)
     {
         var removed = new List<Guid>();
@@ -138,6 +143,6 @@ public sealed class ProjectEntity : Entity<Guid>
 
         return removed;
     }
+
     #endregion
-    
 }

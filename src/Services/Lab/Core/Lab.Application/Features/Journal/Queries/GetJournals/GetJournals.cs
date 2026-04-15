@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JasperFx.Core;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
@@ -12,7 +13,10 @@ namespace Lab.Application.Features.Journal.Queries.GetJournals;
 
 public record GetJournalsQuery(GetJournalsFilter Filter, PaginationRequest Paging) : IQuery<GetJournalsResult>;
 
-public class GetJournalsQueryHandler(IDocumentSession session, IManagementApiService managementApiService, IMapper mapper)
+public class GetJournalsQueryHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService,
+    IMapper mapper)
     : IQueryHandler<GetJournalsQuery, GetJournalsResult>
 {
     public async Task<GetJournalsResult> Handle(GetJournalsQuery request, CancellationToken cancellationToken)
@@ -29,13 +33,12 @@ public class GetJournalsQueryHandler(IDocumentSession session, IManagementApiSer
 
         if (!filter.TemplateCode.IsNullOrWhiteSpace())
         {
-            var code = filter.TemplateCode.Trim();
+            var code = filter.TemplateCode.Trim().ToLower();
             var template = await session.Query<TemplateEntity>()
-                .FirstOrDefaultAsync(x => x.Code == code, cancellationToken);
-            if (template != null)
-            {
-                query = query.Where(x => x.TemplateId == template.Id);
-            }
+                .FirstOrDefaultAsync(x => x.Code!.ToLower().Contains(code), cancellationToken);
+            var templateId = template?.Id ?? Guid.Empty;
+
+            query = query.Where(x => x.TemplateId == templateId);
         }
 
         if (!filter.ProjectName.IsNullOrWhiteSpace() || !filter.ProjectCode.IsNullOrWhiteSpace())

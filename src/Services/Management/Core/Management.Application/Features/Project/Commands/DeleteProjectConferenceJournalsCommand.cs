@@ -1,11 +1,10 @@
-﻿using Management.Application.Dtos.Projects;
-using Management.Domain.Entities;
+﻿using Management.Domain.Entities;
 using Marten;
 
 namespace Management.Application.Features.Project.Commands;
 
-public sealed record DeleteProjectConferenceJournalsCommand(Guid ProjectId, DeleteProjectConferenceJournalDto Dto)
-    : ICommand<List<Guid>>;
+public sealed record DeleteProjectConferenceJournalsCommand(Guid ProjectId, Guid JournalId)
+    : ICommand<Guid>;
 
 public class DeleteProjectConferenceJournalsValidator : AbstractValidator<DeleteProjectConferenceJournalsCommand>
 {
@@ -15,37 +14,27 @@ public class DeleteProjectConferenceJournalsValidator : AbstractValidator<Delete
             .NotEmpty()
             .WithMessage(MessageCode.ProjectIdIsRequired);
 
-        RuleFor(x => x.Dto.ConferenceJournalIds)
+        RuleFor(x => x.JournalId)
             .NotEmpty()
-            .WithMessage(MessageCode.ConferenceJournalIdsAreRequired);
+            .WithMessage(MessageCode.ConferenceJournalIdIsRequired);
     }
 }
 
 public class DeleteProjectConferenceJournalsCommandHandler(IDocumentSession session)
-    : ICommandHandler<DeleteProjectConferenceJournalsCommand, List<Guid>>
+    : ICommandHandler<DeleteProjectConferenceJournalsCommand, Guid>
 {
-    public async Task<List<Guid>> Handle(DeleteProjectConferenceJournalsCommand command, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(DeleteProjectConferenceJournalsCommand command,
+        CancellationToken cancellationToken)
     {
         var project = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken);
         if (project == null)
             throw new NotFoundException(MessageCode.ProjectIsNotExists);
 
-        var ids = command.Dto.ConferenceJournalIds
-            .Where(x => x != Guid.Empty)
-            .Distinct()
-            .ToList();
+        project.ConferenceJournalIds.Remove(command.JournalId);
 
-        if (!ids.Any())
-            throw new ClientValidationException(MessageCode.ConferenceJournalIdsAreRequired);
-
-        var removed = project.RemoveConferenceJournals(ids);
-
-        if (!removed.Any())
-            throw new NotFoundException(MessageCode.ConferenceJournalNotFoundInProject);
-
-        session.Store(project);
+        session.Update(project);
         await session.SaveChangesAsync(cancellationToken);
 
-        return removed;
+        return project.Id;
     }
 }
