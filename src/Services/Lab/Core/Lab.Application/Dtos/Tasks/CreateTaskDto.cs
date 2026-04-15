@@ -5,6 +5,7 @@ namespace Lab.Application.Dtos.Tasks;
 public class CreateTaskDto
 {
     public Guid PaperId { get; set; }
+    public Guid? SectionId { get; set; }
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public string? AssignedToUserName  { get; set; }

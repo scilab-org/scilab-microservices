@@ -55,6 +55,19 @@ public sealed class GetTasksByPaperIdQueryHandler(IDocumentSession session, IMap
         var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken);
         var paperName = paper?.Title ?? string.Empty;
 
+        var sectionIds = contributors
+            .Where(x => x.SectionId.HasValue)
+            .Select(x => x.SectionId!.Value)
+            .Distinct()
+            .ToList();
+        var sectionTitleMap = sectionIds.Count > 0
+            ? (await session.Query<SectionEntity>()
+                .Where(x => sectionIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.Title })
+                .ToListAsync(cancellationToken))
+              .ToDictionary(x => x.Id, x => x.Title)
+            : new Dictionary<Guid, string?>();
+
         var taskDtos = mapper.Map<List<TaskDto>>(tasks);
         foreach (var taskDto in taskDtos)
         {
@@ -62,7 +75,11 @@ public sealed class GetTasksByPaperIdQueryHandler(IDocumentSession session, IMap
             taskDto.PaperTitle = paperName;
 
             if (contributorMap.TryGetValue(taskDto.Id, out var contributor))
+            {
                 taskDto.PaperContributorId = contributor.Id;
+                taskDto.SectionId = contributor.SectionId;
+                taskDto.SectionTitle = contributor.SectionId.HasValue && sectionTitleMap.TryGetValue(contributor.SectionId.Value, out var sTitle) ? sTitle : null;
+            }
         }
 
         return new GetTasksPagedResult(taskDtos, pagedTasks.TotalItemCount, request.Paging);
