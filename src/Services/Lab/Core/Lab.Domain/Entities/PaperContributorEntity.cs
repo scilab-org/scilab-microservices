@@ -11,7 +11,6 @@ public class PaperContributorEntity : Entity<Guid>
     public Guid? SectionId { get; set; }
     public Guid MemberId { get; set; }
     public Guid MarkSectionId { get; set; }
-    public List<Guid> TaskIds { get; set; } = new();
 
     #endregion
 
@@ -51,18 +50,6 @@ public class PaperContributorEntity : Entity<Guid>
         SectionId = sectionId ?? SectionId;
         MemberId = memberId ?? MemberId;
         MarkSectionId = markSectionId ?? MarkSectionId;
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-    }
-
-    public void AddTasks(Guid taskId)
-    {
-        TaskIds.Add(taskId);
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-    }
-    
-    public void RemoveTasks(Guid taskId)
-    {
-        TaskIds = TaskIds.Where(t => t != taskId).ToList();
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
     

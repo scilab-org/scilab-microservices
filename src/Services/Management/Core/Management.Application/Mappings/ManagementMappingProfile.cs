@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Management.Application.Dtos.Datasets;
+using Management.Application.Dtos.Members;
 using Management.Application.Dtos.Projects;
 using Management.Application.Models.Results;
 using Management.Domain.Entities;
@@ -14,6 +15,7 @@ public class ManagementMappingProfile : Profile
     {
         CreateProjectMappings();
         CreateDatasetMappings();
+        CreateMemberMappings();
     }
 
     #endregion
@@ -37,6 +39,11 @@ public class ManagementMappingProfile : Profile
         
     }
     
-
+    private void CreateMemberMappings()
+    {
+        // DatasetEntity -> DatasetDto
+        CreateMap<MemberEntity, MemberDto>();
+        
+    }
     #endregion
 }

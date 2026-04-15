@@ -65,10 +65,10 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
         if (!tasks.Any())
             return new GetTasksPagedResult([], 0, request.Paging);
 
-        var taskIds = tasks.Select(x => x.Id).ToList();
+        var memberIds = tasks.Where(x => x.MemberId != Guid.Empty).Select(x => x.MemberId).Distinct().ToList();
 
         var paperContributorQuery = session.Query<PaperContributorEntity>()
-            .Where(x => x.TaskIds.Any(tid => taskIds.Contains(tid))); 
+            .Where(x => memberIds.Contains(x.MemberId)); 
         
         if (filter.PaperId.HasValue)
             paperContributorQuery = paperContributorQuery.Where(x => x.PaperId == filter.PaperId.Value);
@@ -76,12 +76,11 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
         var contributors = await paperContributorQuery
             .ToListAsync(cancellationToken);
 
+        // A member may map to multiple sections, but the PaperId is always the same for that member in a subproject.
+        // So we take the first contributor record for each member to get the Paper linkage.
         var contributorMap = contributors
-            .SelectMany(x => x.TaskIds
-                .Where(tid => taskIds.Contains(tid))
-                .Select(taskId => new { taskId, contributor = x }))
-            .GroupBy(x => x.taskId)
-            .ToDictionary(g => g.Key, g => g.First().contributor);
+            .GroupBy(x => x.MemberId)
+            .ToDictionary(g => g.Key, g => g.First());
 
         var paperIds = contributors.Select(x => x.PaperId).Distinct().ToList();
         var paperNameMap = await session.Query<PaperEntity>()
@@ -103,14 +102,15 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
             : new Dictionary<Guid, string?>();
         
         var filteredTasks = filter.PaperId.HasValue
-            ? tasks.Where(x => contributorMap.ContainsKey(x.Id)).ToList()
+            ? tasks.Where(x => contributorMap.ContainsKey(x.MemberId)).ToList()
             : tasks;
 
         var taskDtos = mapper.Map<List<TaskDto>>(filteredTasks);
 
         foreach (var taskDto in taskDtos)
         {
-            if (!contributorMap.TryGetValue(taskDto.Id, out var contributor))
+            var taskEntity = filteredTasks.First(x => x.Id == taskDto.Id);
+            if (!contributorMap.TryGetValue(taskEntity.MemberId, out var contributor))
                 continue;
 
             taskDto.SectionId = contributor.SectionId;

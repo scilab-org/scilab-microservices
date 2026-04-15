@@ -46,6 +46,13 @@ public interface IManagementServiceApi
         [AliasAs("paperId")] Guid paperId,
         [AliasAs("userId")] Guid userId);
 
+    /// <summary>
+    /// GET /projects/members/{memberId} — gets a member by their Id.
+    /// </summary>
+    [Get("/projects/members/{memberId}")]
+    Task<HttpResponseMessage> GetMemberByIdAsync(
+        [AliasAs("memberId")] Guid memberId);
+
     /// <summary>GET /sub-projects/papers/{paperId}/members — all members of the sub-project that owns this paper.</summary>
     [Get("/sub-projects/papers/{paperId}/members")]
     Task<HttpResponseMessage> GetSubProjectMembersByPaperIdAsync(
@@ -87,6 +94,24 @@ public interface IManagementServiceApi
     [Post("/projects/journal/{journalId}")]
     Task<HttpResponseMessage> RemoveConferenceJournalFromProjectAsync(
         [AliasAs("journalId")] Guid journalId);
+
+    /// <summary>
+    /// POST /manager/projects/{projectId}/members/{memberId}/tasks - adds tasks to a member
+    /// </summary>
+    [Post("/manager/projects/{projectId}/members/{memberId}/tasks")]
+    Task<HttpResponseMessage> AddMemberTasksAsync(
+        [AliasAs("projectId")] Guid projectId,
+        [AliasAs("memberId")] Guid memberId,
+        [Body] MemberTaskRequest body);
+
+    /// <summary>
+    /// DELETE /manager/projects/{projectId}/members/{memberId}/tasks/remove - removes tasks from a member
+    /// </summary>
+    [Delete("/manager/projects/{projectId}/members/{memberId}/tasks/remove")]
+    Task<HttpResponseMessage> RemoveMemberTasksAsync(
+        [AliasAs("projectId")] Guid projectId,
+        [AliasAs("memberId")] Guid memberId,
+        [Body] MemberTaskRequest body);
 }
 
 public class CreateSubProjectRequest
@@ -109,4 +134,9 @@ public sealed class AddSubProjectMemberEntry
 public sealed class ProjectConferenceJournalsRequest
 {
     public List<Guid> ConferenceJournalIds { get; set; } = [];
+}
+
+public sealed class MemberTaskRequest
+{
+    public List<Guid> TaskIds { get; set; } = [];
 }

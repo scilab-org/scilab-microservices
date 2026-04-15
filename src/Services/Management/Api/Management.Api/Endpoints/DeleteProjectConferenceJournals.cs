@@ -1,4 +1,4 @@
-﻿using Management.Api.Constants;
+using Management.Api.Constants;
 using Management.Application.Dtos.Projects;
 using Management.Application.Features.Project.Commands;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,7 @@ public class DeleteProjectConferenceJournals : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost(ApiRoutes.ProjectConferenceJournal.ProjectConferenceJournals, HandleDeleteProjectConferenceJournalsAsync)
+        app.MapDelete(ApiRoutes.ProjectConferenceJournal.ProjectConferenceJournals, HandleDeleteProjectConferenceJournalsAsync)
             .WithTags(ApiRoutes.ProjectConferenceJournal.Tags)
             .WithName(nameof(DeleteProjectConferenceJournals))
             .Produces<ApiDeletedResponse<Guid>>()
