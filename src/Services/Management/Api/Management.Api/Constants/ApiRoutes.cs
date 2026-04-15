@@ -1,4 +1,4 @@
-﻿namespace Management.Api.Constants;
+namespace Management.Api.Constants;
 
 public sealed class ApiRoutes
 {
@@ -92,6 +92,9 @@ public sealed class ApiRoutes
         public const string DeleteProjectMembers = $"{BaseProjectManager}/{{projectId}}/members/remove";
         public const string GetProjectMembers    = $"{Base}/{{projectId}}/members";
         public const string UpdateProjectMemberRole = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/role";
+        public const string GetMemberById = $"{Base}/members/{{memberId}}";
+        public const string AddMemberTasks = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/tasks";
+        public const string RemoveMemberTasks = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/tasks/remove";
 
         #endregion
     }

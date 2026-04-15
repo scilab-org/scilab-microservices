@@ -1,4 +1,4 @@
-﻿using BuildingBlocks.Authentication.Extensions;
+using BuildingBlocks.Authentication.Extensions;
 using BuildingBlocks.Exceptions;
 using Common.Constants;
 using Lab.Api.Constants;
@@ -30,8 +30,8 @@ public class UpdateTask: ICarterModule
         var currentUser = httpContext.GetCurrentUser();
         if (string.IsNullOrWhiteSpace(currentUser.Id))
             throw new NoPermissionException(MessageCode.AccessDenied);
-        
-        var command = new UpdateTaskCommand(id, request);
+
+        var command = new UpdateTaskCommand(id, request, currentUser.UserName, currentUser.Id);
         var result = await sender.Send(command);
 
         return new ApiUpdatedResponse<Guid>(result);

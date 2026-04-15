@@ -228,6 +228,67 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
 
         return body?.Value;
     }
+    public async Task<ManagementMemberInfo?> GetMemberByIdAsync(
+        Guid memberId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await managementServiceApi.GetMemberByIdAsync(memberId);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var result = await response.Content.ReadFromJsonAsync<ApiGetResponse<dynamic>>(cancellationToken);
+            if (result?.Result == null)
+                return null;
+
+            var data = result.Result;
+            return new ManagementMemberInfo(
+                Id: Guid.Parse(data.id.ToString()),
+                UserId: Guid.Parse(data.userId.ToString()),
+                ProjectId: Guid.Parse(data.projectId.ToString()),
+                ProjectRole: data.projectRole.ToString()
+            );
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+    public async Task<bool> AddMemberTasksAsync(
+        Guid projectId,
+        Guid memberId,
+        List<Guid> taskIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = taskIds.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0) return false;
+
+        var response = await managementServiceApi.AddMemberTasksAsync(
+            projectId,
+            memberId,
+            new MemberTaskRequest { TaskIds = ids });
+
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> RemoveMemberTasksAsync(
+        Guid projectId,
+        Guid memberId,
+        List<Guid> taskIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = taskIds.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0) return false;
+
+        var response = await managementServiceApi.RemoveMemberTasksAsync(
+            projectId,
+            memberId,
+            new MemberTaskRequest { TaskIds = ids });
+
+        return response.IsSuccessStatusCode;
+    }
+
 
     public async Task<List<SubProjectMemberInfo>> GetSubProjectMembersByPaperIdAsync(
         Guid paperId,

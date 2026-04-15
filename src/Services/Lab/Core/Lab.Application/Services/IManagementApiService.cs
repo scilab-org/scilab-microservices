@@ -56,6 +56,14 @@ public interface IManagementApiService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets a member by their Id. Returns SubProjectMemberInfo (since the caller usually wants UserId/Role etc or ProjectId)
+    /// WAIT: I need an object that returns ProjectId!
+    /// </summary>
+    Task<ManagementMemberInfo?> GetMemberByIdAsync(
+        Guid memberId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Returns all members of the sub-project that owns the given paper.
     /// Each entry contains (MemberId, UserId, Role).
     /// </summary>
@@ -102,6 +110,24 @@ public interface IManagementApiService
     Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(
         Guid journalId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds tasks to a member in Management service.
+    /// </summary>
+    Task<bool> AddMemberTasksAsync(
+        Guid projectId,
+        Guid memberId,
+        List<Guid> taskIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes tasks from a member in Management service.
+    /// </summary>
+    Task<bool> RemoveMemberTasksAsync(
+        Guid projectId,
+        Guid memberId,
+        List<Guid> taskIds,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record SubProjectMemberInfo(
@@ -112,6 +138,12 @@ public sealed record SubProjectMemberInfo(
     string? Email = null,
     string? FirstName = null,
     string? LastName = null);
+
+public sealed record ManagementMemberInfo(
+    Guid Id,
+    Guid UserId,
+    Guid ProjectId,
+    string ProjectRole);
 
 public sealed record ManagementProjectInfo(
     Guid Id,
