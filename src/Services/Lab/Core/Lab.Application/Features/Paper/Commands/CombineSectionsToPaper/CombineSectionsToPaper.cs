@@ -28,7 +28,11 @@ public class CombineSectionsToPaperCommandValidator : AbstractValidator<CombineS
     }
 }
 
-public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IManagementApiService managementApiService)
+public class CombineSectionsToPaperCommandHandler(
+    IDocumentSession session,
+    IManagementApiService managementApiService,
+    IAiApiService aiApiService,
+    IHttpClientFactory httpClientFactory)
     : ICommandHandler<CombineSectionsToPaperCommand, CombineSectionsToPaperResult>
 {
     public async Task<CombineSectionsToPaperResult> Handle(CombineSectionsToPaperCommand request,
@@ -75,8 +79,14 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IMan
 
         var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken);
 
-        //Huy dùng content trên + template của các conference or journal để build ra final
-
+        // Format the paper content to match the conference/journal template style using AI
+        var savedContent = content;
+        if (!string.IsNullOrWhiteSpace(journal?.TexFile))
+        {
+            var httpClient = httpClientFactory.CreateClient();
+            var templateContent = await httpClient.GetStringAsync(journal.TexFile, cancellationToken);
+            savedContent = await aiApiService.FormatPaperToStyleAsync(content, templateContent, cancellationToken);
+        }
         var files = mainSections
             .Where(x => x.Files != null)
             .SelectMany(x => x.Files!)
@@ -88,9 +98,6 @@ public class CombineSectionsToPaperCommandHandler(IDocumentSession session, IMan
         var versionNumber = await session.Query<PaperVersionEntity>()
             .CountAsync(x => x.PaperId == paper.Id, cancellationToken) + 1;
         var name = $"Version {versionNumber}";
-        var savedContent = content;
-        if (request.Dto.Content != null)
-            savedContent = request.Dto.Content.Trim();
 
         var version = PaperVersionEntity.Create(
             id: Guid.NewGuid(),
