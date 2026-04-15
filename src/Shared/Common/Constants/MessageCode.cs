@@ -232,6 +232,8 @@ public sealed class MessageCode
 
     public const string JournalSectionsAreRequired = "JOURNAL_SECTIONS_ARE_REQUIRED";
 
+    public const string JournalEndAtInvalid = "JOURNAL_END_AT_INVALID";
+
     #endregion
 
     #region Task Management

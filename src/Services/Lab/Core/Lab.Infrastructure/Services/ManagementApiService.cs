@@ -21,7 +21,7 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
         var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<GetProjectByIdApiResult>>(
             cancellationToken: cancellationToken);
 
-        var project = body?.Result?.Project;
+        var project = body?.Result.Project;
         if (project is null)
             return null;
 
@@ -36,6 +36,59 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
             project.Context,
             project.Domain,
             project.Keypoint);
+    }
+
+    public async Task<List<ManagementProjectInfo>> GetProjectsAsync(
+        string? name = null,
+        string? code = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await managementServiceApi.GetProjectsAsync(name, code, pageNumber, pageSize);
+
+        if (!response.IsSuccessStatusCode)
+            return [];
+
+        var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<GetProjectsApiResult>>(
+            cancellationToken: cancellationToken);
+
+        var items = body?.Result.Items ?? [];
+
+        return items
+            .Select(project => new ManagementProjectInfo(
+                project.Id,
+                project.Name,
+                project.Code,
+                project.Description,
+                NormalizeStatus(project.Status),
+                project.StartDate,
+                project.EndDate,
+                project.Context,
+                project.Domain,
+                project.Keypoint))
+            .ToList();
+    }
+
+    public async Task<List<ManagementProjectInfo>> GetProjectsByIdsAsync(
+        IEnumerable<Guid> projectIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = projectIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+            return [];
+
+        var projectTasks = ids.Select(id => GetProjectByIdAsync(id, cancellationToken));
+        var projects = await Task.WhenAll(projectTasks);
+
+        return projects
+            .Where(project => project != null)
+            .Cast<ManagementProjectInfo>()
+            .ToList();
     }
 
     public async Task<Guid?> CreateSubProjectAsync(
@@ -166,6 +219,24 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(
+        Guid journalId,
+        CancellationToken cancellationToken = default)
+    {
+        if (journalId == Guid.Empty)
+            return [];
+
+        var response = await managementServiceApi.RemoveConferenceJournalFromProjectAsync(journalId);
+
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var body = await response.Content.ReadFromJsonAsync<ApiDeletedResponse<List<Guid>>>(
+            cancellationToken: cancellationToken);
+
+        return body?.Value;
+    }
+
     public async Task<List<SubProjectMemberInfo>> GetSubProjectMembersByPaperIdAsync(
         Guid paperId,
         CancellationToken cancellationToken = default)
@@ -224,6 +295,11 @@ file sealed class MemberByPaperDto
 file sealed class GetProjectByIdApiResult
 {
     public ProjectApiDto? Project { get; init; }
+}
+
+file sealed class GetProjectsApiResult
+{
+    public List<ProjectApiDto>? Items { get; init; }
 }
 
 file sealed class ProjectApiDto

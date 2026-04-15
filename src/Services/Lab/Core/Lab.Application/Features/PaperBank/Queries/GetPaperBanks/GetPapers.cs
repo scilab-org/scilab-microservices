@@ -59,11 +59,6 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => x.Doi != null && x.Doi.Contains(doi));
         }
 
-        if (filter.Status.HasValue)
-        {
-            query = query.Where(x => x.Status == filter.Status.Value);
-        }
-
         if (filter.FromPublicationDate.HasValue)
         {
             query = query.Where(x => x.PublicationDate.HasValue && x.PublicationDate.Value >= filter.FromPublicationDate.Value);
@@ -112,9 +107,6 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
                 );
             }
         }
-
-        // Exclude Draft and Processing papers by default
-        query = query.Where(x => x.Status != PaperStatus.Draft && x.Status != PaperStatus.Processing);
 
         #endregion
 

@@ -11,6 +11,23 @@ public interface IManagementApiService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Calls the Management service to search projects by name/code and returns the matching projects.
+    /// </summary>
+    Task<List<ManagementProjectInfo>> GetProjectsAsync(
+        string? name = null,
+        string? code = null,
+        int pageNumber = 1,
+        int pageSize = 1000,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resolves project details for a list of project ids.
+    /// </summary>
+    Task<List<ManagementProjectInfo>> GetProjectsByIdsAsync(
+        IEnumerable<Guid> projectIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Calls the Management service to create a sub-project under the given project,
     /// linking it to the specified paper.
     /// Returns the newly created sub-project Id.
@@ -85,6 +102,13 @@ public interface IManagementApiService
     Task<bool> RemoveProjectConferenceJournalsAsync(
         Guid projectId,
         IEnumerable<Guid> conferenceJournalIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a conference journal id from all projects that reference it in Management service.
+    /// </summary>
+    Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(
+        Guid journalId,
         CancellationToken cancellationToken = default);
 }
 

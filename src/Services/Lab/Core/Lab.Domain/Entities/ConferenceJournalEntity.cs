@@ -7,13 +7,13 @@ public class ConferenceJournalEntity : Entity<Guid>
     #region Fields, Properties and Indexers
 
     public string Name { get; set; } = null!;
-    public Guid ProjectId { get; set; }
     public DateTimeOffset StartAt { get; set; }
     public DateTimeOffset EndAt { get; set; }
     public string? TexFile { get; set; }
     public string? PdfFile { get; set; }
     public string? Style { get; set; }
     public Guid TemplateId { get; set; }
+    public List<Guid>? ProjectIds { get; set; }
 
     #endregion
 
@@ -22,20 +22,20 @@ public class ConferenceJournalEntity : Entity<Guid>
     public static ConferenceJournalEntity Create(
         Guid id,
         string name,
-        Guid projectId,
         DateTimeOffset startAt,
         DateTimeOffset endAt,
         string? style,
         Guid templateId,
         string? texFile,
         string? pdfFile,
+        List<Guid>? projectIds = null,
         string? createdBy = null)
     {
         return new ConferenceJournalEntity()
         {
             Id = id,
             Name = name,
-            ProjectId = projectId,
+            ProjectIds = projectIds ?? [],
             StartAt = startAt,
             EndAt = endAt,
             Style = style,
@@ -54,7 +54,7 @@ public class ConferenceJournalEntity : Entity<Guid>
 
     public void Update(
         string? name = null,
-        Guid? projectId = null,
+        List<Guid>? projectIds = null,
         DateTimeOffset? startAt = null,
         DateTimeOffset? endAt = null,
         string? style = null,
@@ -64,7 +64,7 @@ public class ConferenceJournalEntity : Entity<Guid>
         string? lastModifiedBy = null)
     {
         Name = name ?? Name;
-        ProjectId = projectId ?? ProjectId;
+        ProjectIds = projectIds ?? ProjectIds;
         StartAt = startAt ?? StartAt;
         EndAt = endAt ?? EndAt;
         Style = style ?? Style;

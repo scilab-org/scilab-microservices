@@ -5,25 +5,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Lab.Api.Endpoints;
 
-public class GetJournalById : ICarterModule
+public class GetJournalInProjectById : ICarterModule
 {
+    #region Implementations
+
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet(ApiRoutes.Journal.GetJournalById, HandleGetJournalByIdAsync)
+        app.MapGet(ApiRoutes.Journal.GetJournalInProjectById, HandleGetJournalByIdAsync)
             .WithTags(ApiRoutes.Journal.Tags)
-            .WithName(nameof(GetJournalById))
+            .WithName(nameof(GetJournalInProjectById))
             .Produces<ApiGetResponse<GetJournalByIdResult>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
+        // .RequireAuthorization();
     }
+
+    #endregion
+
+    #region Methods
 
     private async Task<ApiGetResponse<GetJournalByIdResult>> HandleGetJournalByIdAsync(
         ISender sender,
-        [FromRoute] Guid id)
+        [FromRoute] Guid id,
+        [FromRoute] Guid projectId)
     {
-        var query = new GetJournalByIdQuery(id);
+        var query = new GetJournalInProjectByIdQuery(id, projectId);
         var result = await sender.Send(query);
 
         return new ApiGetResponse<GetJournalByIdResult>(result);
     }
+
+    #endregion
 }

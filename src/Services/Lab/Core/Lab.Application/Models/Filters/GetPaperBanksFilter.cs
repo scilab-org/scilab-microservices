@@ -9,7 +9,6 @@ public record class GetPaperBanksFilter
     public string? Publisher { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
-    public PaperStatus? Status { get; set; }
     public DateTimeOffset? FromPublicationDate { get; set; }
     public DateTimeOffset? ToPublicationDate { get; set; }
     public string? PaperType { get; set; }

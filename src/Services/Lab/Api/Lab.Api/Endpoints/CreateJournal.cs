@@ -44,15 +44,11 @@ public sealed class CreateJournal : ICarterModule
 
         var dto = new CreateJournalEntityDto
         {
-            ProjectId = req.ProjectId,
             TemplateId = req.TemplateId,
             Name = req.Name,
             StartAt = req.StartAt,
             EndAt = req.EndAt,
             Style = req.Style,
-            TemplateCode = req.TemplateCode,
-            TemplateDescription = req.TemplateDescription,
-            Sections = req.Sections,
             TexUploadFile = await ToUploadFileAsync(req.TexFile),
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
         };
@@ -63,10 +59,8 @@ public sealed class CreateJournal : ICarterModule
         return TypedResults.Created($"{ApiRoutes.Journal.Create}/{result}", new ApiCreatedResponse<Guid>(result));
     }
 
-    private static async Task<UploadFileBytes?> ToUploadFileAsync(IFormFile? file)
+    private static async Task<UploadFileBytes> ToUploadFileAsync(IFormFile file)
     {
-        if (file == null) return null;
-
         await using var ms = new MemoryStream();
         await file.CopyToAsync(ms);
 

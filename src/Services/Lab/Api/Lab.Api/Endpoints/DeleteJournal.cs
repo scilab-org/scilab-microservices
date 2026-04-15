@@ -36,7 +36,7 @@ public sealed class DeleteJournal : ICarterModule
         if (currentUser == null)
             throw new UnauthorizedException(MessageCode.Unauthorized);
 
-        var command = new DeleteJournalCommand(id, Guid.Empty, currentUser.UserName);
+        var command = new DeleteJournalCommand(id, currentUser.UserName);
         await sender.Send(command);
 
         return TypedResults.Ok(new ApiDeletedResponse<Unit>());

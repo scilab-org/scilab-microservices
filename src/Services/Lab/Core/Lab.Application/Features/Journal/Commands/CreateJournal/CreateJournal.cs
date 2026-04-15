@@ -22,9 +22,6 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
                     .NotEmpty().WithMessage(MessageCode.JournalNameIsRequired)
                     .NotNull().WithMessage(MessageCode.JournalNameIsRequired);
 
-                RuleFor(x => x.Dto.ProjectId)
-                    .NotEmpty().WithMessage(MessageCode.JournalProjectIdIsRequired);
-
                 RuleFor(x => x.Dto.StartAt)
                     .NotEmpty().WithMessage(MessageCode.JournalStartDateIsRequired)
                     .LessThan(x => x.Dto.EndAt).WithMessage(MessageCode.JournalStartDateMustBeforeEndDate);
@@ -32,14 +29,9 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
                 RuleFor(x => x.Dto.EndAt)
                     .NotEmpty().WithMessage(MessageCode.JournalEndDateIsRequired);
 
-                RuleFor(x => x.Dto.Sections)
-                    .NotNull().WithMessage(MessageCode.JournalSectionsAreRequired)
-                    .NotEmpty().WithMessage(MessageCode.JournalSectionsAreRequired)
-                    .When(x => !x.Dto.TemplateId.HasValue || x.Dto.TemplateId == Guid.Empty);
-
                 RuleFor(x => x.Dto.TemplateId)
-                    .Must(id => !id.HasValue || id.Value != Guid.Empty)
-                    .WithMessage(MessageCode.BadRequest);
+                    .NotEmpty().WithMessage(MessageCode.TemplateIdIsRequired)
+                    .NotNull().WithMessage(MessageCode.TemplateIdIsRequired);
 
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
@@ -52,62 +44,34 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
     }
 }
 
-public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudService minIo, IManagementApiService managementApiService) : IRequestHandler<CreateJournalCommand, Guid>
+public class CreateJournalCommandHandler(
+    IDocumentSession session,
+    IMinIoCloudService minIo) : IRequestHandler<CreateJournalCommand, Guid>
 {
     #region Implementations
 
     public async Task<Guid> Handle(CreateJournalCommand request, CancellationToken cancellationToken)
     {
-        var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
-        if (string.IsNullOrEmpty(role) && !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role!))
-        {
-            throw new UnauthorizedException(MessageCode.Unauthorized);
-        }
-
         await session.BeginTransactionAsync(cancellationToken);
-        var id = Guid.NewGuid();
 
         var normalizedName = request.Dto.Name.Trim();
 
         var existingJournal = await session.Query<ConferenceJournalEntity>()
-            .FirstOrDefaultAsync(x => x.Name == normalizedName &&
-                                      x.ProjectId == request.Dto.ProjectId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Name == normalizedName, cancellationToken);
 
         if (existingJournal != null)
             throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, request.Dto.Name);
 
-        var existingTemplateId = request.Dto.TemplateId;
-        var useExistingTemplate = existingTemplateId.HasValue && existingTemplateId.Value != Guid.Empty;
-
-        var templateToStore = default(TemplateEntity);
-        Guid templateId;
-        if (useExistingTemplate)
-        {
-            var template = await session.LoadAsync<TemplateEntity>(existingTemplateId!.Value, cancellationToken);
-            if (template == null)
-                throw new NotFoundException(MessageCode.NotFound, existingTemplateId.Value.ToString());
-
-            templateId = template.Id;
-        }
-        else
-        {
-            templateToStore = TemplateEntity.Create(
-                code: request.Dto.TemplateCode ?? $"TEMPLATE-{id:N}",
-                description: request.Dto.TemplateDescription ?? $"Default template for {normalizedName}",
-                sections: request.Dto.Sections,
-                createdBy: request.UserName);
-
-            templateId = templateToStore.Id;
-        }
+        var template = await session.LoadAsync<TemplateEntity>(request.Dto.TemplateId, cancellationToken)
+                       ?? throw new NotFoundException(MessageCode.TemplateIsNotExists, request.Dto.TemplateId);
 
         var entity = ConferenceJournalEntity.Create(
-            id: id,
+            id: Guid.NewGuid(),
             name: normalizedName,
-            projectId: request.Dto.ProjectId,
             startAt: request.Dto.StartAt,
             endAt: request.Dto.EndAt,
             style: request.Dto.Style,
-            templateId: templateId,
+            templateId: template.Id,
             texFile: null,
             pdfFile: null,
             createdBy: request.UserName);
@@ -115,11 +79,7 @@ public class CreateJournalCommandHandler(IDocumentSession session, IMinIoCloudSe
         var (texFile, pdfFile) = await UploadFilesAsync(request.Dto, cancellationToken);
         entity.UpdateFilePath(texFile, pdfFile);
 
-
         session.Store(entity);
-
-        if (!useExistingTemplate)
-            session.Store(templateToStore!);
 
         await session.SaveChangesAsync(cancellationToken);
 

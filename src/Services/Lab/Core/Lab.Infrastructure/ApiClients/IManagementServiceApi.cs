@@ -12,6 +12,16 @@ public interface IManagementServiceApi
         [AliasAs("projectId")] Guid projectId);
 
     /// <summary>
+    /// GET /projects — searches projects by filter and paging.
+    /// </summary>
+    [Get("/projects")]
+    Task<HttpResponseMessage> GetProjectsAsync(
+        [AliasAs("name")] string? name = null,
+        [AliasAs("code")] string? code = null,
+        [AliasAs("pageNumber")] int pageNumber = 1,
+        [AliasAs("pageSize")] int pageSize = 1000);
+
+    /// <summary>
     /// POST /projects/{projectId}/sub-projects — creates a sub-project with a paper.
     /// </summary>
     [Post("/projects/{projectId}/sub-projects")]
@@ -70,6 +80,13 @@ public interface IManagementServiceApi
     Task<HttpResponseMessage> RemoveProjectConferenceJournalsAsync(
         [AliasAs("projectId")] Guid projectId,
         [Body] ProjectConferenceJournalsRequest body);
+
+    /// <summary>
+    /// POST /projects/journal/{journalId} - removes this journal id from all projects.
+    /// </summary>
+    [Post("/projects/journal/{journalId}")]
+    Task<HttpResponseMessage> RemoveConferenceJournalFromProjectAsync(
+        [AliasAs("journalId")] Guid journalId);
 }
 
 public class CreateSubProjectRequest

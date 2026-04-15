@@ -13,7 +13,6 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
-    public PaperStatus? Status { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; } = false;
     public bool? IsAutoTagged { get; set; } = false;
@@ -38,7 +37,6 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? publisher = null,
         string? abstractText = null,
         string? doi = null,
-        PaperStatus? status = null,
         string? parsedText = null,
         bool? isIngested = null,
         bool? isAutoTagged = null,
@@ -50,7 +48,8 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? volume = null,
         string? conferenceName = null,
         string? referenceContent = null,
-        List<string>? tagNames = null)
+        List<string>? tagNames = null,
+        IngestStatus? ingestStatus = null)
     {
         return new PaperBankEntity()
         {
@@ -60,7 +59,6 @@ public sealed class PaperBankEntity : Entity<Guid>
             Publisher = publisher,
             Abstract = abstractText,
             Doi = doi,
-            Status = status ?? PaperStatus.Draft,
             ParsedText = parsedText ?? string.Empty,
             IsIngested = isIngested ?? false,
             IsAutoTagged = isAutoTagged ?? false,
@@ -73,6 +71,7 @@ public sealed class PaperBankEntity : Entity<Guid>
             ConferenceName = conferenceName,
             ReferenceContent = referenceContent,
             TagNames = tagNames ?? new(),
+            IngestStatus = ingestStatus ?? Enums.IngestStatus.Pending,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -87,7 +86,6 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? publisher = null,
         string? abstractText = null,
         string? doi = null,
-        PaperStatus? status = null,
         bool? isIngested = null,
         bool? isAutoTagged = null,
         DateTimeOffset? publicationDate = null,
@@ -106,7 +104,6 @@ public sealed class PaperBankEntity : Entity<Guid>
         Publisher = publisher ?? Publisher;
         Abstract = abstractText ?? Abstract;
         Doi = doi ?? Doi;
-        Status = status ?? Status;
         IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
         PublicationDate = publicationDate ?? PublicationDate;

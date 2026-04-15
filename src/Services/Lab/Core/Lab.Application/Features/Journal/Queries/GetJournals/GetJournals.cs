@@ -2,6 +2,7 @@
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using Marten.Linq.SoftDeletes;
@@ -9,24 +10,47 @@ using Marten.Pagination;
 
 namespace Lab.Application.Features.Journal.Queries.GetJournals;
 
-public record GetJournalsInProjectQuery(GetJournalsFilter Filter, PaginationRequest Paging, Guid ProjectId) : IQuery<GetJournalsResult>;
+public record GetJournalsQuery(GetJournalsFilter Filter, PaginationRequest Paging) : IQuery<GetJournalsResult>;
 
-public class GetJournalsInProjectQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetJournalsInProjectQuery, GetJournalsResult>
+public class GetJournalsQueryHandler(IDocumentSession session, IManagementApiService managementApiService, IMapper mapper)
+    : IQueryHandler<GetJournalsQuery, GetJournalsResult>
 {
-    #region Implementations
-
-    public async Task<GetJournalsResult> Handle(GetJournalsInProjectQuery request, CancellationToken cancellationToken)
+    public async Task<GetJournalsResult> Handle(GetJournalsQuery request, CancellationToken cancellationToken)
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<ConferenceJournalEntity>()
-            .Where(x => x.ProjectId == request.ProjectId)
-            .AsQueryable();
+        var query = session.Query<ConferenceJournalEntity>().AsQueryable();
 
         if (!filter.Name.IsNullOrWhiteSpace())
         {
             var name = filter.Name.Trim();
             query = query.Where(x => x.Name.Contains(name));
+        }
+
+        if (!filter.TemplateCode.IsNullOrWhiteSpace())
+        {
+            var code = filter.TemplateCode.Trim();
+            var template = await session.Query<TemplateEntity>()
+                .FirstOrDefaultAsync(x => x.Code == code, cancellationToken);
+            if (template != null)
+            {
+                query = query.Where(x => x.TemplateId == template.Id);
+            }
+        }
+
+        if (!filter.ProjectName.IsNullOrWhiteSpace() || !filter.ProjectCode.IsNullOrWhiteSpace())
+        {
+            var projects = await managementApiService.GetProjectsAsync(
+                name: filter.ProjectName,
+                code: filter.ProjectCode,
+                pageNumber: 1,
+                pageSize: 1000,
+                cancellationToken);
+            if (projects.Count > 0)
+            {
+                var projectIds = projects.Select(x => x.Id).ToList();
+                query = query.Where(x => x.ProjectIds != null && x.ProjectIds.Any(projectIds.Contains));
+            }
         }
 
         if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
@@ -42,10 +66,15 @@ public class GetJournalsInProjectQueryHandler(IDocumentSession session, IMapper 
         var journals = results.ToList();
         var items = mapper.Map<List<JournalDto>>(journals);
 
-        var response = new GetJournalsResult(items, totalCount, paging);
+        if (items.Count > 0)
+        {
+            foreach (var item in items)
+            {
+                var template = await session.LoadAsync<TemplateEntity>(item.TemplateId, cancellationToken);
+                item.TemplateCode = template?.Code ?? "N/A";
+            }
+        }
 
-        return response;
+        return new GetJournalsResult(items, totalCount, paging);
     }
-
-    #endregion
 }

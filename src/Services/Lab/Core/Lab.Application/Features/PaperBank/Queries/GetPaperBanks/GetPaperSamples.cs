@@ -31,14 +31,6 @@ public class GetPaperSamplesQueryHandler(IDocumentSession session, IMapper mappe
             query = query.Where(x => x.Title.Contains(title));
         }
 
-        if (filter.Status.HasValue)
-        {
-            query = query.Where(x => x.Status == filter.Status.Value);
-        }
-
-        // Exclude Draft and Processing papers by default
-        query = query.Where(x => x.Status != PaperStatus.Draft && x.Status != PaperStatus.Processing);
-
         #endregion
 
         var totalCount = await query.CountAsync(cancellationToken);

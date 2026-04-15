@@ -6,15 +6,11 @@ using Lab.Domain.Models;
 /// </summary>
 public class CreateJournalEntityDto
 {
-    public Guid ProjectId { get; set; }
-    public Guid? TemplateId { get; set; }
-    public required string Name { get; set; }
-    public required DateTimeOffset StartAt { get; set; }
-    public required DateTimeOffset EndAt { get; set; }
-    public string? Style { get; set; }
-    public UploadFileBytes? TexUploadFile { get; set; }
-    public UploadFileBytes? PdfUploadFile { get; set; }
-    public string? TemplateCode { get; set; }
-    public string? TemplateDescription { get; set; }
-    public List<Section>? Sections { get; set; }
+    public string Name { get; set; } = null!;
+    public Guid TemplateId { get; set; }
+    public DateTimeOffset StartAt { get; set; }
+    public DateTimeOffset EndAt { get; set; }
+    public string Style { get; set; } = null!;
+    public UploadFileBytes TexUploadFile { get; set; } = null!;
+    public UploadFileBytes PdfUploadFile { get; set; } = null!;
 }

@@ -20,7 +20,6 @@ public sealed class UpdateJournal : ICarterModule
         app.MapPut(ApiRoutes.Journal.Update, HandleUpdateJournalAsync)
             .WithTags(ApiRoutes.Journal.Tags)
             .WithName(nameof(UpdateJournal))
-            .WithMultipartForm<UpdateJournalRequest>()
             .Produces<ApiUpdatedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -36,45 +35,18 @@ public sealed class UpdateJournal : ICarterModule
         ISender sender,
         IHttpContextAccessor httpContext,
         [FromRoute] Guid id,
-        [FromForm] UpdateJournalRequest req)
+        [FromBody] UpdateJournalEntityDto request)
     {
-        if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
+        if (request == null) throw new ClientValidationException(MessageCode.BadRequest);
 
         var currentUser = httpContext.GetCurrentUser();
         if (currentUser == null)
             throw new UnauthorizedException(MessageCode.Unauthorized);
 
-        var dto = new UpdateJournalEntityDto
-        {
-            Id = id,
-            TemplateId = req.TemplateId,
-            Name = req.Name,
-            StartAt = req.StartAt,
-            EndAt = req.EndAt,
-            Style = req.Style,
-            TexUploadFile = await ToUploadFileAsync(req.TexFile),
-            PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
-        };
-
-        var command = new UpdateJournalCommand(dto, currentUser.UserName);
+        var command = new UpdateJournalCommand(request, id, currentUser.UserName);
         var result = await sender.Send(command);
 
         return TypedResults.Ok(new ApiUpdatedResponse<Guid>(result));
-    }
-
-    private static async Task<UploadFileBytes?> ToUploadFileAsync(IFormFile? file)
-    {
-        if (file == null) return null;
-
-        await using var ms = new MemoryStream();
-        await file.CopyToAsync(ms);
-
-        return new UploadFileBytes
-        {
-            FileName = file.FileName,
-            ContentType = file.ContentType,
-            Bytes = ms.ToArray()
-        };
     }
 
     #endregion

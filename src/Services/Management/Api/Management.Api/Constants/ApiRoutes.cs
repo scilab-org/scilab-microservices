@@ -73,10 +73,12 @@ public sealed class ApiRoutes
     {
         public const string Tags = "Project Conference Journals";
 
+        private const string Base = "/projects";
         private const string BaseManager = "/manager/projects";
 
         public const string CreateProjectConferenceJournals = $"{BaseManager}/{{projectId}}/journals";
         public const string DeleteProjectConferenceJournals = $"{BaseManager}/{{projectId}}/journals/remove";
+        public const string DeleteProjectConferenceJournalByJournalId = $"{Base}/journal/{{journalId}}";
     }
 
     public static class Member
