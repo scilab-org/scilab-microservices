@@ -75,6 +75,9 @@ public class UpsertSectionCommandHandler(
                     throw new ClientValidationException(MessageCode.SectionAlreadyHasVersion, section.Id);
             }
 
+            if (section.Version.EqualsIgnoreCase("Version Initial"))
+                section.Update(status: SectionStatus.InProgress);
+            
             var version = BuildNextDraftVersion(section.Version);
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
@@ -108,7 +111,8 @@ public class UpsertSectionCommandHandler(
                 sectionId: newSection.Id,
                 markSectionId: section.Id
             );
-
+            
+            session.Update(section);
             session.Store(newSection);
             session.Update(contributor);
             await session.SaveChangesAsync(cancellationToken);

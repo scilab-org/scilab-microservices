@@ -52,7 +52,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
                         x.IsOldMainSection == true &&
                         x.Title!.EqualsIgnoreCase(section.Title!))
             .CountAsync(cancellationToken);
-
+        
         // Clone main section to new record
         var newMainSection = SectionEntity.Create(
             id: Guid.NewGuid(),
@@ -114,7 +114,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
         }
 
         // Update old main section
-        oldMainSection.Update(isMainSection: false, nextVersionSectionId: newMainSection.Id);
+        oldMainSection.Update(isMainSection: false, nextVersionSectionId: newMainSection.Id, status: SectionStatus.Completed);
 
         // Find others version of main section
         var otherVersionSections = await session.Query<SectionEntity>()
@@ -124,7 +124,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
 
         foreach (var otherVersionSection in otherVersionSections)
         {
-            otherVersionSection.Update(nextVersionSectionId: newMainSection.Id);
+            otherVersionSection.Update(nextVersionSectionId: newMainSection.Id, status: SectionStatus.Completed);
             var oldContributor = await session.Query<PaperContributorEntity>()
                                      .Where(x => x.PaperId == otherVersionSection.PaperId &&
                                                  x.SectionId == otherVersionSection.Id)
