@@ -86,14 +86,35 @@ public sealed class GetAssignedPapersQueryHandler(
         if (memberSubProjectIds.Count == 0)
             return new GetAssignedPapersResult([], 0, request.Paging);
 
-        var paperIds = await session.Query<ProjectEntity>()
+        var subProjects = await session.Query<ProjectEntity>()
             .Where(x => memberSubProjectIds.Contains(x.Id))
-            .SelectMany(x => x.PaperIds)
-            .Distinct()
+            .Select(x => new { x.Id, x.ParentProjectId, x.PaperIds })
             .ToListAsync(cancellationToken);
+
+        var paperToProjectMap = new Dictionary<Guid, Guid>();
+        foreach (var subProject in subProjects)
+        {
+            if (subProject.ParentProjectId.HasValue)
+            {
+                foreach (var paperId in subProject.PaperIds)
+                {
+                    paperToProjectMap[paperId] = subProject.ParentProjectId.Value;
+                }
+            }
+        }
+
+        var paperIds = paperToProjectMap.Keys.Distinct().ToList();
 
         if (paperIds.Count == 0)
             return new GetAssignedPapersResult([], 0, request.Paging);
+
+        var distinctParentProjectIds = paperToProjectMap.Values.Distinct().ToList();
+        var parentProjects = await session.Query<ProjectEntity>()
+            .Where(x => distinctParentProjectIds.Contains(x.Id))
+            .Select(x => new { x.Id, x.Code })
+            .ToListAsync(cancellationToken);
+
+        var projectIdToCodeMap = parentProjects.ToDictionary(x => x.Id, x => x.Code);
 
         var (items, totalCount) = await labApiService.GetPapersByIdsPagedAsync(
             paperIds,
@@ -102,6 +123,25 @@ public sealed class GetAssignedPapersQueryHandler(
             pageSize: request.Paging.PageSize,
             cancellationToken: cancellationToken);
 
-        return new GetAssignedPapersResult(items, totalCount, request.Paging);
+        var assignedItems = items.Select(item => 
+        {
+            var projectId = paperToProjectMap.TryGetValue(item.Id, out var pid) ? pid : Guid.Empty;
+            return new AssignedPaperDto
+            {
+                ProjectId = projectId,
+                ProjectCode = projectId != Guid.Empty && projectIdToCodeMap.TryGetValue(projectId, out var code) ? code : null,
+                Id = item.Id,
+                SubProjectId = item.SubProjectId,
+                Title = item.Title,
+                Authors = item.Authors,
+                Abstract = item.Abstract,
+                FilePath = item.FilePath,
+                Status = item.Status,
+                CreatedBy = item.CreatedBy,
+                Template = item.Template
+            };
+        }).ToList();
+
+        return new GetAssignedPapersResult(assignedItems, totalCount, request.Paging);
     }
 }

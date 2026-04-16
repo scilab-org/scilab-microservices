@@ -34,7 +34,7 @@ public class UpdateTaskCommandHandler(IDocumentSession session, IManagementApiSe
         current.Update(
             name: dto.Name,
             description: dto.Description ?? current.Description,
-            assignedToUserName: dto.AssignedToUserName ?? current.AssignedToUserName,
+            // assignedToUserName: dto.AssignedToUserName ?? current.AssignedToUserName,
             status: dto.Status,
             startDate: dto.StartDate,
             nextReviewDate: dto.NextReviewDate

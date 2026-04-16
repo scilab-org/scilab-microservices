@@ -5,7 +5,7 @@
 /// Contains Paper-entity-specific fields (Template, ParsedText) in addition to the
 /// shared fields present on PaperBankInfoDto.
 /// </summary>
-public sealed class PaperInfoDto : PaperBankInfoDto
+public class PaperInfoDto : PaperBankInfoDto
 {
     #region Fields, Properties and Indexers
 

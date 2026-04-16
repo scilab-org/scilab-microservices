@@ -94,24 +94,7 @@ public interface IManagementServiceApi
     [Post("/projects/journal/{journalId}")]
     Task<HttpResponseMessage> RemoveConferenceJournalFromProjectAsync(
         [AliasAs("journalId")] Guid journalId);
-
-    /// <summary>
-    /// POST /manager/projects/{projectId}/members/{memberId}/tasks - adds tasks to a member
-    /// </summary>
-    [Post("/manager/projects/{projectId}/members/{memberId}/tasks")]
-    Task<HttpResponseMessage> AddMemberTasksAsync(
-        [AliasAs("projectId")] Guid projectId,
-        [AliasAs("memberId")] Guid memberId,
-        [Body] MemberTaskRequest body);
-
-    /// <summary>
-    /// DELETE /manager/projects/{projectId}/members/{memberId}/tasks/remove - removes tasks from a member
-    /// </summary>
-    [Delete("/manager/projects/{projectId}/members/{memberId}/tasks/remove")]
-    Task<HttpResponseMessage> RemoveMemberTasksAsync(
-        [AliasAs("projectId")] Guid projectId,
-        [AliasAs("memberId")] Guid memberId,
-        [Body] MemberTaskRequest body);
+    
 }
 
 public class CreateSubProjectRequest

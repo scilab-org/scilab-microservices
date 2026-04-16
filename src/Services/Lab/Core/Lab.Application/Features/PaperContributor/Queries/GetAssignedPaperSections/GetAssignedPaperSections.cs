@@ -34,7 +34,7 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
         if (memberInfo == null)
             throw new NotFoundException(MessageCode.MemberNotFound, request.UserId.ToString());
 
-        var (subProjectId, memberId) = memberInfo.Value;
+        var (subProjectId, memberId, projectId) = memberInfo.Value;
 
         // Get all PaperContributor records assigned to this member on this paper
         var contributors = await session.Query<PaperContributorEntity>()

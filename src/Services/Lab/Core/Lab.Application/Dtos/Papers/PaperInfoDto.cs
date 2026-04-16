@@ -17,6 +17,7 @@ public  class PaperInfoDto : DtoId<Guid>
     public string? GapType { get; set; }
     public string? ConferenceJournalName { get; set; }
     public Guid? ConferenceJournalId { get; set; }
+    public Guid? SubProjectId { get; set; }
     public PaperStatus? Status { get; set; }
     public List<string> TagNames { get; set; } = new();
     public List<PaperVersionInfo> Versions { get; set; } = new();

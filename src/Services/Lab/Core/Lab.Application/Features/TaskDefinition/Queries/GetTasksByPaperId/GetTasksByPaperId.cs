@@ -15,7 +15,8 @@ public sealed record GetTasksByPaperIdQuery(Guid PaperId, string UserId, GetTask
 public sealed class GetTasksByPaperIdQueryHandler(
     IDocumentSession session, 
     IMapper mapper,
-    IManagementApiService apiService)
+    IManagementApiService apiService,
+    IUserApiService userApiService)
     : IQueryHandler<GetTasksByPaperIdQuery, GetTasksPagedResult>
 {
     public async Task<GetTasksPagedResult> Handle(GetTasksByPaperIdQuery request, CancellationToken cancellationToken)
@@ -31,6 +32,13 @@ public sealed class GetTasksByPaperIdQueryHandler(
 
         if (memberIds.Count == 0)
             return new GetTasksPagedResult([], 0, request.Paging);
+
+        // Resolve usernames from the User service for all members
+        // var memberUserIds = allMembers.Select(m => m.UserId).Distinct().ToList();
+        // var userInfoMap = await userApiService.GetUsersByIdsAsync(memberUserIds, cancellationToken);
+        // var memberUsernameMap = allMembers
+        //     .Where(m => userInfoMap.ContainsKey(m.UserId))
+        //     .ToDictionary(m => m.MemberId, m => userInfoMap[m.UserId].Username);
 
         var query = session.Query<TaskEntity>()
             .Where(x => memberIds.Contains(x.MemberId));
@@ -54,9 +62,10 @@ public sealed class GetTasksByPaperIdQueryHandler(
             .Where(x => x.PaperId == request.PaperId)
             .ToListAsync(cancellationToken);
 
-        var contributorMap = contributors
-            .GroupBy(x => x.MemberId)
-            .ToDictionary(g => g.Key, g => g.First());
+        // Map taskId → the contributor that owns it (each contributor records its TaskIds)
+        var taskContributorMap = contributors
+            .SelectMany(c => c.TaskIds.Select(tid => (tid, c)))
+            .ToDictionary(x => x.tid, x => x.c);
 
         var paper = await session.LoadAsync<PaperEntity>(request.PaperId, cancellationToken);
         var paperName = paper?.Title ?? string.Empty;
@@ -77,12 +86,10 @@ public sealed class GetTasksByPaperIdQueryHandler(
         var taskDtos = mapper.Map<List<TaskDto>>(tasks);
         foreach (var taskDto in taskDtos)
         {
-            var taskEntity = tasks.First(x => x.Id == taskDto.Id);
-            
             taskDto.PaperId = request.PaperId;
             taskDto.PaperTitle = paperName;
 
-            if (contributorMap.TryGetValue(taskEntity.MemberId, out var contributor))
+            if (taskContributorMap.TryGetValue(taskDto.Id, out var contributor))
             {
                 taskDto.PaperContributorId = contributor.Id;
                 taskDto.SectionId = contributor.SectionId;

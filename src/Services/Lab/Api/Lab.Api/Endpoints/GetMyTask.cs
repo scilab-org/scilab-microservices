@@ -32,7 +32,7 @@ public class GetMyTask: ICarterModule
         if (string.IsNullOrWhiteSpace(currentUser.Id))
             throw new NoPermissionException(MessageCode.AccessDenied);
         
-        var query = new GetMyTaskQuery(currentUser.UserName, req, paging);
+        var query = new GetMyTaskQuery(currentUser.Id, req, paging);
         var result = await sender.Send(query);
 
         return new ApiGetResponse<GetTasksPagedResult>(result);

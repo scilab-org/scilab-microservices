@@ -6,5 +6,4 @@ public class MemberDto
     public Guid ProjectId { get; set; }
     public string ProjectRole { get; set; } = string.Empty;
     public DateTimeOffset JoinedAt { get; set; }
-    public List<Guid> TaskIds { get; set; } = new();
 }

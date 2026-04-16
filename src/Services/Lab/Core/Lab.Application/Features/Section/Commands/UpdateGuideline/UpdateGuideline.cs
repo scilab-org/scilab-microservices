@@ -35,7 +35,7 @@ public class UpdateGuidelineCommandHandler(
         if (memberInfo == null)
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
-        var (_, memberId) = memberInfo.Value;
+        var (_, memberId, _) = memberInfo.Value;
 
         var contributor = await session.Query<PaperContributorEntity>()
             .Where(x => x.PaperId == section.PaperId

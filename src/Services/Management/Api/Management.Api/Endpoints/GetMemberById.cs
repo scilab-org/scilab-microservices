@@ -1,6 +1,6 @@
 using Management.Api.Constants;
 using Management.Application.Dtos.Members;
-using Management.Application.Features.Member.Queries.GetMemberById;
+using Management.Application.Features.Member.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Management.Api.Endpoints;
