@@ -125,7 +125,8 @@ public class UpsertSectionCommandHandler(
             mainIdea: dto.MainIdea,
             sectionRule: sectionRule,
             packages: dto.CurrentSectionPackages,
-            rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule)
+            rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule),
+            lastModifiedBy: request.UserName
         );
 
         // Find reference section and update its packages directly
