@@ -148,6 +148,7 @@ public sealed class ApiRoutes
         public const string Delete = $"{Base}/{{id}}";
         public const string GetSectionById = $"{Base}/{{id}}";
         public const string GetSectionByMarkSectionId = $"{Base}/mark-section/{{id}}";
+        public const string GetSectionVersionsByMarkSectionId = $"{Base}/mark-section/{{id}}/versions";
         public const string GetSectionHistory = $"{Base}/{{id}}/history";
         public const string Upload = $"{Base}/{{id}}/upload-file";
         public const string GetSectionFileById = $"{Base}/{{id}}/files";
