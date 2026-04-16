@@ -32,6 +32,13 @@ public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper, 
 
         var response = mapper.Map<PaperDto>(paper);
 
+        var latestHistory = await session.Query<PaperStatusHistoryEntity>()
+            .Where(h => h.PaperId == paper.Id)
+            .OrderByDescending(h => h.CreatedOnUtc)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        response.SubmissionStatus = latestHistory?.Status;
+
         var members = await managementApiService.GetSubProjectMembersByPaperIdAsync(paper.Id, cancellationToken);
         if (members != null && members.Count > 0)
         {

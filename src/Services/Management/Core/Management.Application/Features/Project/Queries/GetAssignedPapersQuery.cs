@@ -137,6 +137,7 @@ public sealed class GetAssignedPapersQueryHandler(
                 Abstract = item.Abstract,
                 FilePath = item.FilePath,
                 Status = item.Status,
+                SubmissionStatus = item.SubmissionStatus,
                 CreatedBy = item.CreatedBy,
                 Template = item.Template
             };

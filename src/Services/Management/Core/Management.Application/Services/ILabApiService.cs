@@ -141,6 +141,11 @@ public interface ILabApiService
         Guid? sectionId = null,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns submission status counts for a batch of paper IDs in a single Lab DB query.</summary>
+    Task<SubmissionStatusSummaryResult> GetSubmissionStatusSummaryAsync(
+        IEnumerable<Guid> paperIds,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Rebuilds Lab section rules when a project's rule-related fields change.</summary>
     Task<bool> UpdateProjectRulesAsync(
         IEnumerable<Guid> paperIds,

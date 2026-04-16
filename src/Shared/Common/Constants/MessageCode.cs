@@ -110,6 +110,10 @@ public sealed class MessageCode
 
     #region Paper Message Codes
 
+    public const string InvalidStatusTransition = "INVALID_STATUS_TRANSITION";
+
+    public const string DuplicateStatusTransition = "DUPLICATE_STATUS_TRANSITION";
+
     public const string PaperPublicationDateInvalid = "PAPER_PUBLICATION_DATE_INVALID";
 
     public const string PaperTitleIsRequired = "PAPER_TITLE_IS_REQUIRED";
