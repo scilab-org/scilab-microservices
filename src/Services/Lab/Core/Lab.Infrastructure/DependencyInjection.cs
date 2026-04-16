@@ -41,6 +41,8 @@ public static class DependencyInjection
                 .SoftDeleted();
             opts.Schema.For<PaperContributorEntity>()
                 .SoftDeleted();
+            opts.Schema.For<PaperStatusHistoryEntity>()
+                .Index(h => h.PaperId);
         }).UseLightweightSessions();
 
         services.Scan(s => s

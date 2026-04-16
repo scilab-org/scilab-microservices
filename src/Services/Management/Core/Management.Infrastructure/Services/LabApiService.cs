@@ -82,6 +82,7 @@ file sealed class LabPaperFull
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public int? Status { get; set; }
+    public int? SubmissionStatus { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
@@ -642,6 +643,43 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<SubmissionStatusSummaryResult> GetSubmissionStatusSummaryAsync(
+        IEnumerable<Guid> paperIds,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var ids = paperIds.ToList();
+            if (ids.Count == 0)
+                return new SubmissionStatusSummaryResult();
+
+            var response = await labServiceApi.GetSubmissionStatusSummaryAsync(
+                new LabSubmissionStatusSummaryRequest { PaperIds = ids });
+
+            if (!response.IsSuccessStatusCode)
+                return new SubmissionStatusSummaryResult();
+
+            var body = await response.Content
+                .ReadFromJsonAsync<LabSubmissionStatusSummaryResponse>(
+                    cancellationToken: cancellationToken);
+
+            return new SubmissionStatusSummaryResult
+            {
+                Items = body?.Items?
+                    .Select(x => new SubmissionStatusSummaryItem
+                    {
+                        Status = x.Status,
+                        Count = x.Count,
+                    })
+                    .ToList() ?? [],
+            };
+        }
+        catch
+        {
+            return new SubmissionStatusSummaryResult();
+        }
+    }
+
     public async Task<bool> DeletePaperContributorAsync(
         Guid contributorId,
         CancellationToken cancellationToken = default)
@@ -691,6 +729,18 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
     #endregion
 }
 
+// POST /papers/submission-status-summary response shape
+file sealed class LabSubmissionStatusSummaryItemRaw
+{
+    public int Status { get; set; }
+    public int Count { get; set; }
+}
+
+file sealed class LabSubmissionStatusSummaryResponse
+{
+    public List<LabSubmissionStatusSummaryItemRaw> Items { get; set; } = [];
+}
+
 file static class LabPaperItemMapper
 {
     internal static PaperBankInfoDto MapToDto(this LabPaperItem p) => new()
@@ -725,6 +775,7 @@ file static class LabPaperItemMapper
         Doi             = p.Doi,
         FilePath        = p.FilePath,
         Status          = p.Status ?? 0,
+        SubmissionStatus = p.SubmissionStatus,
         ParsedText      = p.ParsedText,
         PublicationDate = p.PublicationDate,
         PaperType       = p.PaperType,

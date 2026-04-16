@@ -13,6 +13,7 @@ public class PaperBankInfoDto
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
     public int Status { get; set; }
+    public int? SubmissionStatus { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }

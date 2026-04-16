@@ -65,6 +65,7 @@ public sealed class ApiRoutes
         public const string DeleteProjectPapers = $"{BaseManager}/{{projectId}}/papers/remove";
         public const string CreateSubProject = $"{Base}/{{projectId}}/sub-projects";
         public const string GetSubProjects = $"{Base}/{{projectId}}/sub-projects";
+        public const string GetSubmissionStatusSummary = $"{Base}/{{projectId}}/submission-status-summary";
         public const string GetProjectPapers = $"{Base}/{{projectId}}/papers";
         public const string DeleteProjectPaperByBankId = $"{Base}/paper-bank/{{paperBankId}}";
    }

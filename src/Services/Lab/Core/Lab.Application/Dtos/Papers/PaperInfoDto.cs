@@ -19,6 +19,7 @@ public  class PaperInfoDto : DtoId<Guid>
     public Guid? ConferenceJournalId { get; set; }
     public Guid? SubProjectId { get; set; }
     public PaperStatus? Status { get; set; }
+    public SubmissionStatus? SubmissionStatus { get; set; }
     public List<string> TagNames { get; set; } = new();
     public List<PaperVersionInfo> Versions { get; set; } = new();
     public List<PaperReferenceInfo> References { get; set; } = new();

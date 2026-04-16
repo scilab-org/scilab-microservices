@@ -1,0 +1,45 @@
+using Lab.Domain.Abstractions;
+using Lab.Domain.Enums;
+
+namespace Lab.Domain.Entities;
+
+public sealed class PaperStatusHistoryEntity : Entity<Guid>
+{
+    #region Fields, Properties and Indexers
+
+    public Guid PaperId { get; set; }
+    public SubmissionStatus Status { get; set; }
+    public string ActorId { get; set; } = null!;
+    public string ActorUserName { get; set; } = null!;
+    public string? Note { get; set; }
+    public string? RevisionType { get; set; }
+
+    #endregion
+
+    #region Factories
+
+    public static PaperStatusHistoryEntity Create(
+        Guid paperId,
+        SubmissionStatus status,
+        string actorId,
+        string actorUserName,
+        string? note = null,
+        string? revisionType = null)
+    {
+        return new PaperStatusHistoryEntity
+        {
+            Id = Guid.NewGuid(),
+            PaperId = paperId,
+            Status = status,
+            ActorId = actorId,
+            ActorUserName = actorUserName,
+            Note = note,
+            RevisionType = revisionType,
+            CreatedOnUtc = DateTimeOffset.UtcNow,
+            LastModifiedOnUtc = DateTimeOffset.UtcNow,
+            CreatedBy = actorUserName
+        };
+    }
+
+    #endregion
+}

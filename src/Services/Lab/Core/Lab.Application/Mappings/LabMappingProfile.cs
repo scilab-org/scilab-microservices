@@ -47,6 +47,8 @@ public sealed class LabMappingProfile : Profile
 
         CreateMap<PaperEntity, GetPaperBankByIdResult>()
             .ForMember(dest => dest.PaperBank, opt => opt.MapFrom(src => src));
+
+        CreateMap<PaperStatusHistoryEntity, PaperStatusHistoryDto>();
     }
 
     #endregion

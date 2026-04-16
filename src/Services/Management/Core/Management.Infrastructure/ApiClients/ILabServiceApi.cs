@@ -97,6 +97,12 @@ public interface ILabServiceApi
     [Delete("/author/paper-contributors/{id}")]
     Task<HttpResponseMessage> DeletePaperContributorAsync([AliasAs("id")] Guid id);
 
+    /// <summary>
+    /// POST /papers/submission-status-summary — returns submission status counts for a batch of paper IDs.
+    /// </summary>
+    [Post("/papers/submission-status-summary")]
+    Task<HttpResponseMessage> GetSubmissionStatusSummaryAsync([Body] LabSubmissionStatusSummaryRequest body);
+
     #endregion
 
     #region Paper Contributors
@@ -123,6 +129,11 @@ public sealed class CreatePaperContributorRequest
     public Guid? SectionId { get; set; }
     public List<Guid> MemberIds { get; set; } = [];
     public Guid MarkSectionId { get; set; }
+}
+
+public sealed class LabSubmissionStatusSummaryRequest
+{
+    public List<Guid> PaperIds { get; set; } = [];
 }
 
 public sealed class UpdateProjectRulesRequest
