@@ -1,4 +1,6 @@
-﻿namespace Lab.Application.Dtos.Sections;
+﻿using Lab.Domain.Enums;
+
+namespace Lab.Application.Dtos.Sections;
 
 public class SectionContributorDto
 {
@@ -19,6 +21,7 @@ public class SectionContributorDto
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
     public bool? IsOldMainSection { get; set; } = false;
     public string? MainIdea { get; set; }
+    public SectionStatus? Status { get; set; }
 
 
     //User info
