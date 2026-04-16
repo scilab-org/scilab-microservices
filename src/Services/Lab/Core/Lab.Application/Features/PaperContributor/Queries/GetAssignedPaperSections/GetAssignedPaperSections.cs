@@ -117,7 +117,8 @@ public sealed class GetAssignedPaperSectionsQueryHandler(
                     IsOldMainSection    = s.IsOldMainSection,
                     Rule                = s.Rule,
                     Version             = s.Version,
-                    Packages            = s.Packages
+                    Packages            = s.Packages,
+                    Status             = s.Status,
                 };
             })
             .ToList();

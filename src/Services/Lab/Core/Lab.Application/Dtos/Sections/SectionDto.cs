@@ -1,4 +1,5 @@
 ﻿using Lab.Application.Dtos.Abstractions;
+using Lab.Domain.Enums;
 
 namespace Lab.Application.Dtos.Sections;
 
@@ -20,6 +21,7 @@ public class SectionDto : DtoId<Guid>
     public string? Rule { get; set; }
     public string? Version { get; set; }
     public List<string>? Packages { get; set; }
+    public SectionStatus? Status { get; set; }
 }
 
 public class AssignedSectionDto : SectionDto

@@ -48,6 +48,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
             CreatedOnUtc             = mainSection?.CreatedOnUtc ?? DateTimeOffset.MinValue,
             LastModifiedOnUtc        = mainSection?.LastModifiedOnUtc,
             MainIdea                 = mainSection?.MainIdea,
+            Status                  = mainSection?.Status,
 
             Name     = null,
             Email    = null,
@@ -146,6 +147,7 @@ public sealed class GetSectionByMarkSectionIdQueryHandler(
                 CreatedOnUtc             = section?.CreatedOnUtc ?? DateTimeOffset.MinValue,
                 LastModifiedOnUtc        = section?.LastModifiedOnUtc,
                 MainIdea                 = section?.MainIdea,
+                Status                  = section?.Status,
 
                 Name     = name,
                 Email    = user?.Email ?? member?.Email,
