@@ -10,7 +10,6 @@ public sealed class MemberEntity : Entity<Guid>
     public Guid ProjectId { get; set; }
     public string ProjectRole { get; set; } = string.Empty;
     public DateTimeOffset JoinedAt { get; set; }
-    public List<Guid> TaskIds { get; set; } = new();
     
     #endregion
     
@@ -39,18 +38,6 @@ public sealed class MemberEntity : Entity<Guid>
     public void UpdateProjectRole(string projectRole)
     {
         ProjectRole = projectRole;
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-    }
-
-    public void AddTasks(Guid taskId)
-    {
-        TaskIds.Add(taskId);
-        LastModifiedOnUtc = DateTimeOffset.UtcNow;
-    }
-    
-    public void RemoveTasks(Guid taskId)
-    {
-        TaskIds = TaskIds.Where(t => t != taskId).ToList();
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
     

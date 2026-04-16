@@ -4,10 +4,10 @@ namespace Management.Application.Models.Results;
 
 public sealed class GetAssignedPapersResult
 {
-    public List<PaperInfoDto> Items { get; init; }
+    public List<AssignedPaperDto> Items { get; init; }
     public PagingResult Paging { get; init; }
 
-    public GetAssignedPapersResult(List<PaperInfoDto> items, long totalCount, PaginationRequest pagination)
+    public GetAssignedPapersResult(List<AssignedPaperDto> items, long totalCount, PaginationRequest pagination)
     {
         Items = items;
         Paging = PagingResult.Of(totalCount, pagination);

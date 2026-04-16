@@ -152,7 +152,7 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
         return body?.Result;
     }
 
-    public async Task<(Guid SubProjectId, Guid MemberId)?> GetMemberByPaperIdAsync(
+    public async Task<(Guid SubProjectId, Guid MemberId, Guid ProjectId)?> GetMemberByPaperIdAsync(
         Guid paperId,
         Guid userId,
         CancellationToken cancellationToken = default)
@@ -169,7 +169,7 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
         if (dto == null)
             return null;
 
-        return (dto.SubProjectId, dto.MemberId);
+        return (dto.SubProjectId, dto.MemberId, dto.ProjectId);
     }
 
     public async Task<List<Guid>?> DeleteProjectPaperByBankIdAsync(
@@ -238,57 +238,25 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            var result = await response.Content.ReadFromJsonAsync<ApiGetResponse<dynamic>>(cancellationToken);
-            if (result?.Result == null)
+            var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<MemberApiDto>>(
+                cancellationToken: cancellationToken);
+
+            var data = body?.Result;
+            if (data == null)
                 return null;
 
-            var data = result.Result;
             return new ManagementMemberInfo(
-                Id: Guid.Parse(data.id.ToString()),
-                UserId: Guid.Parse(data.userId.ToString()),
-                ProjectId: Guid.Parse(data.projectId.ToString()),
-                ProjectRole: data.projectRole.ToString()
+                Id: data.Id,
+                UserId: data.UserId,
+                ProjectId: data.ProjectId,
+                ProjectRole: data.ProjectRole ?? string.Empty
             );
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return null;
         }
     }
-    public async Task<bool> AddMemberTasksAsync(
-        Guid projectId,
-        Guid memberId,
-        List<Guid> taskIds,
-        CancellationToken cancellationToken = default)
-    {
-        var ids = taskIds.Where(x => x != Guid.Empty).Distinct().ToList();
-        if (ids.Count == 0) return false;
-
-        var response = await managementServiceApi.AddMemberTasksAsync(
-            projectId,
-            memberId,
-            new MemberTaskRequest { TaskIds = ids });
-
-        return response.IsSuccessStatusCode;
-    }
-
-    public async Task<bool> RemoveMemberTasksAsync(
-        Guid projectId,
-        Guid memberId,
-        List<Guid> taskIds,
-        CancellationToken cancellationToken = default)
-    {
-        var ids = taskIds.Where(x => x != Guid.Empty).Distinct().ToList();
-        if (ids.Count == 0) return false;
-
-        var response = await managementServiceApi.RemoveMemberTasksAsync(
-            projectId,
-            memberId,
-            new MemberTaskRequest { TaskIds = ids });
-
-        return response.IsSuccessStatusCode;
-    }
-
 
     public async Task<List<SubProjectMemberInfo>> GetSubProjectMembersByPaperIdAsync(
         Guid paperId,
@@ -342,6 +310,7 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
 file sealed class MemberByPaperDto
 {
     public Guid SubProjectId { get; init; }
+    public Guid ProjectId { get; init; }
     public Guid MemberId { get; init; }
 }
 
@@ -381,3 +350,11 @@ file sealed class MemberItem
     public string? LastName  { get; init; }
 }
 file sealed class SubProjectMembersPagedResult { public List<MemberItem>? Items { get; init; } }
+
+file sealed class MemberApiDto
+{
+    public Guid Id { get; init; }
+    public Guid UserId { get; init; }
+    public Guid ProjectId { get; init; }
+    public string? ProjectRole { get; init; }
+}

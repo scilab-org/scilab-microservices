@@ -1,6 +1,7 @@
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 using MediatR;
 
@@ -18,32 +19,30 @@ public class DeleteTaskCommandHandler(IDocumentSession session, IManagementApiSe
             .FirstOrDefaultAsync(x => x.Id == command.Id, cancellationToken);
         if (task is null)
             throw new NotFoundException(MessageCode.TaskIsNotExists);
-
-        // Check if the user is the creator.
-        // Or if the user has PaperAuthor role
-        if(task.CreatedBy != command.UserName) 
-        {
-            var isAuthor = false;
-            if (task.MemberId != Guid.Empty)
-            {
-                // We don't have paper directly, but we can verify against the assigned member's SubProject
-                // or just see if the user is Author in that subproject.
-                // We'll let the endpoint check it or handle it cleanly.
-                // For simplicity, we just deny if they are not creator
-                // (PaperAuthor logic here requires SubProjectId which we don't store directly on task)
-            }
-            if(!isAuthor)
-                throw new NoPermissionException(MessageCode.AccessDenied);
-        }
         
-        session.Delete(task);
-        await session.SaveChangesAsync(cancellationToken);
-
-        // Remove from Member
-        if (task.MemberId != Guid.Empty)
+        if(task.CreatedBy != command.UserName)
+            throw new NoPermissionException(MessageCode.AccessDenied);
+        
+        if (task.TaskType == TaskType.Writing)
         {
-            await apiService.RemoveMemberTasksAsync(Guid.Empty, task.MemberId, [task.Id], cancellationToken);
+            var paperContributor = await session.Query<PaperContributorEntity>()
+                .Where(x => x.TaskIds.Contains(task.Id))
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var isCreator = task.CreatedBy == command.UserName;
+            var isPaperAuthor = paperContributor != null && paperContributor.SectionRole.Contains(AuthorizeConstants.PaperAuthor);
+            if (!isCreator && !isPaperAuthor)
+                throw new NoPermissionException(MessageCode.AccessDenied);
+            
+            if (paperContributor != null)
+            {
+                paperContributor.RemoveTasks(task.Id);
+                session.Store(paperContributor);
+            }
         }
+        session.Delete(task);
+        
+        await session.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

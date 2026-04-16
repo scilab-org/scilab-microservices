@@ -28,7 +28,8 @@ public class CreateTaskValidator : AbstractValidator<CreateTaskCommand>
 
 public class CreateTaskHandler(
     IDocumentSession session,
-    IManagementApiService apiService) : ICommandHandler<CreateTaskCommand, Guid>
+    IManagementApiService apiService,
+    IUserApiService userApiService) : ICommandHandler<CreateTaskCommand, Guid>
 {
     #region Implementation
 
@@ -42,36 +43,43 @@ public class CreateTaskHandler(
             throw new NotFoundException(MessageCode.PaperIsNotExists);
 
         // 2. Resolve member — user must be a member of the subproject that owns this paper
-        var memberInfo = await apiService.GetMemberByPaperIdAsync(
+        var authorInfo = await apiService.GetMemberByPaperIdAsync(
             dto.PaperId, Guid.Parse(request.UserId), cancellationToken);
-        if (memberInfo == null)
+        if (authorInfo == null)
             throw new NotFoundException(MessageCode.MemberNotFound, request.UserId);
 
-        var (subProjectId, memberId) = memberInfo.Value;
+        var (subProjectId, authorId, projectId) = authorInfo.Value;
 
         // 3. Only PaperAuthor can create tasks
-        var paperRole = await apiService.GetMyProjectRoleAsync(subProjectId, cancellationToken);
-        if (paperRole == null || paperRole != AuthorizeConstants.PaperAuthor)
+        var authorRole = await apiService.GetMyProjectRoleAsync(subProjectId, cancellationToken);
+        if (authorRole == null || authorRole != AuthorizeConstants.PaperAuthor)
             throw new NoPermissionException(MessageCode.AccessDenied);
+
+        var member = await apiService.GetMemberByIdAsync(dto.MemberId, cancellationToken);
+        if (member == null)
+            throw new NotFoundException(MessageCode.MemberNotFound, dto.MemberId);
+
+        // Resolve the assigned member's username from the User service
+        var userInfoMap = await userApiService.GetUsersByIdsAsync([member.UserId], cancellationToken);
+        var assignedToUserName = userInfoMap.TryGetValue(member.UserId, out var userInfo) ? userInfo.Username : null;
 
         // 4. Create the task entity
         var entity = TaskEntity.Create(
             id: Guid.NewGuid(),
-            memberId: memberId,
+            memberId: dto.MemberId,
             name: dto.Name,
             description: dto.Description,
-            assignedToUserName: dto.AssignedToUserName,
+            assignedToUserName: assignedToUserName,
+            taskType: dto.Type,
             status: dto.Status,
             startDate: dto.StartDate,
             nextReviewDate: dto.NextReviewDate,
             completeDate: dto.CompleteDate,
             createdBy: request.UserName);
+        
 
         session.Store(entity);
-
-        // 5. Add task to Member in Management service
-        await apiService.AddMemberTasksAsync(subProjectId, memberId, [entity.Id], cancellationToken);
-
+        
         // 6. If SectionId is provided → find or create a PaperContributor and link the task
         if (dto.SectionId.HasValue)
         {
@@ -80,11 +88,9 @@ public class CreateTaskHandler(
             if (section == null || section.PaperId != dto.PaperId)
                 throw new NotFoundException(MessageCode.SectionIsNotExists, dto.SectionId.Value);
 
-            var contributor = await ResolveOrCreateContributorAsync(dto, memberId, cancellationToken);
+            var contributor = await ResolveOrCreateContributorAsync(dto, dto.MemberId, cancellationToken);
+            contributor.AddTasks(entity.Id);
             session.Store(contributor);
-
-            // Auto-assign reference section (mirrors CreatePaperContributor logic)
-            await TryAssignReferenceSectionAsync(dto.PaperId, memberId, cancellationToken);
         }
         
 
@@ -120,7 +126,11 @@ public class CreateTaskHandler(
             memberId: memberId,
             markSectionId: dto.SectionId.Value);
 
+        
         session.Store(newContributor);
+        
+        await TryAssignReferenceSectionAsync(dto.PaperId, dto.MemberId, cancellationToken);
+        
         return newContributor;
     }
 

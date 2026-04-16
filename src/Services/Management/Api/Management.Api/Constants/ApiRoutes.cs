@@ -93,9 +93,7 @@ public sealed class ApiRoutes
         public const string GetProjectMembers    = $"{Base}/{{projectId}}/members";
         public const string UpdateProjectMemberRole = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/role";
         public const string GetMemberById = $"{Base}/members/{{memberId}}";
-        public const string AddMemberTasks = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/tasks";
-        public const string RemoveMemberTasks = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/tasks/remove";
-
+        
         #endregion
     }
 

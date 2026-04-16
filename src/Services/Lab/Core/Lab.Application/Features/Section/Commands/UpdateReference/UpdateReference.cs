@@ -51,7 +51,7 @@ public class UpdateReferenceCommandHandler(IDocumentSession session, IManagement
         if (memberInfo == null)
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
-        var (_, memberId) = memberInfo.Value;
+        var (_, memberId, _) = memberInfo.Value;
 
         await session.BeginTransactionAsync(cancellationToken);
 

@@ -9,12 +9,13 @@ public sealed class TaskEntity: Entity<Guid>
 
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
-    public string? AssignedToUserName  { get; set; }
     public TaskDefineStatus Status { get; set; }
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? NextReviewDate { get; set; }
     public DateTimeOffset? CompleteDate { get; set; }
     public Guid MemberId { get; set; }
+    public TaskType TaskType { get; set; }
+    public string? AssignedToUserName { get; set; }
 
     #endregion
 
@@ -24,8 +25,9 @@ public sealed class TaskEntity: Entity<Guid>
         Guid memberId,
         string name,
         string? description = null,
-        string? assignedToUserName  = null,
+        string? assignedToUserName = null,
         TaskDefineStatus status = TaskDefineStatus.ToDo,
+        TaskType taskType = TaskType.Other,
         DateTimeOffset? startDate = null,
         DateTimeOffset? nextReviewDate = null,
         DateTimeOffset? completeDate = null,
@@ -37,8 +39,9 @@ public sealed class TaskEntity: Entity<Guid>
             MemberId = memberId,
             Name = name,
             Description = description,
-            AssignedToUserName  = assignedToUserName ,
+            AssignedToUserName = assignedToUserName,
             Status = status,
+            TaskType = taskType,
             StartDate = startDate,
             NextReviewDate = nextReviewDate,
             CompleteDate = completeDate,
@@ -54,7 +57,7 @@ public sealed class TaskEntity: Entity<Guid>
 
     public void Update(string? name = null,
         string? description = null,
-        string? assignedToUserName  = null,
+        Guid? memberId = null,
         TaskDefineStatus? status = null,
         DateTimeOffset? startDate = null,
         DateTimeOffset? nextReviewDate = null,
@@ -62,7 +65,7 @@ public sealed class TaskEntity: Entity<Guid>
     {
         Name = name ?? Name;
         Description = description ?? Description;
-        AssignedToUserName  = assignedToUserName  ?? AssignedToUserName ;
+        MemberId = memberId ?? MemberId;
         Status = status ?? Status;
         StartDate = startDate ?? StartDate;
         NextReviewDate = nextReviewDate ?? NextReviewDate;

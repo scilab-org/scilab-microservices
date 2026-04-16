@@ -3,7 +3,7 @@ using Management.Application.Dtos.Members;
 using Management.Domain.Entities;
 using Marten;
 
-namespace Management.Application.Features.Member.Queries.GetMemberById;
+namespace Management.Application.Features.Member.Queries;
 
 public record GetMemberByIdQuery(Guid MemberId) : IQuery<MemberDto>;
 

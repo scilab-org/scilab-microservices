@@ -20,7 +20,7 @@ public class GetPaperByIdQueryValidator : AbstractValidator<GetPaperByIdQuery>
     }
 }
 
-public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper)
+public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper, Lab.Application.Services.IManagementApiService managementApiService)
     : IRequestHandler<GetPaperByIdQuery, GetPaperByIdResult>
 {
     public async Task<GetPaperByIdResult> Handle(GetPaperByIdQuery request, CancellationToken cancellationToken)
@@ -31,6 +31,16 @@ public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper)
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         var response = mapper.Map<PaperDto>(paper);
+
+        var members = await managementApiService.GetSubProjectMembersByPaperIdAsync(paper.Id, cancellationToken);
+        if (members != null && members.Count > 0)
+        {
+            var subProjId = await managementApiService.GetMemberByPaperIdAsync(paper.Id, members[0].UserId, cancellationToken);
+            if (subProjId.HasValue)
+            {
+                response.SubProjectId = subProjId.Value.SubProjectId;
+            }
+        }
         var versions = await session.Query<PaperVersionEntity>()
             .Where(x => x.PaperId == paper.Id)
             .OrderByDescending(x => x.CreatedOnUtc)

@@ -39,6 +39,7 @@ public sealed class GetMemberByPaperIdQueryHandler(IDocumentSession session)
             MemberId    = member.Id,
             UserId      = member.UserId,
             SubProjectId = subProject.Id,
+            ProjectId   = subProject.ParentProjectId ?? Guid.Empty,
             Role        = member.ProjectRole,
             JoinedAt    = member.JoinedAt,
         };

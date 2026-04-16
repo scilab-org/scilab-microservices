@@ -51,7 +51,7 @@ public async Task<GetAssignedPaperSectionsHistoryResult> Handle(
     if (memberInfo == null)
         throw new NotFoundException(MessageCode.MemberNotFound, request.UserId.ToString());
 
-    var (_, memberId) = memberInfo.Value;
+    var (_, memberId, _) = memberInfo.Value;
 
 
     var contributors = await session.Query<PaperContributorEntity>()

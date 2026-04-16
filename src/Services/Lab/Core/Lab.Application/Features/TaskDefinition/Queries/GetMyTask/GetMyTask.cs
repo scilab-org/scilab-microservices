@@ -4,16 +4,17 @@ using BuildingBlocks.Pagination;
 using Lab.Application.Dtos.Tasks;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using Marten.Pagination;
 
 namespace Lab.Application.Features.TaskDefinition.Queries.GetMyTask;
 
-public sealed record GetMyTaskQuery(string UserName, GetTaskFilter Filter, PaginationRequest Paging): IQuery<GetTasksPagedResult>;
+public sealed record GetMyTaskQuery(string UserId, GetTaskFilter Filter, PaginationRequest Paging): IQuery<GetTasksPagedResult>;
 
 
-public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
+public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper, IUserApiService userApiService, IManagementApiService managementApiService)
     : IQueryHandler<GetMyTaskQuery, GetTasksPagedResult>
 {
     #region Implementations
@@ -22,8 +23,14 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
     {
         var filter = request.Filter;
 
+        // Resolve the current user's username from the User service
+        var userInfoMap = await userApiService.GetUsersByIdsAsync([Guid.Parse(request.UserId)], cancellationToken);
+        var userName = userInfoMap.TryGetValue(Guid.Parse(request.UserId), out var userInfo) ? userInfo.Username : null;
+        if (string.IsNullOrWhiteSpace(userName))
+            return new GetTasksPagedResult([], 0, request.Paging);
+
         var query = session.Query<TaskEntity>()
-            .Where(x => x.AssignedToUserName == request.UserName);
+            .Where(x => x.AssignedToUserName == userName);
 
         if (filter.Status.HasValue)
             query = query.Where(x => x.Status == filter.Status.Value);
@@ -76,11 +83,10 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
         var contributors = await paperContributorQuery
             .ToListAsync(cancellationToken);
 
-        // A member may map to multiple sections, but the PaperId is always the same for that member in a subproject.
-        // So we take the first contributor record for each member to get the Paper linkage.
-        var contributorMap = contributors
-            .GroupBy(x => x.MemberId)
-            .ToDictionary(g => g.Key, g => g.First());
+        // Map taskId → the contributor that owns it (each contributor records its TaskIds)
+        var taskContributorMap = contributors
+            .SelectMany(c => c.TaskIds.Select(tid => (tid, c)))
+            .ToDictionary(x => x.tid, x => x.c);
 
         var paperIds = contributors.Select(x => x.PaperId).Distinct().ToList();
         var paperNameMap = await session.Query<PaperEntity>()
@@ -100,21 +106,37 @@ public class GetMyTaskQueryHandler(IDocumentSession session, IMapper mapper)
                 .ToListAsync(cancellationToken))
               .ToDictionary(x => x.Id, x => x.Title)
             : new Dictionary<Guid, string?>();
-        
+
         var filteredTasks = filter.PaperId.HasValue
-            ? tasks.Where(x => contributorMap.ContainsKey(x.MemberId)).ToList()
+            ? tasks.Where(x => taskContributorMap.ContainsKey(x.Id)).ToList()
             : tasks;
 
         var taskDtos = mapper.Map<List<TaskDto>>(filteredTasks);
+        
+        var paperSubProjectMap = new Dictionary<Guid, (Guid SubProjectId, Guid ProjectId)>();
+        var subProjectTasks = paperIds.Select(async paperId =>
+        {
+            var memberInfo = await managementApiService.GetMemberByPaperIdAsync(paperId, Guid.Parse(request.UserId), cancellationToken);
+            return memberInfo.HasValue ? (paperId, memberInfo.Value.SubProjectId, memberInfo.Value.ProjectId) : ((Guid paperId, Guid SubProjectId, Guid ProjectId)?)null;
+        });
+
+        var subProjectResults = await Task.WhenAll(subProjectTasks);
+        foreach (var res in subProjectResults)
+        {
+            if (res.HasValue)
+                paperSubProjectMap[res.Value.paperId] = (res.Value.SubProjectId, res.Value.ProjectId);
+        }
 
         foreach (var taskDto in taskDtos)
         {
-            var taskEntity = filteredTasks.First(x => x.Id == taskDto.Id);
-            if (!contributorMap.TryGetValue(taskEntity.MemberId, out var contributor))
+            if (!taskContributorMap.TryGetValue(taskDto.Id, out var contributor))
                 continue;
 
+            var (subProjectId, projectId) = paperSubProjectMap.GetValueOrDefault(contributor.PaperId, (Guid.Empty, Guid.Empty));
             taskDto.SectionId = contributor.SectionId;
             taskDto.PaperId = contributor.PaperId;
+            taskDto.SubProjectId = subProjectId;
+            taskDto.ProjectId = projectId;
             taskDto.PaperContributorId = contributor.Id;
             taskDto.PaperTitle = paperNameMap.FirstOrDefault(x => x.Id == contributor.PaperId)?.Title ?? string.Empty;
             taskDto.SectionTitle = contributor.SectionId.HasValue && sectionTitleMap.TryGetValue(contributor.SectionId.Value, out var sTitle) ? sTitle : null;

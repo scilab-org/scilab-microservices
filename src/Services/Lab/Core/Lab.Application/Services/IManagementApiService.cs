@@ -50,7 +50,7 @@ public interface IManagementApiService
     /// Single call that resolves the sub-project from paperId and returns the
     /// memberId + subProjectId for the given user — replaces the two separate calls.
     /// </summary>
-    Task<(Guid SubProjectId, Guid MemberId)?> GetMemberByPaperIdAsync(
+    Task<(Guid SubProjectId, Guid MemberId, Guid ProjectId)?> GetMemberByPaperIdAsync(
         Guid paperId,
         Guid userId,
         CancellationToken cancellationToken = default);
@@ -110,24 +110,7 @@ public interface IManagementApiService
     Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(
         Guid journalId,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Adds tasks to a member in Management service.
-    /// </summary>
-    Task<bool> AddMemberTasksAsync(
-        Guid projectId,
-        Guid memberId,
-        List<Guid> taskIds,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Removes tasks from a member in Management service.
-    /// </summary>
-    Task<bool> RemoveMemberTasksAsync(
-        Guid projectId,
-        Guid memberId,
-        List<Guid> taskIds,
-        CancellationToken cancellationToken = default);
+    
 }
 
 public sealed record SubProjectMemberInfo(
