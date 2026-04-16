@@ -107,7 +107,8 @@ public class SectionEntity : Entity<Guid>
         string? projectRule = null,
         string? sectionRule = null,
         List<string>? files = null,
-        List<string>? packages = null)
+        List<string>? packages = null,
+        string? lastModifiedBy = null!)
     {
         Content = content ?? Content;
         Title = title ?? Title;
@@ -129,6 +130,7 @@ public class SectionEntity : Entity<Guid>
         Files = files ?? Files;
         References = references ?? References;
         Packages = packages ?? Packages;
+        LastModifiedBy = lastModifiedBy ?? LastModifiedBy;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

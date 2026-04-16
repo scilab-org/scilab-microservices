@@ -199,6 +199,10 @@ public sealed class MessageCode
 
     public const string PaperDescriptionIsRequired = "PAPER_DESCRIPTION_IS_REQUIRED";
 
+    public const string SectionStatusMustBeInProgress = "SECTION_STATUS_MUST_BE_IN_PROGRESS";
+
+    public const string SectionStatusMustBeInReview = "SECTION_STATUS_MUST_BE_IN_REVIEW";
+
     #endregion
 
     #region Comment Management
