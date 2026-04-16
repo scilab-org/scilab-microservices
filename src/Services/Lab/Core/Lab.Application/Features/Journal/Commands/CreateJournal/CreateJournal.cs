@@ -101,9 +101,8 @@ public class CreateJournalCommandHandler(
         if (file == null) return null;
 
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
-        var extension = Path.GetExtension(file.FileName);
         var shortId = Guid.NewGuid().ToString("N")[..8];
-        var name = $"{fileNameWithoutExtension}-{shortId}{extension}";
+        var name = $"{fileNameWithoutExtension}-{shortId}";
 
         var result = await minIo.UploadFilesAsync(
             name,

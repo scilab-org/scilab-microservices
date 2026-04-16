@@ -78,7 +78,7 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
             sectionRule: section.SectionRule ?? SectionRuleComposer.BuildSectionRule(section.Title, section.Description, section.MainIdea)
         );
 
-        section.Update(nextVersionSectionId: newMainSection.Id, isOldMainSection: true);
+        section.Update(version: $"Version {count}", nextVersionSectionId: newMainSection.Id, isOldMainSection: true);
 
         // Find contributor to find old main section
         var contributor = await session.Query<PaperContributorEntity>()
