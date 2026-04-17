@@ -17,6 +17,9 @@ public class SectionEntity : Entity<Guid>
     public string? PaperRule { get; set; }
     public string? ProjectRule { get; set; }
     public string? SectionRule { get; set; }
+    public string? SectionContext { get; set; }
+    public string? ProjectContext { get; set; }
+    public string? PaperContext { get; set; }
     public float DisplayOrder { get; set; }
     public bool? IsMainSection { get; set; } = false;
     public bool? IsOldMainSection { get; set; } = false;
@@ -53,7 +56,10 @@ public class SectionEntity : Entity<Guid>
         string? projectRule = null,
         string? sectionRule = null,
         List<string>? files = null,
-        List<string>? packages = null)
+        List<string>? packages = null,
+        string? sectionContext = null,
+        string? projectContext = null,
+        string? paperContext = null)
     {
         return new SectionEntity()
         {
@@ -70,6 +76,9 @@ public class SectionEntity : Entity<Guid>
             PaperRule = paperRule,
             ProjectRule = projectRule,
             SectionRule = sectionRule,
+            SectionContext = sectionContext,
+            ProjectContext = projectContext,
+            PaperContext = paperContext,
             DisplayOrder = displayOrder,
             IsMainSection = isMainSection,
             IsOldMainSection = isOldMainSection,
@@ -108,7 +117,10 @@ public class SectionEntity : Entity<Guid>
         string? sectionRule = null,
         List<string>? files = null,
         List<string>? packages = null,
-        string? lastModifiedBy = null!)
+        string? lastModifiedBy = null!,
+        string? sectionContext = null,
+        string? projectContext = null,
+        string? paperContext = null)
     {
         Content = content ?? Content;
         Title = title ?? Title;
@@ -121,6 +133,9 @@ public class SectionEntity : Entity<Guid>
         PaperRule = paperRule ?? PaperRule;
         ProjectRule = projectRule ?? ProjectRule;
         SectionRule = sectionRule ?? SectionRule;
+        SectionContext = sectionContext ?? SectionContext;
+        ProjectContext = projectContext ?? ProjectContext;
+        PaperContext = paperContext ?? PaperContext;
         IsMainSection = isMainSection ?? IsMainSection;
         IsOldMainSection = isOldMainSection ?? IsOldMainSection;
         Version = version ?? Version;

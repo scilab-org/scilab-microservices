@@ -102,6 +102,64 @@ public static class SectionRuleComposer
         return contentBuilder.ToString().TrimEnd();
     }
 
+    // ── Section Context builders (cached per sub-level, like Rule) ────────
+
+    public static string BuildProjectContext(ManagementProjectInfo? project)
+    {
+        var contentBuilder = new StringBuilder();
+        contentBuilder.AppendLine("# Project Context: **Level 3 (Guidelines)**");
+        contentBuilder.AppendLine();
+        AppendBlock(contentBuilder, "Context", project?.Context);
+        return contentBuilder.ToString().TrimEnd();
+    }
+
+    public static string BuildPaperContext(PaperEntity paper)
+    {
+        var contentBuilder = new StringBuilder();
+        contentBuilder.AppendLine("# Paper Context: **Level 2 (Important)**");
+        contentBuilder.AppendLine();
+        AppendBlock(contentBuilder, "Context", paper.Context);
+        AppendBlock(contentBuilder, "Research Gap", paper.ResearchGap);
+        AppendBlock(contentBuilder, "Research Aim", paper.ResearchAim);
+        return contentBuilder.ToString().TrimEnd();
+    }
+
+    public static string BuildPaperContext(CreatePaperDto paperDto)
+    {
+        var contentBuilder = new StringBuilder();
+        contentBuilder.AppendLine("# Paper Context: **Level 2 (Important)**");
+        contentBuilder.AppendLine();
+        AppendBlock(contentBuilder, "Context", paperDto.Context);
+        AppendBlock(contentBuilder, "Research Gap", paperDto.ResearchGap);
+        AppendBlock(contentBuilder, "Research Aim", paperDto.ResearchAim);
+        return contentBuilder.ToString().TrimEnd();
+    }
+
+    public static string ComposeSectionContext(
+        string? projectContext,
+        string? paperContext,
+        string? sectionTitle,
+        string? sectionMainIdea)
+    {
+        var contentBuilder = new StringBuilder();
+
+        contentBuilder.AppendLine("## Context Levels");
+        contentBuilder.AppendLine("**Level 1 (Critical):** Section-specific context");
+        contentBuilder.AppendLine("**Level 2 (Important):** Paper-specific context");
+        contentBuilder.AppendLine("**Level 3 (Guidelines):** Project-level context");
+        contentBuilder.AppendLine();
+
+        AppendRawBlock(contentBuilder, projectContext);
+        AppendRawBlock(contentBuilder, paperContext);
+
+        // Section context — Level 1 (built inline, not cached separately)
+        contentBuilder.AppendLine($"# Section {sectionTitle} Context: **Level 1 (Critical)**");
+        contentBuilder.AppendLine();
+        AppendBlock(contentBuilder, "Main Idea", sectionMainIdea);
+
+        return contentBuilder.ToString().TrimEnd();
+    }
+
     private static void AppendBlock(StringBuilder contentBuilder, string title, string? content)
     {
         contentBuilder.AppendLine($"## {title}");

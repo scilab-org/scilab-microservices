@@ -66,6 +66,7 @@ public class UpdatePaperCommandHandler(
                           dto.ConferenceJournalId.ToString());
 
         var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal);
+        var paperContext = SectionRuleComposer.BuildPaperContext(paper);
         var sections = await session.Query<SectionEntity>()
             .Where(x => x.PaperId == paper.Id)
             .ToListAsync(cancellationToken);
@@ -82,7 +83,10 @@ public class UpdatePaperCommandHandler(
             section.Update(
                 paperRule: paperRule,
                 sectionRule: sectionRule,
-                rule: normalizedRule);
+                rule: normalizedRule,
+                paperContext: paperContext,
+                sectionContext: SectionRuleComposer.ComposeSectionContext(
+                    section.ProjectContext, paperContext, section.Title, section.MainIdea));
 
             session.Update(section);
         }
