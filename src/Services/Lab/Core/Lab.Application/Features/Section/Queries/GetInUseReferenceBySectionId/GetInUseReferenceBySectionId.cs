@@ -86,6 +86,7 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             Title = paperBank.Title,
             Authors = paperBank.Authors,
             Publisher = paperBank.Publisher,
+            Ranking = paperBank.Ranking,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             FilePath = paperBank.FilePath,

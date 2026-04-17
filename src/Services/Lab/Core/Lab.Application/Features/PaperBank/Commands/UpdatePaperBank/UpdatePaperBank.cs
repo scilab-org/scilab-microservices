@@ -63,6 +63,7 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
             title: dto.Title,
             authors: dto.Authors,
             publisher: dto.Publisher,
+            ranking: dto.Ranking,
             abstractText: dto.Abstract,
             doi: dto.Doi,
             isIngested: dto.IsIngested,

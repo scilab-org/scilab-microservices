@@ -140,6 +140,20 @@ public sealed class MessageCode
 
     public const string PaperCombineContentIsRequired = "PAPER_COMBINE_CONTENT_IS_REQUIRED";
 
+    public const string PaperTemplateIsRequired = "PAPER_TEMPLATE_IS_REQUIRED";
+
+    public const string PaperResearchGapIsRequired = "PAPER_RESEARCH_GAP_IS_REQUIRED";
+
+    public const string PaperGapTypeIsRequired = "PAPER_GAP_TYPE_IS_REQUIRED";
+
+    public const string PaperMainContributionIsRequired = "PAPER_MAIN_CONTRIBUTION_IS_REQUIRED";
+
+    public const string PaperResearchAimIsRequired = "PAPER_RESEARCH_AIM_IS_REQUIRED";
+
+    public const string JournalStartAtIsRequired  = "JOURNAL_START_AT_IS_REQUIRED";
+
+    public const string JournalEndAtIsRequired  = "JOURNAL_END_AT_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes
@@ -232,15 +246,11 @@ public sealed class MessageCode
 
     public const string JournalProjectIdIsRequired = "JOURNAL_PROJECT_ID_IS_REQUIRED";
 
-    public const string JournalStartDateIsRequired = "JOURNAL_START_DATE_IS_REQUIRED";
-
-    public const string JournalEndDateIsRequired = "JOURNAL_END_DATE_IS_REQUIRED";
-
     public const string JournalStartDateMustBeforeEndDate = "JOURNAL_START_DATE_MUST_BE_BEFORE_END_DATE";
 
-    public const string JournalSectionsAreRequired = "JOURNAL_SECTIONS_ARE_REQUIRED";
+    public const string JournalRankingIsRequired = "JOURNAL_RANKING_IS_REQUIRED";
 
-    public const string JournalEndAtInvalid = "JOURNAL_END_AT_INVALID";
+    public const string JournalUrlIsRequired = "JOURNAL_URL_IS_REQUIRED";
 
     #endregion
 

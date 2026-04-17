@@ -8,9 +8,9 @@ public class CreateJournalEntityDto
 {
     public string Name { get; set; } = null!;
     public Guid TemplateId { get; set; }
-    public DateTimeOffset StartAt { get; set; }
-    public DateTimeOffset EndAt { get; set; }
+    public string Ranking { get; set; } = null!;
+    public string Url { get; set; } = null!;
     public string Style { get; set; } = null!;
-    public UploadFileBytes TexUploadFile { get; set; } = null!;
-    public UploadFileBytes PdfUploadFile { get; set; } = null!;
+    public UploadFileBytes? TexUploadFile { get; set; }
+    public UploadFileBytes? PdfUploadFile { get; set; }
 }

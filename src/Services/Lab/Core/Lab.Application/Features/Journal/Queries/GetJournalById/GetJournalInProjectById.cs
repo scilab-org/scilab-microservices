@@ -49,7 +49,7 @@ public class GetJournalInProjectByIdQueryHandler(IDocumentSession session, IMapp
         // }
         //
         // return new GetJournalByIdResult(response, templateDtos);
-        var response = new GetJournalByIdResult(new JournalDto(), new List<ProjectJournalInfo>());
+        var response = new GetJournalByIdResult(new JournalDto(), new List<ProjectJournalInfo>(), new List<PaperJournalInfo>());
         return response;
     }
 

@@ -8,15 +8,17 @@ public class GetJournalByIdResult
 
     public JournalDto Journal { get; init; }
     public List<ProjectJournalInfo> Projects { get; init; }
+    public List<PaperJournalInfo> Papers { get; init; }
 
     #endregion
 
     #region Ctors
 
-    public GetJournalByIdResult(JournalDto journal, List<ProjectJournalInfo>? projects)
+    public GetJournalByIdResult(JournalDto journal, List<ProjectJournalInfo>? projects, List<PaperJournalInfo>? papers)
     {
         Journal = journal;
         Projects = projects ?? [];
+        Papers = papers ?? [];
     }
 
     #endregion

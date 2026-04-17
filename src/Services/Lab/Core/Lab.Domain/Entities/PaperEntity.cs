@@ -20,6 +20,8 @@ public sealed class PaperEntity : Entity<Guid>
     public string? GapType { get; set; }
     public string? ConferenceJournalName { get; set; }
     public Guid? ConferenceJournalId { get; set; }
+    public DateTimeOffset? ConferenceJournalStartAt { get; set; }
+    public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public PaperStatus? Status { get; set; }
     public List<Reference>? References { get; set; } = new();
 
@@ -38,7 +40,9 @@ public sealed class PaperEntity : Entity<Guid>
         string? rule = null,
         string? gapType = null,
         string? conferenceJournalName = null,
-        Guid? conferenceJournalId  = null,
+        Guid? conferenceJournalId = null,
+        DateTimeOffset? conferenceJournalStartAt = null,
+        DateTimeOffset? conferenceJournalEndAt = null,
         PaperStatus? status = null,
         List<Reference>? references = null,
         string? createdBy = null)
@@ -57,6 +61,8 @@ public sealed class PaperEntity : Entity<Guid>
             GapType = gapType,
             ConferenceJournalName = conferenceJournalName,
             ConferenceJournalId = conferenceJournalId,
+            ConferenceJournalStartAt = conferenceJournalStartAt,
+            ConferenceJournalEndAt = conferenceJournalEndAt,
             Status = status ?? PaperStatus.Processing,
             References = references ?? [],
             CreatedOnUtc = DateTimeOffset.UtcNow,
@@ -79,6 +85,8 @@ public sealed class PaperEntity : Entity<Guid>
         string? rule = null,
         string? conferenceJournalName = null,
         Guid? conferenceJournalId = null,
+        DateTimeOffset? conferenceJournalStartAt = null,
+        DateTimeOffset? conferenceJournalEndAt = null,
         PaperStatus? status = null,
         string? gapType = null,
         List<Reference>? references = null,
@@ -95,6 +103,8 @@ public sealed class PaperEntity : Entity<Guid>
         GapType = gapType ?? GapType;
         ConferenceJournalName = conferenceJournalName ?? ConferenceJournalName;
         ConferenceJournalId = conferenceJournalId ?? ConferenceJournalId;
+        ConferenceJournalStartAt = conferenceJournalStartAt ?? ConferenceJournalStartAt;
+        ConferenceJournalEndAt = conferenceJournalEndAt ?? conferenceJournalEndAt;
         Status = status ?? Status;
         References = references ?? References;
         LastModifiedBy = lastModifiedBy ?? LastModifiedBy;

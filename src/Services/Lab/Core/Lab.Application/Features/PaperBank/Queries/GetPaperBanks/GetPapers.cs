@@ -3,7 +3,6 @@ using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
-using Lab.Domain.Enums;
 using Marten;
 using Marten.Linq.SoftDeletes;
 using Marten.Pagination;
