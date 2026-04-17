@@ -62,6 +62,18 @@ public sealed class UpdateProjectRulesCommandHandler(
             request.Dto.Domain,
             request.Dto.Keypoint));
 
+        var projectContext = SectionRuleComposer.BuildProjectContext(new ManagementProjectInfo(
+            Guid.Empty,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            request.Dto.Context,
+            request.Dto.Domain,
+            request.Dto.Keypoint));
+
         foreach (var section in sections)
         {
             if (!paperMap.TryGetValue(section.PaperId, out var paper))
@@ -88,7 +100,10 @@ public sealed class UpdateProjectRulesCommandHandler(
                 projectRule: projectRule,
                 paperRule: paperRule,
                 sectionRule: sectionRule,
-                rule: normalizedRule);
+                rule: normalizedRule,
+                projectContext: projectContext,
+                sectionContext: SectionRuleComposer.ComposeSectionContext(
+                    projectContext, section.PaperContext, section.Title, section.MainIdea));
 
             session.Update(section);
         }

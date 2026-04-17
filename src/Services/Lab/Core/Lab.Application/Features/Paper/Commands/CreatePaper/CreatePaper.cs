@@ -69,6 +69,8 @@ public class CreatePaperCommandHandler(
 
         var projectRule = SectionRuleComposer.BuildProjectRule(project);
         var paperRule = SectionRuleComposer.BuildPaperRule(dto, journal);
+        var projectContext = SectionRuleComposer.BuildProjectContext(project);
+        var paperContext = SectionRuleComposer.BuildPaperContext(dto);
 
         var entity = PaperEntity.Create(
             id: Guid.NewGuid(),
@@ -94,6 +96,7 @@ public class CreatePaperCommandHandler(
                 var sectionRule =
                     SectionRuleComposer.BuildSectionRule(template.Title, template.SectionRule, template.MainIdea);
                 var normalizedRule = SectionRuleComposer.ComposeNormalizedRule(projectRule, paperRule, sectionRule);
+                var sectionContext = SectionRuleComposer.ComposeSectionContext(projectContext, paperContext, template.Title, template.MainIdea);
 
                 var section = SectionEntity.Create(
                     id: Guid.NewGuid(),
@@ -111,7 +114,10 @@ public class CreatePaperCommandHandler(
                     paperRule: paperRule,
                     projectRule: projectRule,
                     sectionRule: sectionRule,
-                    packages: []
+                    packages: [],
+                    sectionContext: sectionContext,
+                    projectContext: projectContext,
+                    paperContext: paperContext
                 );
                 session.Store(section);
             }

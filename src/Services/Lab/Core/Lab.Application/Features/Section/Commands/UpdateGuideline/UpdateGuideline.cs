@@ -72,7 +72,9 @@ public class UpdateGuidelineCommandHandler(
                 description: dto.Description,
                 mainIdea: dto.MainIdea,
                 sectionRule: sectionRule,
-                rule: normalizedRule);
+                rule: normalizedRule,
+                sectionContext: SectionRuleComposer.ComposeSectionContext(
+                    currentSection.ProjectContext, currentSection.PaperContext, currentSection.Title, dto.MainIdea));
 
             session.Update(currentSection);
         }

@@ -99,7 +99,11 @@ public class UpsertSectionCommandHandler(
                 paperRule: section.PaperRule,
                 projectRule: section.ProjectRule,
                 sectionRule: SectionRuleComposer.BuildSectionRule(dto.Title, section.Description, dto.MainIdea ?? section.MainIdea),
-                packages: dto.CurrentSectionPackages
+                packages: dto.CurrentSectionPackages,
+                projectContext: section.ProjectContext,
+                paperContext: section.PaperContext,
+                sectionContext: SectionRuleComposer.ComposeSectionContext(
+                    section.ProjectContext, section.PaperContext, dto.Title, dto.MainIdea ?? section.MainIdea)
             );
 
             // Find reference section and create a new version with updated packages
@@ -130,6 +134,8 @@ public class UpsertSectionCommandHandler(
             sectionRule: sectionRule,
             packages: dto.CurrentSectionPackages,
             rule: SectionRuleComposer.ComposeNormalizedRule(section.ProjectRule, section.PaperRule, sectionRule),
+            sectionContext: SectionRuleComposer.ComposeSectionContext(
+                section.ProjectContext, section.PaperContext, dto.Title ?? section.Title, dto.MainIdea ?? section.MainIdea),
             lastModifiedBy: request.UserName
         );
 
