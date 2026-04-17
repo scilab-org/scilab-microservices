@@ -20,6 +20,7 @@ public sealed class UpdateJournal : ICarterModule
         app.MapPut(ApiRoutes.Journal.Update, HandleUpdateJournalAsync)
             .WithTags(ApiRoutes.Journal.Tags)
             .WithName(nameof(UpdateJournal))
+            .WithMultipartForm<UpdateJournalRequest>()
             .Produces<ApiUpdatedResponse<Guid>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -45,6 +46,7 @@ public sealed class UpdateJournal : ICarterModule
 
         var dto = new UpdateJournalEntityDto()
         {
+            Name = request.Name,
             Ranking = request.Ranking,
             Url = request.Url,
             Style = request.Style,
