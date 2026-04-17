@@ -41,7 +41,7 @@ public class CreateCombineSectionsToPaper : ICarterModule
         var command = new CombineSectionsToPaperCommand(id, request, currentUser.UserName);
         var result = await sender.Send(command);
 
-        return TypedResults.Created($"/papers/{id}/versions/{result.Version?.Id}/combine",
+        return TypedResults.Created($"/papers/{id}/combine",
             new ApiCreatedResponse<CombineSectionsToPaperResult>(result));
     }
 
