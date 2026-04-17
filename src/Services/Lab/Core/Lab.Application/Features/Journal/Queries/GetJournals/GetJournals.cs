@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
-using JasperFx.Core;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
-using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using Marten.Linq.SoftDeletes;
@@ -15,7 +13,6 @@ public record GetJournalsQuery(GetJournalsFilter Filter, PaginationRequest Pagin
 
 public class GetJournalsQueryHandler(
     IDocumentSession session,
-    IManagementApiService managementApiService,
     IMapper mapper)
     : IQueryHandler<GetJournalsQuery, GetJournalsResult>
 {
@@ -41,18 +38,19 @@ public class GetJournalsQueryHandler(
             query = query.Where(x => x.TemplateId == templateId);
         }
 
-        if (!filter.ProjectName.IsNullOrWhiteSpace() || !filter.ProjectCode.IsNullOrWhiteSpace())
+        if (!filter.ProjectId.IsNullOrWhiteSpace())
         {
-            var projects = await managementApiService.GetProjectsAsync(
-                name: filter.ProjectName,
-                code: filter.ProjectCode,
-                pageNumber: 1,
-                pageSize: 1000,
-                cancellationToken);
-            if (projects.Count > 0)
+            if (Guid.TryParse(filter.ProjectId, out var projectId))
             {
-                var projectIds = projects.Select(x => x.Id).ToList();
-                query = query.Where(x => x.ProjectIds != null && x.ProjectIds.Any(projectIds.Contains));
+                query = query.Where(x => x.ProjectIds != null && x.ProjectIds.Contains(projectId));
+            }
+        }
+
+        if (!filter.PaperId.IsNullOrWhiteSpace())
+        {
+            if (Guid.TryParse(filter.PaperId, out var paperId))
+            {
+                query = query.Where(x => x.PaperIds != null && x.PaperIds.Contains(paperId));
             }
         }
 

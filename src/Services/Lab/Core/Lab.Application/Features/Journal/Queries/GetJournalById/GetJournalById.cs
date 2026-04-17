@@ -61,6 +61,27 @@ public class GetJournalByIdQueryHandler(
                 .ToList();
         }
 
-        return new GetJournalByIdResult(response, projects);
+        var papers = new List<PaperJournalInfo>();
+        if (journal.PaperIds != null && journal.PaperIds.Count != 0)
+        {
+            var availablePapers = await session.Query<PaperEntity>()
+                .Where(x => journal.PaperIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+            var paperMap = availablePapers.ToDictionary(x => x.Id, x => x);
+            papers = journal.PaperIds
+                .Where(paperMap.ContainsKey)
+                .Select(id => paperMap[id])
+                .Select(paper => new PaperJournalInfo
+                {
+                    Id = paper.Id,
+                    Title = paper.Title,
+                    ConferenceJournalStartAt = paper.ConferenceJournalStartAt,
+                    ConferenceJournalEndAt = paper.ConferenceJournalEndAt
+                })
+                .ToList();
+        }
+
+        return new GetJournalByIdResult(response, projects, papers);
     }
 }

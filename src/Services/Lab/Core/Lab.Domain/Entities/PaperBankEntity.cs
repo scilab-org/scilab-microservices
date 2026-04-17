@@ -10,6 +10,7 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string Title { get; set; } = null!;
     public string? Authors { get; set; }
     public string? Publisher { get; set; }
+    public string? Ranking { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
@@ -19,9 +20,9 @@ public sealed class PaperBankEntity : Entity<Guid>
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
-    public string? Pages {get; set;}
+    public string? Pages { get; set; }
     public string? Number { get; set; }
-    public string? Volume {get; set;}
+    public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
     public List<string> TagNames { get; set; } = new();
@@ -35,6 +36,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         string title,
         string? authors = null,
         string? publisher = null,
+        string? ranking = null,
         string? abstractText = null,
         string? doi = null,
         string? parsedText = null,
@@ -57,6 +59,7 @@ public sealed class PaperBankEntity : Entity<Guid>
             Title = title,
             Authors = authors,
             Publisher = publisher,
+            Ranking = ranking,
             Abstract = abstractText,
             Doi = doi,
             ParsedText = parsedText ?? string.Empty,
@@ -84,6 +87,7 @@ public sealed class PaperBankEntity : Entity<Guid>
     public void Update(string? title = null,
         string? authors = null,
         string? publisher = null,
+        string? ranking = null,
         string? abstractText = null,
         string? doi = null,
         bool? isIngested = null,
@@ -102,6 +106,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         Title = title ?? Title;
         Authors = authors ?? Authors;
         Publisher = publisher ?? Publisher;
+        Ranking = ranking ?? Ranking;
         Abstract = abstractText ?? Abstract;
         Doi = doi ?? Doi;
         IsIngested = isIngested ?? IsIngested;

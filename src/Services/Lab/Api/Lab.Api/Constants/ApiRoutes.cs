@@ -52,6 +52,7 @@ public sealed class ApiRoutes
         public const string Create = $"{Base}";
         public const string Update = $"{Base}/{{id}}";
         public const string Delete = $"{BaseManager}/{{id}}";
+        public const string GetPapers = $"{Base}";
         public const string GetPaperSamples = $"{Base}/sample";
         public const string Initialize = $"{BaseManager}/initialize";
         public const string GetAssignedPaperSections = $"{Base}/{{id}}/assigned-sections";

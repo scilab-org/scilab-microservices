@@ -15,8 +15,10 @@ public  class PaperInfoDto : DtoId<Guid>
     public string? ResearchAim { get; set; }
     public string? Rule { get; set; }
     public string? GapType { get; set; }
-    public string? ConferenceJournalName { get; set; }
     public Guid? ConferenceJournalId { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public DateTimeOffset? ConferenceJournalStartAt { get; set; }
+    public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public Guid? SubProjectId { get; set; }
     public PaperStatus? Status { get; set; }
     public SubmissionStatus? SubmissionStatus { get; set; }

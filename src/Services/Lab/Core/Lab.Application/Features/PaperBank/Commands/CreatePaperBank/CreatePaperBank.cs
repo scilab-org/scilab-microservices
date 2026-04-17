@@ -61,6 +61,7 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             title: dto.Title,
             authors: dto.Authors,
             publisher: dto.Publisher,
+            ranking: dto.Ranking,
             abstractText: dto.Abstract,
             doi: dto.Doi,
             parsedText: dto.ParsedText,

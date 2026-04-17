@@ -46,8 +46,8 @@ public sealed class CreateJournal : ICarterModule
         {
             TemplateId = req.TemplateId,
             Name = req.Name,
-            StartAt = req.StartAt,
-            EndAt = req.EndAt,
+            Ranking = req.Ranking,
+            Url = req.Url,
             Style = req.Style,
             TexUploadFile = await ToUploadFileAsync(req.TexFile),
             PdfUploadFile = await ToUploadFileAsync(req.PdfFile)
@@ -59,17 +59,21 @@ public sealed class CreateJournal : ICarterModule
         return TypedResults.Created($"{ApiRoutes.Journal.Create}/{result}", new ApiCreatedResponse<Guid>(result));
     }
 
-    private static async Task<UploadFileBytes> ToUploadFileAsync(IFormFile file)
+    private static async Task<UploadFileBytes?> ToUploadFileAsync(IFormFile? file)
     {
-        await using var ms = new MemoryStream();
-        await file.CopyToAsync(ms);
-
-        return new UploadFileBytes
+        if (file != null)
         {
-            FileName = file.FileName,
-            ContentType = file.ContentType,
-            Bytes = ms.ToArray()
-        };
+            await using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+
+            return new UploadFileBytes
+            {
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                Bytes = ms.ToArray()
+            };
+        }
+        return null;
     }
 
     #endregion

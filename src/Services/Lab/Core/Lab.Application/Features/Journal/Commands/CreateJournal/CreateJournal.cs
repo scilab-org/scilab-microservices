@@ -22,12 +22,13 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
                     .NotEmpty().WithMessage(MessageCode.JournalNameIsRequired)
                     .NotNull().WithMessage(MessageCode.JournalNameIsRequired);
 
-                RuleFor(x => x.Dto.StartAt)
-                    .NotEmpty().WithMessage(MessageCode.JournalStartDateIsRequired)
-                    .LessThan(x => x.Dto.EndAt).WithMessage(MessageCode.JournalStartDateMustBeforeEndDate);
+                RuleFor(x => x.Dto.Ranking)
+                    .NotEmpty().WithMessage(MessageCode.JournalRankingIsRequired)
+                    .NotNull().WithMessage(MessageCode.JournalRankingIsRequired);
 
-                RuleFor(x => x.Dto.EndAt)
-                    .NotEmpty().WithMessage(MessageCode.JournalEndDateIsRequired);
+                RuleFor(x => x.Dto.Url)
+                    .NotEmpty().WithMessage(MessageCode.JournalUrlIsRequired)
+                    .NotNull().WithMessage(MessageCode.JournalUrlIsRequired);
 
                 RuleFor(x => x.Dto.TemplateId)
                     .NotEmpty().WithMessage(MessageCode.TemplateIdIsRequired)
@@ -68,8 +69,8 @@ public class CreateJournalCommandHandler(
         var entity = ConferenceJournalEntity.Create(
             id: Guid.NewGuid(),
             name: normalizedName,
-            startAt: request.Dto.StartAt,
-            endAt: request.Dto.EndAt,
+            ranking: request.Dto.Ranking,
+            url: request.Dto.Url,
             style: request.Dto.Style,
             templateId: template.Id,
             texFile: null,

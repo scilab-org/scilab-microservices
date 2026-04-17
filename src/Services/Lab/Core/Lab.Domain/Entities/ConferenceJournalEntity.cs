@@ -7,13 +7,14 @@ public class ConferenceJournalEntity : Entity<Guid>
     #region Fields, Properties and Indexers
 
     public string Name { get; set; } = null!;
-    public DateTimeOffset StartAt { get; set; }
-    public DateTimeOffset EndAt { get; set; }
+    public string? Ranking { get; set; }
+    public string? Url { get; set; }
     public string? TexFile { get; set; }
     public string? PdfFile { get; set; }
     public string? Style { get; set; }
     public Guid TemplateId { get; set; }
     public List<Guid>? ProjectIds { get; set; }
+    public List<Guid>? PaperIds { get; set; }
 
     #endregion
 
@@ -22,22 +23,24 @@ public class ConferenceJournalEntity : Entity<Guid>
     public static ConferenceJournalEntity Create(
         Guid id,
         string name,
-        DateTimeOffset startAt,
-        DateTimeOffset endAt,
+        string? ranking,
+        string? url,
         string? style,
         Guid templateId,
         string? texFile,
         string? pdfFile,
         List<Guid>? projectIds = null,
+        List<Guid>? paperIds = null,
         string? createdBy = null)
     {
         return new ConferenceJournalEntity()
         {
             Id = id,
             Name = name,
+            Ranking = ranking,
+            Url = url,
             ProjectIds = projectIds ?? [],
-            StartAt = startAt,
-            EndAt = endAt,
+            PaperIds = paperIds ?? [],
             Style = style,
             TemplateId = templateId,
             TexFile = texFile,
@@ -54,9 +57,10 @@ public class ConferenceJournalEntity : Entity<Guid>
 
     public void Update(
         string? name = null,
+        string? ranking = null,
+        string? url = null,
         List<Guid>? projectIds = null,
-        DateTimeOffset? startAt = null,
-        DateTimeOffset? endAt = null,
+        List<Guid>? paperIds = null,
         string? style = null,
         Guid? templateId = null,
         string? texFile = null,
@@ -64,9 +68,10 @@ public class ConferenceJournalEntity : Entity<Guid>
         string? lastModifiedBy = null)
     {
         Name = name ?? Name;
+        Ranking = ranking ?? Ranking;
+        Url = url ?? Url;
         ProjectIds = projectIds ?? ProjectIds;
-        StartAt = startAt ?? StartAt;
-        EndAt = endAt ?? EndAt;
+        PaperIds = paperIds ?? PaperIds;
         Style = style ?? Style;
         TemplateId = templateId ?? TemplateId;
         TexFile = texFile ?? TexFile;

@@ -5,6 +5,10 @@
 /// </summary>
 public class UpdateJournalEntityDto
 {
-    public DateTimeOffset? StartAt { get; set; }
-    public DateTimeOffset? EndAt { get; set; }
+    public string Name { get; set; } = null!;
+    public string? Ranking  { get; set; }
+    public string? Url { get; set; }
+    public string? Style { get; set; }
+    public UploadFileBytes? TexUploadFile { get; set; }
+    public UploadFileBytes? PdfUploadFile { get; set; }
 }

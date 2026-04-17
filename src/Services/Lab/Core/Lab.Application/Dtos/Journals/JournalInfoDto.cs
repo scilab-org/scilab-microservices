@@ -7,8 +7,8 @@ public class JournalInfoDto : DtoId<Guid>
     #region Fields, Properties and Indexers
 
     public string Name { get; set; } = null!;
-    public DateTimeOffset StartAt { get; set; }
-    public DateTimeOffset EndAt { get; set; }
+    public string? Ranking { get; set; }
+    public string? Url { get; set; }
     public string? TexFile { get; set; }
     public string? PdfFile { get; set; }
     public string? Style { get; set; }

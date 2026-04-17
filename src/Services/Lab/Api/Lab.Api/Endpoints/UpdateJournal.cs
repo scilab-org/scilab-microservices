@@ -35,7 +35,7 @@ public sealed class UpdateJournal : ICarterModule
         ISender sender,
         IHttpContextAccessor httpContext,
         [FromRoute] Guid id,
-        [FromBody] UpdateJournalEntityDto request)
+        [FromForm] UpdateJournalRequest request)
     {
         if (request == null) throw new ClientValidationException(MessageCode.BadRequest);
 
@@ -43,10 +43,37 @@ public sealed class UpdateJournal : ICarterModule
         if (currentUser == null)
             throw new UnauthorizedException(MessageCode.Unauthorized);
 
-        var command = new UpdateJournalCommand(request, id, currentUser.UserName);
+        var dto = new UpdateJournalEntityDto()
+        {
+            Ranking = request.Ranking,
+            Url = request.Url,
+            Style = request.Style,
+            TexUploadFile = await ToUploadFileAsync(request.TexFile),
+            PdfUploadFile = await ToUploadFileAsync(request.PdfFile)
+        };
+
+        var command = new UpdateJournalCommand(dto, id, currentUser.UserName);
+
         var result = await sender.Send(command);
 
         return TypedResults.Ok(new ApiUpdatedResponse<Guid>(result));
+    }
+
+    private static async Task<UploadFileBytes?> ToUploadFileAsync(IFormFile? file)
+    {
+        if (file != null)
+        {
+            await using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+
+            return new UploadFileBytes
+            {
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                Bytes = ms.ToArray()
+            };
+        }
+        return null;
     }
 
     #endregion

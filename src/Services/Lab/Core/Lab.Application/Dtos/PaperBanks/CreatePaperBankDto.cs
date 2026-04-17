@@ -9,6 +9,7 @@ public class CreatePaperBankDto
     public string Title { get; init; } = null!;
     public string? Authors { get; set; }
     public string? Publisher { get; set; }
+    public string? Ranking { get; set; }
     public string? Abstract { get; init; }
     public string? Doi { get; init; }
     public UploadFileBytes UploadFile { get; set; } = null!;

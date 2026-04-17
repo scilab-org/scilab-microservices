@@ -24,16 +24,56 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .WithMessage(MessageCode.PaperTitleIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperTitleIsRequired);
+                RuleFor(x => x.Dto.Template)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.PaperTemplateIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperTemplateIsRequired);
                 RuleFor(x => x.Dto.Context)
                     .NotEmpty()
                     .WithMessage(MessageCode.PaperContextIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperContextIsRequired);
+                RuleFor(x => x.Dto.ResearchGap)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.PaperResearchGapIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperResearchGapIsRequired);
+                RuleFor(x => x.Dto.GapType)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.PaperGapTypeIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperGapTypeIsRequired);
+                RuleFor(x => x.Dto.MainContribution)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.PaperMainContributionIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperMainContributionIsRequired);
+                RuleFor(x => x.Dto.ResearchAim)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.PaperResearchAimIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.PaperResearchAimIsRequired);
+                RuleFor(x => x.Dto.ConferenceJournalId)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.JournalIdIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.JournalIdIsRequired);
                 RuleFor(x => x.Dto.ConferenceJournalName)
                     .NotEmpty()
-                    .WithMessage(MessageCode.PaperJournalIsRequired)
+                    .WithMessage(MessageCode.JournalNameIsRequired)
                     .NotNull()
-                    .WithMessage(MessageCode.PaperJournalIsRequired);
+                    .WithMessage(MessageCode.JournalNameIsRequired);
+                RuleFor(x => x.Dto.ConferenceJournalStartAt)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.JournalStartAtIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.JournalStartAtIsRequired);
+                RuleFor(x => x.Dto.ConferenceJournalEndAt)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.JournalEndAtIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.JournalEndAtIsRequired);
             });
     }
 }
@@ -60,11 +100,17 @@ public class CreatePaperCommandHandler(
         var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
                           dto.ConferenceJournalId.ToString());
+        var paperId = Guid.NewGuid();
 
         var projectIds = journal.ProjectIds ?? [];
         projectIds.Add(dto.ProjectId);
         projectIds = projectIds.Distinct().ToList();
-        journal.Update(projectIds: projectIds);
+
+        var paperIds = journal.PaperIds ?? [];
+        paperIds.Add(paperId);
+        paperIds = paperIds.Distinct().ToList();
+
+        journal.Update(projectIds: projectIds, paperIds: paperIds);
         session.Update(journal);
 
         var projectRule = SectionRuleComposer.BuildProjectRule(project);
@@ -73,7 +119,7 @@ public class CreatePaperCommandHandler(
         var paperContext = SectionRuleComposer.BuildPaperContext(dto);
 
         var entity = PaperEntity.Create(
-            id: Guid.NewGuid(),
+            id: paperId,
             title: dto.Title,
             template: dto.Template,
             context: dto.Context,
@@ -84,8 +130,10 @@ public class CreatePaperCommandHandler(
             gapType: dto.GapType,
             conferenceJournalName: dto.ConferenceJournalName,
             conferenceJournalId: dto.ConferenceJournalId,
+            conferenceJournalStartAt: dto.ConferenceJournalStartAt,
+            conferenceJournalEndAt: dto.ConferenceJournalEndAt,
             rule: DomainRules.Paper,
-            status: dto.Status ?? PaperStatus.Processing,
+            status: PaperStatus.Draft,
             createdBy: request.UserName
         );
 
