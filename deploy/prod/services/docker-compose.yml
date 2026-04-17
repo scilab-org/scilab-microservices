@@ -194,7 +194,7 @@ services:
       - SwaggerGen__OAuth2RedirectUrl=https://${KEYCLOAK_HOSTNAME}/swagger/oauth2-redirect.html
       - ApiClients__UserService__BaseUrl=http://user-service:8080
       - ApiClients__ManagementService__BaseUrl=http://management-service:8080
-      - ApiClients__AiService__BaseUrl=http://latex-service:8080
+      - ApiClients__AiService__BaseUrl=${AI_SERVICE_URL}
       - Logging__Serilog__Console__Level=${CONSOLE_LOG_LEVEL}
       - Logging__Serilog__Otlp__Endpoint=${OTLP_ENDPOINT}
       - DistributedTracing__Otlp__Endpoint=${OTLP_ENDPOINT}
@@ -204,7 +204,7 @@ services:
       - MessageBroker__Port=${RABBITMQ_PORT}
     networks:
       - scilab_network
-    
+
   lab-outbox-worker-service:
     build:
       context: ../../../
