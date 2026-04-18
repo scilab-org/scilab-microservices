@@ -9,6 +9,7 @@ public class CreatePaperBankRequest
     public string Title { get; set; } = null!;
     public string? Authors { get; set; }
     public string? Publisher { get; set; }
+    public string? Ranking { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public IFormFile? File { get; set; }

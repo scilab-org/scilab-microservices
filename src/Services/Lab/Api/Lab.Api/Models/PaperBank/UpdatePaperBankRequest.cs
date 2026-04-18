@@ -7,6 +7,7 @@ public class UpdatePaperBankRequest
     public string? Title { get; set; }
     public string? Authors { get; set; }
     public string? Publisher { get; set; }
+    public string? Ranking { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public bool? IsIngested { get; init; }

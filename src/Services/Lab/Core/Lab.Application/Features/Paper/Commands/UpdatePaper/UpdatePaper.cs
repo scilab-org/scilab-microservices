@@ -56,6 +56,8 @@ public class UpdatePaperCommandHandler(
             gapType: dto.GapType,
             conferenceJournalName: dto.ConferenceJournalName,
             conferenceJournalId: dto.ConferenceJournalId,
+            conferenceJournalStartAt: dto.ConferenceJournalStartAt,
+            conferenceJournalEndAt: dto.ConferenceJournalEndAt,
             rule: DomainRules.Paper,
             status: dto.Status ?? PaperStatus.Processing,
             lastModifiedBy: request.UserName

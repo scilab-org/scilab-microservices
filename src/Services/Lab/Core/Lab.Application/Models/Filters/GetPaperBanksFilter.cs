@@ -14,6 +14,7 @@ public record class GetPaperBanksFilter
     public string? PaperType { get; set; }
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
+    public string? Ranking { get; set; }
     public string[]? Tag { get; set; }
     public bool? IsDeleted { get; set; } = false;
 }
