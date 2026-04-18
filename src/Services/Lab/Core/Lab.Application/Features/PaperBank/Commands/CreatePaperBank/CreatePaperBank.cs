@@ -88,14 +88,14 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             PaperId = entity.Id,
             PaperName = entity.Title,
             ParsedText = entity.ParsedText ?? string.Empty,
-            ReferenceKey = GenerateReferenceKey(entity),
-            Authors = entity.Authors,
-            Publisher = entity.Publisher,
-            JournalName = entity.JournalName,
-            Volume = entity.Volume,
-            Pages = entity.Pages,
-            Doi = entity.Doi,
-            PublicationMonthYear = FormatMonthYear(entity.PublicationDate),
+            ReferenceKey = GenerateReferenceKey(entity),         
+            Authors = entity.Authors ?? string.Empty,
+            Publisher = entity.Publisher ?? string.Empty,
+            JournalName = entity.JournalName ?? string.Empty,
+            Volume = entity.Volume ?? string.Empty,
+            Pages = entity.Pages ?? string.Empty,
+            Doi = entity.Doi ?? string.Empty,
+            PublicationMonthYear = FormatMonthYear(entity.PublicationDate) ?? string.Empty,
         };
 
         var outbox = OutboxMessageEntity.Create(

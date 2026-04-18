@@ -7,26 +7,26 @@ public sealed record PaperIngestionEvent : IntegrationEvent
 
     public Guid PaperId { get; init; }
 
-    public string PaperName { get; init; } = default!;
-    
-    public string? ReferenceKey { get; init; }
+    public string PaperName { get; init; } = string.Empty;
 
-    public string? Authors { get; init; }
+    public string ReferenceKey { get; init; } = string.Empty;
 
-    public string? Publisher { get; init; }
+    public string Authors { get; init; } = string.Empty;
 
-    public string? JournalName { get; init; }
+    public string Publisher { get; init; } = string.Empty;
 
-    public string? Volume { get; init; }
+    public string JournalName { get; init; } = string.Empty;
 
-    public string? Pages { get; init; }
+    public string Volume { get; init; } = string.Empty;
 
-    public string? Doi { get; init; }
+    public string Pages { get; init; } = string.Empty;
 
-    /// <summary>Formatted as "MMMM yyyy", e.g. "May 2015". Null when publication date is unknown.</summary>
-    public string? PublicationMonthYear { get; init; }
+    public string Doi { get; init; } = string.Empty;
 
-    public string ParsedText { get; init; } = default!;
+    /// <summary>Formatted as "MMMM yyyy", e.g. "May 2015". Empty when unknown.</summary>
+    public string PublicationMonthYear { get; init; } = string.Empty;
+
+    public string ParsedText { get; init; } = string.Empty;
 
     #endregion
 }
