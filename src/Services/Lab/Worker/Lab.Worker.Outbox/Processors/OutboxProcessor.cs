@@ -114,8 +114,7 @@ internal sealed class OutboxProcessor
             logger.LogInformation("Publishing message {Id} of type {EventType} (attempt {AttemptCount}/{MaxAttempts})",
                 message.Id, message.EventType, message.AttemptCount, message.MaxAttempts);
 
-            await publish.Publish(deserializedMessage, cancellationToken);
-
+            await publish.Publish(deserializedMessage, messageType, cancellationToken);
             // Increment attempt count for successful publish
             message.IncreaseAttemptCount();
 
