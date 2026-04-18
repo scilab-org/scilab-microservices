@@ -18,7 +18,8 @@ public interface IUserServiceApi
     [Get("/users")]
     Task<HttpResponseMessage> GetUsersAsync(
         [AliasAs("pageNumber")] int pageNumber = 1,
-        [AliasAs("pageSize")] int pageSize = 1000);
+        [AliasAs("pageSize")] int pageSize = 1000,
+        [AliasAs("enabled")] bool? enabled = true);
 
     /// <summary>
     /// PUT /users/{userId} — updates user profile including group assignments in Keycloak.

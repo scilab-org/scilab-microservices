@@ -86,6 +86,12 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => x.ConferenceName != null && x.ConferenceName.Contains(conferenceName));
         }
 
+        if (!filter.Ranking.IsNullOrWhiteSpace())
+        {
+            var ranking = filter.Ranking.Trim();
+            query = query.Where(x => x.Ranking != null && x.Ranking.Contains(ranking));
+        }
+
 
         if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
         {

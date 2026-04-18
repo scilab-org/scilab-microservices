@@ -13,4 +13,6 @@ public class UpdatePaperDto
     public PaperStatus? Status { get; init; } = PaperStatus.Draft;
     public string ConferenceJournalName { get; init; } = null!;
     public Guid ConferenceJournalId { get; init; }
+    public DateTimeOffset? ConferenceJournalStartAt { get; init; }
+    public DateTimeOffset? ConferenceJournalEndAt { get; init; }
 }
