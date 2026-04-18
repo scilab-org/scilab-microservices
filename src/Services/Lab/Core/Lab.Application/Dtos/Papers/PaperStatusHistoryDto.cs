@@ -12,6 +12,9 @@ public class PaperStatusHistoryDto : ICreationAuditDto
     public string ActorUserName { get; set; } = null!;
     public string? Note { get; set; }
     public string? RevisionType { get; set; }
+    public Guid? PdfFileId { get; set; }
+    public string? PdfFileName { get; set; }
+    public string? PdfFileUrl { get; set; }
     public DateTimeOffset CreatedOnUtc { get; set; }
     public string? CreatedBy { get; set; }
 }

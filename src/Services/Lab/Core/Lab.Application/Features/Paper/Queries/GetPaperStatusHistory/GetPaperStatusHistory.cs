@@ -41,11 +41,38 @@ public class GetPaperStatusHistoryQueryHandler(IDocumentSession session, IMapper
             ? history[0].Status
             : SubmissionStatus.Draft;
 
+        var dtos = mapper.Map<List<PaperStatusHistoryDto>>(history);
+
+        // Populate PDF info for entries that reference a PDF file
+        var pdfFileIds = history
+            .Where(h => h.PdfFileId.HasValue)
+            .Select(h => h.PdfFileId!.Value)
+            .Distinct()
+            .ToList();
+
+        if (pdfFileIds.Count > 0)
+        {
+            var pdfFiles = await session.Query<PaperVersionFileEntity>()
+                .Where(p => p.Id.IsOneOf(pdfFileIds))
+                .ToListAsync(cancellationToken);
+
+            var pdfLookup = pdfFiles.ToDictionary(p => p.Id);
+
+            foreach (var dto in dtos)
+            {
+                if (dto.PdfFileId.HasValue && pdfLookup.TryGetValue(dto.PdfFileId.Value, out var pdf))
+                {
+                    dto.PdfFileName = pdf.FileName;
+                    dto.PdfFileUrl = pdf.FileUrl;
+                }
+            }
+        }
+
         return new GetPaperStatusHistoryResult
         {
             PaperId = paper.Id,
             CurrentStatus = currentStatus,
-            History = mapper.Map<List<PaperStatusHistoryDto>>(history)
+            History = dtos
         };
     }
 

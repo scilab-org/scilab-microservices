@@ -13,6 +13,7 @@ public sealed class PaperStatusHistoryEntity : Entity<Guid>
     public string ActorUserName { get; set; } = null!;
     public string? Note { get; set; }
     public string? RevisionType { get; set; }
+    public Guid? PdfFileId { get; set; }
 
     #endregion
 
@@ -24,7 +25,8 @@ public sealed class PaperStatusHistoryEntity : Entity<Guid>
         Guid actorId,
         string actorUserName,
         string? note = null,
-        string? revisionType = null)
+        string? revisionType = null,
+        Guid? pdfFileId = null)
     {
         return new PaperStatusHistoryEntity
         {
@@ -35,6 +37,7 @@ public sealed class PaperStatusHistoryEntity : Entity<Guid>
             ActorUserName = actorUserName,
             Note = note,
             RevisionType = revisionType,
+            PdfFileId = pdfFileId,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
             CreatedBy = actorUserName

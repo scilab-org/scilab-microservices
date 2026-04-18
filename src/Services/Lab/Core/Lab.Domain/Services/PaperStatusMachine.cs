@@ -6,6 +6,7 @@ namespace Lab.Domain.Services;
 /// Defines the allowed state transitions for the paper submission lifecycle.
 /// Lifecycle: draft → submitted → revision_required ↔ resubmitted → accepted → published
 /// Terminal states: published, rejected
+/// OnHold: any non-terminal status → on_hold → draft
 /// </summary>
 public static class PaperStatusMachine
 {
@@ -16,30 +17,39 @@ public static class PaperStatusMachine
         {
             [SubmissionStatus.Draft] = new HashSet<SubmissionStatus>
             {
-                SubmissionStatus.Submitted
+                SubmissionStatus.Submitted,
+                SubmissionStatus.OnHold
             },
             [SubmissionStatus.Submitted] = new HashSet<SubmissionStatus>
             {
                 SubmissionStatus.RevisionRequired,
                 SubmissionStatus.Accepted,
-                SubmissionStatus.Rejected
+                SubmissionStatus.Rejected,
+                SubmissionStatus.OnHold
             },
             [SubmissionStatus.RevisionRequired] = new HashSet<SubmissionStatus>
             {
-                SubmissionStatus.Resubmitted
+                SubmissionStatus.Resubmitted,
+                SubmissionStatus.OnHold
             },
             [SubmissionStatus.Resubmitted] = new HashSet<SubmissionStatus>
             {
                 SubmissionStatus.RevisionRequired,
                 SubmissionStatus.Accepted,
-                SubmissionStatus.Rejected
+                SubmissionStatus.Rejected,
+                SubmissionStatus.OnHold
             },
             [SubmissionStatus.Accepted] = new HashSet<SubmissionStatus>
             {
-                SubmissionStatus.Published
+                SubmissionStatus.Published,
+                SubmissionStatus.OnHold
             },
             [SubmissionStatus.Published] = new HashSet<SubmissionStatus>(),
-            [SubmissionStatus.Rejected] = new HashSet<SubmissionStatus>()
+            [SubmissionStatus.Rejected] = new HashSet<SubmissionStatus>(),
+            [SubmissionStatus.OnHold] = new HashSet<SubmissionStatus>
+            {
+                SubmissionStatus.Draft
+            }
         };
 
     /// <summary>
@@ -49,7 +59,9 @@ public static class PaperStatusMachine
         new HashSet<SubmissionStatus>
         {
             SubmissionStatus.Submitted,
-            SubmissionStatus.Resubmitted
+            SubmissionStatus.Resubmitted,
+            SubmissionStatus.OnHold,
+            SubmissionStatus.Draft
         };
 
     /// <summary>
@@ -71,6 +83,16 @@ public static class PaperStatusMachine
             SubmissionStatus.Rejected
         };
 
+    /// <summary>
+    /// Statuses that require a PDF file to be attached.
+    /// </summary>
+    private static readonly IReadOnlySet<SubmissionStatus> RequiresPdfStatuses =
+        new HashSet<SubmissionStatus>
+        {
+            SubmissionStatus.Submitted,
+            SubmissionStatus.Resubmitted
+        };
+
     #endregion
 
     #region Methods
@@ -82,6 +104,9 @@ public static class PaperStatusMachine
 
     public static bool IsTerminal(SubmissionStatus status) =>
         TerminalStatuses.Contains(status);
+
+    public static bool RequiresPdf(SubmissionStatus targetStatus) =>
+        RequiresPdfStatuses.Contains(targetStatus);
 
     /// <summary>
     /// Returns true when moving to <paramref name="targetStatus"/> requires the actor
