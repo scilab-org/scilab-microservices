@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using EventSourcing.Events.Lab;
 using Lab.Application.Dtos.PaperBanks;
@@ -9,7 +10,6 @@ using Lab.Domain.Enums;
 using Marten;
 using MediatR;
 using Microsoft.AspNetCore.OutputCaching;
-using Newtonsoft.Json;
 
 namespace Lab.Application.Features.PaperBank.Commands.CreatePaperBank;
 
@@ -101,7 +101,7 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
         var outbox = OutboxMessageEntity.Create(
             id: Guid.NewGuid(),
             eventType: message.EventType!,
-            content: JsonConvert.SerializeObject(message),
+            content: JsonSerializer.Serialize(message),
             occurredOnUtc: DateTimeOffset.UtcNow
         );
 
