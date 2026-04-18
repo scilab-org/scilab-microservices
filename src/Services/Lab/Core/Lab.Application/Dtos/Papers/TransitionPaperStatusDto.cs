@@ -8,4 +8,5 @@ public class TransitionPaperStatusDto
     public SubmissionStatus TargetStatus { get; set; }
     public string? Note { get; set; }
     public string? RevisionType { get; set; }
+    public Guid? PdfFileId { get; set; }
 }

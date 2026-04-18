@@ -64,6 +64,25 @@ public class TransitionPaperStatusCommandHandler(
                 MessageCode.InvalidStatusTransition,
                 $"{currentStatus} → {dto.TargetStatus}");
 
+        // Validate PDF requirement for Submitted / Resubmitted
+        if (PaperStatusMachine.RequiresPdf(dto.TargetStatus))
+        {
+            if (dto.PdfFileId is null || dto.PdfFileId == Guid.Empty)
+                throw new ClientValidationException(
+                    MessageCode.PdfFileIsRequired,
+                    dto.TargetStatus.ToString());
+
+            var pdfFile = await session.LoadAsync<PaperVersionFileEntity>(dto.PdfFileId.Value, cancellationToken)
+                          ?? throw new NotFoundException(MessageCode.PdfFileNotFound, dto.PdfFileId.ToString()!);
+
+            // Verify the PDF belongs to a version of this paper
+            var paperVersion = await session.LoadAsync<PaperVersionEntity>(pdfFile.PaperVersionId, cancellationToken);
+            if (paperVersion is null || paperVersion.PaperId != request.PaperId)
+                throw new ClientValidationException(
+                    MessageCode.PdfFileNotBelongToPaper,
+                    dto.PdfFileId.ToString()!);
+        }
+
         await AuthorizeAsync(request, dto, cancellationToken);
 
         var historyEntry = PaperStatusHistoryEntity.Create(
@@ -72,7 +91,8 @@ public class TransitionPaperStatusCommandHandler(
             actorId: request.UserId,
             actorUserName: request.UserName,
             note: dto.Note,
-            revisionType: dto.RevisionType);
+            revisionType: dto.RevisionType,
+            pdfFileId: PaperStatusMachine.RequiresPdf(dto.TargetStatus) ? dto.PdfFileId : null);
 
         await session.BeginTransactionAsync(cancellationToken);
         session.Store(historyEntry);
@@ -92,7 +112,6 @@ public class TransitionPaperStatusCommandHandler(
     {
         if (PaperStatusMachine.RequiresAuthorRole(dto.TargetStatus))
         {
-            // Submit and resubmit are restricted to paper authors only
             var members = await managementApiService.GetSubProjectMembersByPaperIdAsync(
                 request.PaperId, cancellationToken);
 
@@ -105,7 +124,6 @@ public class TransitionPaperStatusCommandHandler(
         }
         else if (PaperStatusMachine.RequiresEditorRole(dto.TargetStatus))
         {
-            // Revision request, accept, reject, publish require editor/manager role at project level
             var projectRole = await managementApiService.GetMyProjectRoleAsync(
                 dto.ProjectId, cancellationToken);
 

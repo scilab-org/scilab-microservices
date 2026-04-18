@@ -154,6 +154,24 @@ public sealed class MessageCode
 
     public const string JournalEndAtIsRequired  = "JOURNAL_END_AT_IS_REQUIRED";
 
+    public const string PaperVersionIdIsRequired = "PAPER_VERSION_ID_IS_REQUIRED";
+
+    public const string PaperVersionNotFound = "PAPER_VERSION_NOT_FOUND";
+
+    public const string PaperVersionNotBelongToPaper = "PAPER_VERSION_NOT_BELONG_TO_PAPER";
+
+    public const string PdfFileIsRequired = "PDF_FILE_IS_REQUIRED";
+
+    public const string PdfFileNotFound = "PDF_FILE_NOT_FOUND";
+
+    public const string PdfFileNotBelongToPaper = "PDF_FILE_NOT_BELONG_TO_PAPER";
+
+    public const string PdfFileNameIsRequired = "PDF_FILE_NAME_IS_REQUIRED";
+
+    public const string PdfFileUrlIsRequired = "PDF_FILE_URL_IS_REQUIRED";
+
+    public const string PdfFileIdIsRequired = "PDF_FILE_ID_IS_REQUIRED";
+
     #endregion
 
     #region Tag Message Codes

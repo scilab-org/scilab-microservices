@@ -8,5 +8,6 @@ public enum SubmissionStatus
     Resubmitted = 4,
     Accepted = 5,
     Published = 6,
-    Rejected = 7
+    Rejected = 7,
+    OnHold = 8
 }
