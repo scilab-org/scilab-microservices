@@ -8,7 +8,7 @@ public class PaperStatusHistoryDto : ICreationAuditDto
     public Guid Id { get; set; }
     public Guid PaperId { get; set; }
     public SubmissionStatus Status { get; set; }
-    public string ActorId { get; set; } = null!;
+    public Guid ActorId { get; set; }
     public string ActorUserName { get; set; } = null!;
     public string? Note { get; set; }
     public string? RevisionType { get; set; }

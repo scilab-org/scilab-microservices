@@ -69,7 +69,7 @@ public class TransitionPaperStatusCommandHandler(
         var historyEntry = PaperStatusHistoryEntity.Create(
             paperId: request.PaperId,
             status: dto.TargetStatus,
-            actorId: request.UserId.ToString(),
+            actorId: request.UserId,
             actorUserName: request.UserName,
             note: dto.Note,
             revisionType: dto.RevisionType);

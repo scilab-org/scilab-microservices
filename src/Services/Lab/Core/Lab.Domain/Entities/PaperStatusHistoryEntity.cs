@@ -9,7 +9,7 @@ public sealed class PaperStatusHistoryEntity : Entity<Guid>
 
     public Guid PaperId { get; set; }
     public SubmissionStatus Status { get; set; }
-    public string ActorId { get; set; } = null!;
+    public Guid ActorId { get; set; }
     public string ActorUserName { get; set; } = null!;
     public string? Note { get; set; }
     public string? RevisionType { get; set; }
@@ -21,7 +21,7 @@ public sealed class PaperStatusHistoryEntity : Entity<Guid>
     public static PaperStatusHistoryEntity Create(
         Guid paperId,
         SubmissionStatus status,
-        string actorId,
+        Guid actorId,
         string actorUserName,
         string? note = null,
         string? revisionType = null)
