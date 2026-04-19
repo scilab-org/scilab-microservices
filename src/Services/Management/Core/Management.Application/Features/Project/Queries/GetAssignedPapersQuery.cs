@@ -35,9 +35,13 @@ public sealed class GetAssignedPapersQueryHandler(
 
         var normalizedProjectName = request.Filter.ProjectName?.Trim();
         var normalizedProjectCode = request.Filter.ProjectCode?.Trim();
+        var projectIdFilter = request.Filter.ProjectId;
 
         var projectQuery = session.Query<ProjectEntity>()
             .Where(x => x.ParentProjectId == null);
+
+        if (projectIdFilter.HasValue)
+            projectQuery = projectQuery.Where(x => x.Id == projectIdFilter.Value);
 
         if (!string.IsNullOrWhiteSpace(normalizedProjectName))
             projectQuery = projectQuery.Where(x => x.Name != null && x.Name.Contains(normalizedProjectName, StringComparison.OrdinalIgnoreCase));
