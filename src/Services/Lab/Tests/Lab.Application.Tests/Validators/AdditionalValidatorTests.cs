@@ -225,15 +225,6 @@ public sealed class UpdatePaperCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveError_WhenJournalNameIsEmpty()
-    {
-        var dto = CreateDto(conferenceJournalName: string.Empty);
-        var command = new UpdatePaperCommand(dto, Guid.NewGuid(), "user");
-
-        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.ConferenceJournalName);
-    }
-
-    [Fact]
     public void ShouldNotHaveError_WhenValid()
     {
         var command = new UpdatePaperCommand(CreateValidDto(), Guid.NewGuid(), "user");
@@ -244,8 +235,7 @@ public sealed class UpdatePaperCommandValidatorTests
     private static UpdatePaperDto CreateValidDto() => CreateDto();
 
     private static UpdatePaperDto CreateDto(
-        string context = "context",
-        string conferenceJournalName = "ICSE") => new()
+        string context = "context") => new()
     {
         Context = context,
         Abstract = "abstract",
@@ -253,8 +243,6 @@ public sealed class UpdatePaperCommandValidatorTests
         GapType = "type",
         MainContribution = "contribution",
         ResearchAim = "aim",
-        ConferenceJournalName = conferenceJournalName,
-        ConferenceJournalId = Guid.NewGuid(),
         ConferenceJournalStartAt = DateTimeOffset.UtcNow,
         ConferenceJournalEndAt = DateTimeOffset.UtcNow.AddDays(1)
     };
