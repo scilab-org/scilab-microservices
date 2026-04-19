@@ -60,8 +60,8 @@ public sealed class ApiRoutes
         public const string GetSectionsByPaperId = $"{Base}/{{id}}/sections";
         public const string GetVersionsByPaperId = $"{Base}/{{id}}/versions";
         public const string GetPaperById = $"{Base}/{{id}}";
-        public const string Versions = $"{Base}/{{id}}/combine";
-        public const string GetVersionById = $"{Base}/{{paperId}}/versions/{{versionId}}/combine";
+        public const string Versions = $"{Base}/{{id}}/versions";
+        public const string GetVersionById = $"{Base}/{{paperId}}/versions/{{versionId}}";
         public const string TransitionStatus = $"{Base}/{{id}}/status-transition";
         public const string GetStatusHistory = $"{Base}/{{id}}/status-history";
         public const string GetSubmissionStatusSummary = $"{Base}/submission-status-summary";

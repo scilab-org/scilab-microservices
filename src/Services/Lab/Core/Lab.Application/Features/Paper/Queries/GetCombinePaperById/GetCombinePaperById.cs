@@ -2,7 +2,6 @@ using Lab.Application.Dtos.Papers;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 using Marten;
-using MediatR;
 
 namespace Lab.Application.Features.Paper.Queries.GetCombinePaperById;
 
@@ -35,6 +34,35 @@ public class GetCombinePaperByIdQueryHandler(IDocumentSession session) : IComman
         var version = await session.LoadAsync<PaperVersionEntity>(request.VersionId, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.PaperCombineIsNotExists, request.VersionId.ToString());
 
+        var versionFile = await session.Query<PaperVersionFileEntity>()
+            .Where(x => x.PaperVersionId == version.Id)
+            .OrderByDescending(x => x.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+
+        var versionFileIds = versionFile.Select(x => x.Id).ToHashSet();
+
+        var statusHistory = await session.Query<PaperStatusHistoryEntity>()
+            .Where(x => x.PaperId == request.PaperId && x.PdfFileId != null)
+            .OrderByDescending(x => x.CreatedOnUtc)
+            .ToListAsync(cancellationToken);
+
+        var statusByPdfFileId = statusHistory
+            .Where(x => x.PdfFileId.HasValue && versionFileIds.Contains(x.PdfFileId.Value))
+            .GroupBy(x => x.PdfFileId!.Value)
+            .ToDictionary(x => x.Key, x => x.First().Status);
+
+        var versionFileInfor = versionFile.Select(x => new VersionFileInfor
+        {
+            Id = x.Id,
+            PaperVersionId = x.PaperVersionId,
+            FileName = x.FileName,
+            FileUrl = x.FileUrl,
+            Status = statusByPdfFileId.GetValueOrDefault(x.Id),
+            Note = x.Note,
+            CreatedBy = x.CreatedBy,
+            CreatedOnUtc = x.CreatedOnUtc
+        }).ToList();
+
         return new CombineSectionsToPaperResult
         {
             Version = new PaperVersionInfo()
@@ -45,6 +73,7 @@ public class GetCombinePaperByIdQueryHandler(IDocumentSession session) : IComman
                 References = version.References,
                 Files = version.Files,
                 CreatedBy = version.CreatedBy,
+                VersionFiles = versionFileInfor,
                 CreatedOnUtc = version.CreatedOnUtc,
                 LastModifiedBy = version.LastModifiedBy,
                 LastModifiedOnUtc = version.LastModifiedOnUtc ?? version.CreatedOnUtc
