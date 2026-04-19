@@ -14,7 +14,7 @@ public interface IDomainEvent : INotification
 
     public DateTimeOffset OccurredOn => DateTime.Now;
 
-    public string EventType => GetType()?.AssemblyQualifiedName ?? string.Empty;
+    public string EventType => GetType().AssemblyQualifiedName!;
 
     #endregion
 

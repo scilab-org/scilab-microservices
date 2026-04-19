@@ -9,12 +9,13 @@ public sealed class CommentEntity: Entity<Guid>
     public Guid SectionId { get; set; }
     public string Content { get; set; } = null!;
     public string UserName { get; set; } = null!;
+    public string? ReplyToUserName { get; set; }
 
     #endregion
 
     #region Factories
 
-    public static CommentEntity Create(Guid id, Guid sectionId, string content, string userName)
+    public static CommentEntity Create(Guid id, Guid sectionId, string content, string userName, string? replyToUserName = null)
     {
         return new CommentEntity()
         {
@@ -22,6 +23,7 @@ public sealed class CommentEntity: Entity<Guid>
             SectionId = sectionId,
             Content = content,
             UserName = userName,
+            ReplyToUserName = replyToUserName,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };

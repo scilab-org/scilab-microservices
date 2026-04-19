@@ -1,0 +1,12 @@
+global using Xunit;
+global using FluentAssertions;
+global using FluentValidation.TestHelper;
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using Lab.Application.Rules;
+global using Lab.Application.Services;
+global using Lab.Application.Dtos.Papers;
+global using Lab.Domain.Entities;
+global using Lab.Domain.Enums;
+global using Lab.Domain.Models;

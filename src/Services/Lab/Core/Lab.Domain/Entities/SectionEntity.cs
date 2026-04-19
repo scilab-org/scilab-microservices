@@ -30,6 +30,7 @@ public class SectionEntity : Entity<Guid>
     public List<string>? Files { get; set; }
     public List<Guid>? References { get; set; }
     public List<string>? Packages { get; set; }
+    public List<Guid> CommentIds { get; set; } = new();
 
     #endregion
 
@@ -158,5 +159,14 @@ public class SectionEntity : Entity<Guid>
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
+    public void AddComment(Guid commentId)
+    {
+        CommentIds.Add(commentId);
+    }
+    
+    public void RemoveComment(Guid commentId)
+    {
+        CommentIds = CommentIds.Where(t => t != commentId).ToList();
+    }
     #endregion
 }
