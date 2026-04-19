@@ -27,11 +27,13 @@ public class CreatePaperVersionFileCommandValidator : AbstractValidator<CreatePa
 
         RuleFor(x => x.Dto)
             .NotNull()
-            .WithMessage(MessageCode.BadRequest);
-
-        RuleFor(x => x.Dto.UploadFile)
-            .NotNull()
-            .WithMessage(MessageCode.PdfFileIsRequired);
+            .WithMessage(MessageCode.BadRequest)
+            .DependentRules(() =>
+            {
+                RuleFor(x => x.Dto.UploadFile)
+                    .NotNull()
+                    .WithMessage(MessageCode.PdfFileIsRequired);
+            });
     }
 }
 

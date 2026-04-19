@@ -6,3 +6,4 @@ global using Common.Extensions;
 global using BuildingBlocks.Pagination;
 global using BuildingBlocks.Exceptions;
 global using Common.ValueObjects;
+global using System.Diagnostics.CodeAnalysis;
