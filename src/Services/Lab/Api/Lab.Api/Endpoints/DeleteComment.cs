@@ -2,6 +2,7 @@
 using BuildingBlocks.Exceptions;
 using Common.Constants;
 using Lab.Api.Constants;
+using Lab.Application.Dtos.Comments;
 using Lab.Application.Features.Comment.Commands.DeleteComment;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,13 +30,14 @@ public class DeleteComment: ICarterModule
     private async Task<ApiDeletedResponse<Guid>> HandleDeleteComment(
         ISender sender,
         IHttpContextAccessor httpContext,
-        [FromRoute] Guid id)
+        [FromRoute] Guid id,
+        [FromBody] DeleteCommentDto dto)
     {
         var currentUser = httpContext.GetCurrentUser();
         if (string.IsNullOrWhiteSpace(currentUser.Id))
             throw new NoPermissionException(MessageCode.AccessDenied);
         
-        var command = new DeleteCommentCommand(id, currentUser.UserName);
+        var command = new DeleteCommentCommand(id, dto.markSectionId, currentUser.UserName);
         await sender.Send(command);
 
         return new ApiDeletedResponse<Guid>(id);

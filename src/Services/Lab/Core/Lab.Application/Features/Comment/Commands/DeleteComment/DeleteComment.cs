@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Lab.Application.Features.Comment.Commands.DeleteComment;
 
-public sealed record DeleteCommentCommand(Guid Id, string UserName) : ICommand<Unit>;
+public sealed record DeleteCommentCommand(Guid Id, Guid MarkSectionId, string UserName) : ICommand<Unit>;
 
 public class DeleteCommentCommandHandler(IDocumentSession session)
     : ICommandHandler<DeleteCommentCommand, Unit>
@@ -18,6 +18,13 @@ public class DeleteCommentCommandHandler(IDocumentSession session)
             .FirstOrDefaultAsync(x => x.Id == command.Id && x.UserName == command.UserName, cancellationToken);
         if (comment is null)
             throw new NotFoundException(MessageCode.CommentNotFound);
+
+        var section = await session.LoadAsync<SectionEntity>(command.MarkSectionId, cancellationToken);
+        if (section != null)
+        {
+            section.RemoveComment(comment.Id);
+            session.Update(section);
+        }
 
         session.Delete(comment);
         await session.SaveChangesAsync(cancellationToken);

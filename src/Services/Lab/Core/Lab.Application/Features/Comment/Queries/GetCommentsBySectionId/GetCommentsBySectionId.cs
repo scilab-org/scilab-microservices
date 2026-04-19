@@ -15,12 +15,17 @@ public class GetCommentsBySectionIdQueryHandler(IDocumentSession session, IMappe
 
     public async Task<GetCommentsBySectionIdResult> Handle(GetCommentsBySectionIdQuery request, CancellationToken cancellationToken)
     {
-        var comments = await session.Query<CommentEntity>()
-            .Where(x => x.SectionId == request.SectionId)
-            .OrderByDescending(x => x.CreatedOnUtc)
-            .ToListAsync(cancellationToken);
+        var section = await session.LoadAsync<SectionEntity>(request.SectionId, cancellationToken);
+        if (section == null || section.CommentIds == null || !section.CommentIds.Any())
+        {
+            return new GetCommentsBySectionIdResult(new List<CommentDto>());
+        }
 
-        var commentDtos = mapper.Map<List<CommentDto>>(comments);
+        var comments = await session.LoadManyAsync<CommentEntity>(cancellationToken, section.CommentIds.ToArray());
+        
+        var sortedComments = comments.OrderByDescending(x => x.CreatedOnUtc).ToList();
+
+        var commentDtos = mapper.Map<List<CommentDto>>(sortedComments);
 
         return new GetCommentsBySectionIdResult(commentDtos);
     }

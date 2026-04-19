@@ -30,7 +30,15 @@ public class CreateCommentCommandHandler(IDocumentSession session) : IRequestHan
             id: Guid.NewGuid(),
             sectionId: dto.SectionId,
             content: dto.Content,
-            userName: request.UserName);
+            userName: request.UserName,
+            replyToUserName: dto.RepliedToUserName);
+            
+        var section = await session.LoadAsync<SectionEntity>(dto.MarkSectionId, cancellationToken);
+        if (section != null)
+        {
+            section.AddComment(entity.Id);
+            session.Update(section);
+        }
         
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
