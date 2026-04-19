@@ -1,5 +1,8 @@
-﻿namespace Management.Application.Dtos.Datasets;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Management.Application.Dtos.Datasets;
+
+[ExcludeFromCodeCoverage]
 public class DatasetFileDto
 {
     #region Fields, Properties and Indexers

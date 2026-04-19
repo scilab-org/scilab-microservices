@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Models.Filters;
 
+[ExcludeFromCodeCoverage]
 public sealed class GetAssignedPapersFilter
 {
     public string? Title { get; set; }

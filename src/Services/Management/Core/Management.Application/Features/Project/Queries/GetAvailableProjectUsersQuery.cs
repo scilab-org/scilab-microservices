@@ -5,6 +5,7 @@ using Marten;
 
 namespace Management.Application.Features.Project.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetAvailableProjectUsersQuery(
     Guid ProjectId,
     string AdminGroupName,
@@ -20,6 +21,7 @@ public class GetGetAvailableProjectUsersValidator : AbstractValidator<GetAvailab
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class GetProjectAvailableUsersQueryHandler(
     IDocumentSession session,
     IUserApiService userApiService)

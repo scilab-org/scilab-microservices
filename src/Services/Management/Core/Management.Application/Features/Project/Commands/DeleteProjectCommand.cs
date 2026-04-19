@@ -20,6 +20,7 @@ public class DeleteProjectCommandValidator : AbstractValidator<DeleteProjectComm
     #endregion
 }
 
+[ExcludeFromCodeCoverage]
 public class DeleteProjectCommandHandler(IDocumentSession session) : ICommandHandler<DeleteProjectCommand, Unit>
 {
     #region Implementations

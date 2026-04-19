@@ -3,8 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Infrastructure.ApiClients.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ApiClientExtension
 {
     #region Methods

@@ -15,6 +15,7 @@ public class DeleteProjectConferenceJournalByJournalIdCommandValidator : Abstrac
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class DeleteProjectConferenceJournalByJournalIdCommandHandler(IDocumentSession session)
     : ICommandHandler<DeleteProjectConferenceJournalByJournalIdCommand, List<Guid>>
 {

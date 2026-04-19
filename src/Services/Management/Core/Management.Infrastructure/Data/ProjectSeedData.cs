@@ -1,8 +1,11 @@
 ﻿using Management.Domain.Entities;
 using Management.Domain.Enums;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Infrastructure.Data;
 
+[ExcludeFromCodeCoverage]
 public static class ProjectSeedData
 {
     #region Constants

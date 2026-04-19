@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Dtos.Papers;
 
+[ExcludeFromCodeCoverage]
 public sealed class LabPaperContributorDto
 {
     public Guid Id { get; set; }

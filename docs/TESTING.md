@@ -544,7 +544,7 @@ dotnet test ... --filter "FullyQualifiedName=User.Infrastructure.Tests.Services.
 ### Collect code coverage
 
 ```bash
-dotnet test src/Services/User/Tests/User.Application.Tests/User.Application.Tests.csproj \
+dotnet test \
   --collect:"XPlat Code Coverage" \
   --results-directory ./coverage-results
 ```
@@ -566,7 +566,7 @@ reportgenerator \
   -reports:"coverage-results/**/coverage.cobertura.xml" \
   -targetdir:"coverage-results/html" \
   -reporttypes:Html \
-  -assemblyfilters:"+User.Application;+User.Domain;+User.Infrastructure"
+  -assemblyfilters:"+User.*,+Management.*,+Lab.*"
 
 open coverage-results/html/index.html
 ```

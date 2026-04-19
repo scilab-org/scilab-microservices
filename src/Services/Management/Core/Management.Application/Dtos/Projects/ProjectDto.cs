@@ -1,7 +1,10 @@
 ﻿using Management.Application.Dtos.Abstractions;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Dtos.Projects;
 
+[ExcludeFromCodeCoverage]
 public class ProjectDto :  ProjectInfoDto, IAuditableDto
 {
     public DateTimeOffset CreatedOnUtc { get; set; }

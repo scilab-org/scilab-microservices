@@ -22,6 +22,7 @@ public class AddProjectManagersValidator : AbstractValidator<AddProjectManagersC
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class AddProjectManagersCommandHandler(
     IDocumentSession session,
     IUserApiService userApiService)

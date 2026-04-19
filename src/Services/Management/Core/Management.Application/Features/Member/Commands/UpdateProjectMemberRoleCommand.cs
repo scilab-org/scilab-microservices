@@ -25,6 +25,7 @@ public class UpdateProjectMemberRoleValidator : AbstractValidator<UpdateProjectM
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class UpdateProjectMemberRoleCommandHandler(IDocumentSession session)
     : ICommandHandler<UpdateProjectMemberRoleCommand, Guid>
 {

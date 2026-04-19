@@ -7,6 +7,7 @@ namespace Management.Application.Features.Project.Commands;
 
 public sealed record DeleteSubProjectCommand(Guid SubProjectId, Guid UserId, string UserName) : ICommand<Unit>;
 
+[ExcludeFromCodeCoverage]
 public class DeleteSubProjectCommandHandler(
     IDocumentSession session,
     ILabApiService labApiService) : ICommandHandler<DeleteSubProjectCommand, Unit>

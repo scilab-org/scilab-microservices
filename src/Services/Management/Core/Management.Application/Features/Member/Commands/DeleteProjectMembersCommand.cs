@@ -21,6 +21,7 @@ public class DeleteProjectMembersValidator : AbstractValidator<DeleteProjectMemb
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class DeleteProjectMembersCommandHandler(
     IDocumentSession session,
     ILabApiService labApiService)

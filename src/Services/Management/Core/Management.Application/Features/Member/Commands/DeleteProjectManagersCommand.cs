@@ -22,6 +22,7 @@ public class DeleteProjectManagersValidator : AbstractValidator<DeleteProjectMan
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class DeleteProjectManagersCommandHandler(
     IDocumentSession session)
     : ICommandHandler<DeleteProjectManagersCommand, List<Guid>>

@@ -1,7 +1,10 @@
 ﻿using Management.Domain.Enums;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Dtos.Datasets;
 
+[ExcludeFromCodeCoverage]
 public class UpdateDatasetDto
 {
     #region Fields, Properties and Indexers

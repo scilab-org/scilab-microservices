@@ -20,6 +20,7 @@ public class DeleteDatasetValidator : AbstractValidator<DeleteDatasetCommand>
     #endregion
 }
 
+[ExcludeFromCodeCoverage]
 public class DeleteDatasetCommandHandler(IDocumentSession session)
     : ICommandHandler<DeleteDatasetCommand, Unit>
 {

@@ -1,0 +1,9 @@
+global using Xunit;
+global using Moq;
+global using FluentAssertions;
+global using Microsoft.Extensions.Logging;
+global using Management.Domain.Entities;
+global using Marten;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using System.Collections.Generic;

@@ -1,8 +1,11 @@
-﻿namespace Management.Application.Dtos.Papers;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Management.Application.Dtos.Papers;
 
 /// <summary>
 /// Minimal representation of a Lab section returned from the Lab service.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class LabSectionDto
 {
     public Guid Id { get; set; }

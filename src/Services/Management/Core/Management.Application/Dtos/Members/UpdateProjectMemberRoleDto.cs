@@ -1,5 +1,8 @@
-﻿namespace Management.Application.Dtos.Members;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Management.Application.Dtos.Members;
+
+[ExcludeFromCodeCoverage]
 public sealed class UpdateProjectMemberRoleDto
 {
     public Guid MemberId { get; set; }

@@ -8,8 +8,11 @@ using Polly;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Infrastructure.Data;
 
+[ExcludeFromCodeCoverage]
 public sealed class InitialData : IInitialData
 {
     #region Fields, Properties and Indexers

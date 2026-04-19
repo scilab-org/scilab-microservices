@@ -6,6 +6,7 @@ using Marten;
 
 namespace Management.Application.Features.Project.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetSubProjectsQuery(
     Guid ProjectId,
     PaginationRequest Paging,
@@ -21,6 +22,7 @@ public class GetSubProjectsValidator : AbstractValidator<GetSubProjectsQuery>
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class GetSubProjectsQueryHandler(
     IDocumentSession session,
     ILabApiService labApiService)

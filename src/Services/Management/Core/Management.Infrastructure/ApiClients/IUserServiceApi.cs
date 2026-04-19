@@ -48,6 +48,7 @@ public interface IUserServiceApi
 /// <summary>
 /// Multipart update payload for User service.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class UpdateUserGroupRequest
 {
     public string? FirstName { get; set; }

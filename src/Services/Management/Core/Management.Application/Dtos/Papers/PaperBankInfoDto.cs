@@ -1,5 +1,8 @@
-﻿namespace Management.Application.Dtos.Papers;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Management.Application.Dtos.Papers;
+
+[ExcludeFromCodeCoverage]
 public class PaperBankInfoDto
 {
     #region Fields, Properties and Indexers

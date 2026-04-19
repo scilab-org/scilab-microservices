@@ -22,6 +22,7 @@ public sealed class GetSubProjectMembersByPaperIdQueryValidator : AbstractValida
     }
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class GetSubProjectMembersByPaperIdQueryHandler(
     IDocumentSession session,
     IUserApiService userApiService)

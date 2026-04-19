@@ -1,5 +1,8 @@
 using Management.Application.Dtos.Members;
+using System.Diagnostics.CodeAnalysis;
 namespace Management.Application.Models.Results;
+
+[ExcludeFromCodeCoverage]
 public sealed class GetAvailableProjectUsersResult
 {
     #region Fields, Properties and Indexers

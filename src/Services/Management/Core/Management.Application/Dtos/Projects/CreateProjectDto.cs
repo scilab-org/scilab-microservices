@@ -1,7 +1,10 @@
 ﻿using Management.Domain.Enums;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Dtos.Projects;
 
+[ExcludeFromCodeCoverage]
 public class CreateProjectDto
 {
     #region Fields, Properties and Indexers

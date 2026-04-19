@@ -1,10 +1,13 @@
-﻿namespace Management.Application.Dtos.Papers;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Management.Application.Dtos.Papers;
 
 /// <summary>
 /// Full paper DTO — mirrors Lab.Application.Dtos.Papers.PaperDto (GET /papers/{id}).
 /// Contains Paper-entity-specific fields (Template, ParsedText) in addition to the
 /// shared fields present on PaperBankInfoDto.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class PaperInfoDto : PaperBankInfoDto
 {
     #region Fields, Properties and Indexers

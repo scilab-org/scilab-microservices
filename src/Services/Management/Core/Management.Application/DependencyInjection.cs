@@ -8,8 +8,11 @@ using Microsoft.FeatureManagement;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     #region Methods

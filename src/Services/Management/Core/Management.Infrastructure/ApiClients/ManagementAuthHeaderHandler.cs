@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using System.Net.Http.Headers;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Infrastructure.ApiClients;
 
+[ExcludeFromCodeCoverage]
 public sealed class ManagementAuthHeaderHandler(IHttpContextAccessor httpContextAccessor) : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

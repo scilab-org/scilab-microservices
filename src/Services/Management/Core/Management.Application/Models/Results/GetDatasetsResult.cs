@@ -1,7 +1,10 @@
 ﻿using Management.Application.Dtos.Datasets;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Models.Results;
 
+[ExcludeFromCodeCoverage]
 public sealed class GetDatasetsResult
 {
     #region Fields, Properties and Indexers

@@ -21,6 +21,7 @@ public sealed class GetProjectsByUserIdValidator : AbstractValidator<GetProjects
     }
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class GetProjectsByUserIdQueryHandler(IDocumentSession session, IMapper mapper)
     : IQueryHandler<GetProjectsByUserIdQuery, GetProjectsResult>
 {

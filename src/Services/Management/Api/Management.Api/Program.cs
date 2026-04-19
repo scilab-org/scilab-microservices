@@ -1,5 +1,6 @@
 #region using
 
+using System.Diagnostics.CodeAnalysis;
 using Management.Api;
 using Management.Application;
 using Management.Infrastructure;
@@ -21,3 +22,6 @@ app.UseApi();
 app.UseInfrastructure();
 
 app.Run();
+
+[ExcludeFromCodeCoverage]
+public partial class Program { }

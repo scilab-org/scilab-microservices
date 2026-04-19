@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Dtos.Datasets;
 
+[ExcludeFromCodeCoverage]
 public class CreateDatasetDto
 {
     #region Fields, Properties and Indexers

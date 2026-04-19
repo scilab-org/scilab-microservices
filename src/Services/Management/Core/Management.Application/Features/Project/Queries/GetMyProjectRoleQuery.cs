@@ -19,6 +19,7 @@ public sealed class GetMyProjectRoleQueryValidator : AbstractValidator<GetMyProj
     }
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class GetMyProjectRoleQueryHandler(
     IDocumentSession session,
     IRedisService redisService) : IQueryHandler<GetMyProjectRoleQuery, string>

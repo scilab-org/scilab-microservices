@@ -7,12 +7,14 @@ using Marten;
 
 namespace Management.Application.Features.Member.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetAvailableSubProjectMembersQuery(
     Guid SubProjectId,
     GetAvailableSubProjectMembersFilter Filter,
     PaginationRequest Paging) : IQuery<GetProjectMembersResult>;
 
 
+[ExcludeFromCodeCoverage]
 public class GetAvailableSubProjectMembersQueryHandler(
     IDocumentSession session,
     IUserApiService userApiService)

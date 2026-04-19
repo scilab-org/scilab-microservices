@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using Management.Application.Dtos.Papers;
 using Management.Application.Services;
@@ -18,6 +19,7 @@ file enum PaperStatus
 
 // Internal shapes matching Lab service JSON response
 // Internal deserialization shapes — LabPaperItem (bank/list) and LabPaperFull (single paper with Template + ParsedText)
+[ExcludeFromCodeCoverage]
 file sealed class LabPaperItem
 {
     public Guid Id { get; set; }
@@ -42,28 +44,33 @@ file sealed class LabPaperItem
 }
 
 // GET /papers/sample  =>  { "result": { "items": [...], "paging": {...} } }
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPapersResult
 {
     public List<LabPaperItem> Items { get; set; } = new();
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPapersResponse
 {
     public LabGetPapersResult? Result { get; set; }
 }
 
 // GET /paper-bank  =>  { "result": { "items": [...], "paging": { "totalCount": ... } } }
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperBanksPaging
 {
     public long TotalCount { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperBanksResult
 {
     public List<LabPaperItem> Items { get; set; } = new();
     public LabGetPaperBanksPaging? Paging { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperBanksResponse
 {
     public LabGetPaperBanksResult? Result { get; set; }
@@ -71,6 +78,7 @@ file sealed class LabGetPaperBanksResponse
 
 // GET /papers/{id}  =>  { "result": { "paper": { ...PaperDto... } } }
 // PaperDto adds Template + ParsedText over PaperBankInfoDto
+[ExcludeFromCodeCoverage]
 file sealed class LabPaperFull
 {
     public Guid Id { get; set; }
@@ -98,28 +106,33 @@ file sealed class LabPaperFull
     public string? CreatedBy { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperByIdResult
 {
     public LabPaperFull? Paper { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperByIdResponse
 {
     public LabGetPaperByIdResult? Result { get; set; }
 }
 
 // GET /paper-bank/{id}  =>  { "result": { "paperBank": { ... } } }
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperBankByIdResult
 {
     public LabPaperItem? PaperBank { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperBankByIdResponse
 {
     public LabGetPaperBankByIdResult? Result { get; set; }
 }
 
 // GET /papers/{id}/sections  =>  { "result": { "items": [...] } }
+[ExcludeFromCodeCoverage]
 file sealed class LabSectionItem
 {
     public Guid Id { get; set; }
@@ -130,16 +143,19 @@ file sealed class LabSectionItem
     public string? SectionRole { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetSectionsResult
 {
     public List<LabSectionItem>? Items { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetSectionsResponse
 {
     public LabGetSectionsResult? Result { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabPaperContributorItem
 {
     public Guid Id { get; set; }
@@ -151,16 +167,19 @@ file sealed class LabPaperContributorItem
     public Guid UserId { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperContributorsResult
 {
     public List<LabPaperContributorItem> Items { get; set; } = new();
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperContributorsResponse
 {
     public LabGetPaperContributorsResult? Result { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class AssignedPapersPagedResult
 {
     public List<PaperInfoDto>? Items { get; set; }
@@ -730,17 +749,20 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
 }
 
 // POST /papers/submission-status-summary response shape
+[ExcludeFromCodeCoverage]
 file sealed class LabSubmissionStatusSummaryItemRaw
 {
     public int Status { get; set; }
     public int Count { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class LabSubmissionStatusSummaryResponse
 {
     public List<LabSubmissionStatusSummaryItemRaw> Items { get; set; } = [];
 }
 
+[ExcludeFromCodeCoverage]
 file static class LabPaperItemMapper
 {
     internal static PaperBankInfoDto MapToDto(this LabPaperItem p) => new()

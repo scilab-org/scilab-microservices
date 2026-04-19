@@ -10,10 +10,12 @@ using MediatR;
 
 namespace Management.Application.Features.Project.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetProjectsQuery(
     GetProjectsFilter Filter,
     PaginationRequest Paging) : IQuery<GetProjectsResult>;
 
+[ExcludeFromCodeCoverage]
 public sealed class GetProjectsQueryHandler(IDocumentSession session, IMapper mapper)
     : IQueryHandler<GetProjectsQuery, GetProjectsResult>
 {

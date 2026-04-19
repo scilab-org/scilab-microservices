@@ -1,0 +1,165 @@
+Summary
+  Generated on: 19/4/2026 - 19:23:50
+  Coverage date: 19/4/2026 - 19:23:39 - 19/4/2026 - 19:23:50
+  Parser: MultiReport (4x Cobertura)
+  Assemblies: 4
+  Classes: 137
+  Files: 98
+  Line coverage: 99.7%
+  Covered lines: 1968
+  Uncovered lines: 4
+  Coverable lines: 1972
+  Total lines: 6369
+  Branch coverage: 80.4% (341 of 424)
+  Covered branches: 341
+  Total branches: 424
+  Method coverage: 100% (292 of 292)
+  Full method coverage: 98.9% (289 of 292)
+  Covered methods: 292
+  Fully covered methods: 289
+  Total methods: 292
+
+Management.Api                                                                                                  100%
+  Management.Api.Endpoints.AddProjectManagers                                                                   100%
+  Management.Api.Endpoints.AddProjectMembers                                                                    100%
+  Management.Api.Endpoints.AddSubProjectMembers                                                                 100%
+  Management.Api.Endpoints.CreateDataset                                                                        100%
+  Management.Api.Endpoints.CreateProject                                                                        100%
+  Management.Api.Endpoints.CreateProjectConferenceJournals                                                      100%
+  Management.Api.Endpoints.CreateProjectPaper                                                                   100%
+  Management.Api.Endpoints.CreateSubProject                                                                     100%
+  Management.Api.Endpoints.DeleteDataset                                                                        100%
+  Management.Api.Endpoints.DeleteProject                                                                        100%
+  Management.Api.Endpoints.DeleteProjectConferenceJournalByJournalId                                            100%
+  Management.Api.Endpoints.DeleteProjectConferenceJournals                                                      100%
+  Management.Api.Endpoints.DeleteProjectManagers                                                                100%
+  Management.Api.Endpoints.DeleteProjectMembers                                                                 100%
+  Management.Api.Endpoints.DeleteProjectPaperByBankId                                                           100%
+  Management.Api.Endpoints.DeleteProjectPapers                                                                  100%
+  Management.Api.Endpoints.DeleteSubProjectMember                                                               100%
+  Management.Api.Endpoints.DeleteSubProjectPaper                                                                100%
+  Management.Api.Endpoints.GetAssignedPaper                                                                     100%
+  Management.Api.Endpoints.GetAvailableProjectPapers                                                            100%
+  Management.Api.Endpoints.GetAvailableProjectUsers                                                             100%
+  Management.Api.Endpoints.GetAvailableSubProjectMembers                                                        100%
+  Management.Api.Endpoints.GetDatasets                                                                          100%
+  Management.Api.Endpoints.GetMemberById                                                                        100%
+  Management.Api.Endpoints.GetMemberByPaperId                                                                   100%
+  Management.Api.Endpoints.GetMyProjectRole                                                                     100%
+  Management.Api.Endpoints.GetMyProjects                                                                        100%
+  Management.Api.Endpoints.GetProjectById                                                                       100%
+  Management.Api.Endpoints.GetProjectMembers                                                                    100%
+  Management.Api.Endpoints.GetProjectPapers                                                                     100%
+  Management.Api.Endpoints.GetProjects                                                                          100%
+  Management.Api.Endpoints.GetProjectsByUserId                                                                  100%
+  Management.Api.Endpoints.GetProjectSubmissionStatusSummary                                                    100%
+  Management.Api.Endpoints.GetSubProjectMembers                                                                 100%
+  Management.Api.Endpoints.GetSubProjectMembersByPaperId                                                        100%
+  Management.Api.Endpoints.GetSubProjects                                                                       100%
+  Management.Api.Endpoints.InitializeData                                                                       100%
+  Management.Api.Endpoints.UpdateDataset                                                                        100%
+  Management.Api.Endpoints.UpdateProject                                                                        100%
+  Management.Api.Endpoints.UpdateProjectMemberRole                                                              100%
+  Management.Api.Mapping.ManagementApiMappingProfile                                                            100%
+  Management.Api.Models.CreateDatasetRequest                                                                    100%
+  Management.Api.Models.UpdateDatasetRequest                                                                    100%
+
+Management.Application                                                                                          100%
+  Management.Application.Dtos.Members.ProjectMemberEntry                                                        100%
+  Management.Application.Exceptions.ApplicationException                                                        100%
+  Management.Application.Features.Dataset.Commands.CreateDatasetCommand                                         100%
+  Management.Application.Features.Dataset.Commands.CreateDatasetCommandHandler                                  100%
+  Management.Application.Features.Dataset.Commands.CreateDatasetCommandValidator                                100%
+  Management.Application.Features.Dataset.Commands.DeleteDatasetCommand                                         100%
+  Management.Application.Features.Dataset.Commands.DeleteDatasetValidator                                       100%
+  Management.Application.Features.Dataset.Commands.UpdateDatasetCommand                                         100%
+  Management.Application.Features.Dataset.Commands.UpdateDatasetCommandHandler                                  100%
+  Management.Application.Features.Dataset.Commands.UpdateDatasetCommandValidator                                100%
+  Management.Application.Features.Dataset.Queries.GetDatasetsQuery                                              100%
+  Management.Application.Features.Member.Commands.AddProjectManagersCommand                                     100%
+  Management.Application.Features.Member.Commands.AddProjectManagersValidator                                   100%
+  Management.Application.Features.Member.Commands.AddProjectMembersCommand                                      100%
+  Management.Application.Features.Member.Commands.AddProjectMembersValidator                                    100%
+  Management.Application.Features.Member.Commands.AddSubProjectMembersCommand                                   100%
+  Management.Application.Features.Member.Commands.AddSubProjectMembersValidator                                 100%
+  Management.Application.Features.Member.Commands.DeleteProjectManagersCommand                                  100%
+  Management.Application.Features.Member.Commands.DeleteProjectManagersValidator                                100%
+  Management.Application.Features.Member.Commands.DeleteProjectMembersCommand                                   100%
+  Management.Application.Features.Member.Commands.DeleteProjectMembersValidator                                 100%
+  Management.Application.Features.Member.Commands.DeleteSubProjectMembersCommand                                100%
+  Management.Application.Features.Member.Commands.DeleteSubProjectMembersValidator                              100%
+  Management.Application.Features.Member.Commands.UpdateProjectMemberRoleCommand                                100%
+  Management.Application.Features.Member.Commands.UpdateProjectMemberRoleValidator                              100%
+  Management.Application.Features.Member.Queries.GetMemberByIdQuery                                             100%
+  Management.Application.Features.Member.Queries.GetMemberByIdQueryHandler                                      100%
+  Management.Application.Features.Member.Queries.GetMemberByPaperIdQuery                                        100%
+  Management.Application.Features.Member.Queries.GetMemberByPaperIdQueryValidator                               100%
+  Management.Application.Features.Member.Queries.GetProjectMembersValidator                                     100%
+  Management.Application.Features.Member.Queries.GetSubProjectMembersByPaperIdQuery                             100%
+  Management.Application.Features.Member.Queries.GetSubProjectMembersByPaperIdQueryValidator                    100%
+  Management.Application.Features.Member.Queries.GetSubProjectMembersValidator                                  100%
+  Management.Application.Features.Project.Commands.CreateProjectCommand                                         100%
+  Management.Application.Features.Project.Commands.CreateProjectCommandValidator                                100%
+  Management.Application.Features.Project.Commands.CreateProjectConferenceJournalCommand                        100%
+  Management.Application.Features.Project.Commands.CreateProjectConferenceJournalCommandHandler                 100%
+  Management.Application.Features.Project.Commands.CreateProjectConferenceJournalValidator                      100%
+  Management.Application.Features.Project.Commands.CreateProjectPaperCommand                                    100%
+  Management.Application.Features.Project.Commands.CreateProjectPaperCommandHandler                             100%
+  Management.Application.Features.Project.Commands.CreateProjectPaperValidator                                  100%
+  Management.Application.Features.Project.Commands.CreateSubProjectCommand                                      100%
+  Management.Application.Features.Project.Commands.CreateSubProjectCommandHandler                               100%
+  Management.Application.Features.Project.Commands.CreateSubProjectValidator                                    100%
+  Management.Application.Features.Project.Commands.DeleteProjectCommand                                         100%
+  Management.Application.Features.Project.Commands.DeleteProjectCommandValidator                                100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalByJournalIdCommand             100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalByJournalIdCommandValidator    100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalsCommand                       100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalsCommandHandler                100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalsValidator                     100%
+  Management.Application.Features.Project.Commands.DeleteProjectPaperByBankIdCommand                            100%
+  Management.Application.Features.Project.Commands.DeleteProjectPaperByBankIdCommandValidator                   100%
+  Management.Application.Features.Project.Commands.DeleteProjectPapersCommand                                   100%
+  Management.Application.Features.Project.Commands.DeleteProjectPapersCommandHandler                            100%
+  Management.Application.Features.Project.Commands.DeleteProjectPapersValidator                                 100%
+  Management.Application.Features.Project.Commands.DeleteSubProjectCommand                                      100%
+  Management.Application.Features.Project.Commands.UpdateProjectCommand                                         100%
+  Management.Application.Features.Project.Commands.UpdateProjectCommandValidator                                100%
+  Management.Application.Features.Project.Queries.GetAssignedPapersValidator                                    100%
+  Management.Application.Features.Project.Queries.GetAvailablePapersQuery                                       100%
+  Management.Application.Features.Project.Queries.GetAvailablePapersQueryHandler                                100%
+  Management.Application.Features.Project.Queries.GetAvailablePapersValidator                                   100%
+  Management.Application.Features.Project.Queries.GetGetAvailableProjectUsersValidator                          100%
+  Management.Application.Features.Project.Queries.GetMyProjectRoleQuery                                         100%
+  Management.Application.Features.Project.Queries.GetMyProjectRoleQueryValidator                                100%
+  Management.Application.Features.Project.Queries.GetMyProjectsValidator                                        100%
+  Management.Application.Features.Project.Queries.GetProjectByIdQuery                                           100%
+  Management.Application.Features.Project.Queries.GetProjectPapersQuery                                         100%
+  Management.Application.Features.Project.Queries.GetProjectPapersQueryHandler                                  100%
+  Management.Application.Features.Project.Queries.GetProjectPapersValidator                                     100%
+  Management.Application.Features.Project.Queries.GetProjectsByUserIdQuery                                      100%
+  Management.Application.Features.Project.Queries.GetProjectsByUserIdValidator                                  100%
+  Management.Application.Features.Project.Queries.GetProjectSubmissionStatusSummaryQuery                        100%
+  Management.Application.Features.Project.Queries.GetSubProjectsValidator                                       100%
+  Management.Application.Features.System.InitialDataCommand                                                     100%
+  Management.Application.Features.System.InitialDataCommandHandler                                              100%
+
+Management.Domain                                                                                               100%
+  Management.Domain.Abstractions.Aggregate<T>                                                                   100%
+  Management.Domain.Abstractions.EntityId<T>                                                                    100%
+  Management.Domain.Abstractions.IDomainEvent                                                                   100%
+  Management.Domain.Entities.DatasetEntity                                                                      100%
+  Management.Domain.Entities.MemberEntity                                                                       100%
+  Management.Domain.Entities.OutboxMessageEntity                                                                100%
+  Management.Domain.Entities.ProjectEntity                                                                      100%
+  Management.Domain.Exceptions.DomainException                                                                  100%
+
+Management.Infrastructure                                                                                      99.3%
+  Management.Infrastructure.ApiClients.CreatePaperContributorRequest                                            100%
+  Management.Infrastructure.ApiClients.LabSubmissionStatusSummaryRequest                                        100%
+  Management.Infrastructure.ApiClients.UpdateProjectRulesRequest                                                100%
+  Management.Infrastructure.ApiClients.UpdateUserGroupsRequest                                                  100%
+  Management.Infrastructure.Exceptions.InfrastructureException                                                  100%
+  Management.Infrastructure.Services.LabApiService                                                             99.7%
+  Management.Infrastructure.Services.MinIoCloudService                                                          100%
+  Management.Infrastructure.Services.RedisService                                                               100%
+  Management.Infrastructure.Services.UserApiService                                                            97.1%

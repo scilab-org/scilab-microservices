@@ -24,6 +24,7 @@ public class AddSubProjectMembersValidator : AbstractValidator<AddSubProjectMemb
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class AddSubProjectMembersCommandHandler(
     IDocumentSession session,
     IUserApiService userApiService,

@@ -1,7 +1,10 @@
 using Management.Application.Dtos.Papers;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Models.Results;
 
+[ExcludeFromCodeCoverage]
 public sealed class GetAvailablePapersResult
 {
     #region Fields, Properties and Indexers

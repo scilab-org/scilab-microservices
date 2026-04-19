@@ -1,7 +1,10 @@
 ﻿using Management.Domain.Entities;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Infrastructure.Data;
 
+[ExcludeFromCodeCoverage]
 public static class DatasetSeedData
 {
     #region Constants

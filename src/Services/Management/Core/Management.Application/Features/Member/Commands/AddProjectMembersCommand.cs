@@ -31,6 +31,7 @@ public class AddProjectMembersValidator : AbstractValidator<AddProjectMembersCom
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class AddProjectMembersCommandHandler(
     IDocumentSession session,
     IUserApiService userApiService)

@@ -11,6 +11,7 @@ namespace Management.Application.Features.Dataset.Queries;
 public sealed record GetDatasetsQuery(Guid? ProjectId, PaginationRequest Paging) : IRequest<GetDatasetsResult>;
 
 
+[ExcludeFromCodeCoverage]
 public sealed class GetDatasetsQueryHandler(IDocumentSession session, IMapper mapper)
     : IRequestHandler<GetDatasetsQuery, GetDatasetsResult>
 {

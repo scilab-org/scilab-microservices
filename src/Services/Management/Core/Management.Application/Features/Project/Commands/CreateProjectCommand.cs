@@ -34,6 +34,7 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
     #endregion
 }
 
+[ExcludeFromCodeCoverage]
 public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHandler<CreateProjectCommand, Guid>
 {
     #region Implementations

@@ -7,6 +7,7 @@ using Marten;
 
 namespace Management.Application.Features.Member.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetSubProjectMembersQuery(
     Guid SubProjectId,
     GetProjectMembersFilter Filter,
@@ -22,6 +23,7 @@ public class GetSubProjectMembersValidator : AbstractValidator<GetSubProjectMemb
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class GetSubProjectMembersQueryHandler(
     IDocumentSession session,
     IUserApiService userApiService)

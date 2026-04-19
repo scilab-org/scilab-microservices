@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Json;
 using Common.Constants;
 using Management.Application.Dtos.Members;
 using Management.Application.Services;
@@ -7,6 +8,7 @@ using Management.Infrastructure.ApiClients;
 namespace Management.Infrastructure.Services;
 
 // Internal shape matching User service response
+[ExcludeFromCodeCoverage]
 file sealed class UserServiceItem
 {
     public string Id { get; set; } = default!;
@@ -18,26 +20,31 @@ file sealed class UserServiceItem
     public List<UserServiceGroup>? Groups { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class UserServiceGroup
 {
     public string? Name { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class UserServiceResult
 {
     public List<UserServiceItem> Items { get; set; } = new();
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class UserServiceGetResponse
 {
     public UserServiceResult? Result { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class UserServiceGetByIdResult
 {
     public UserServiceItem? User { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 file sealed class UserServiceGetByIdResponse
 {
     public UserServiceGetByIdResult? Result { get; set; }

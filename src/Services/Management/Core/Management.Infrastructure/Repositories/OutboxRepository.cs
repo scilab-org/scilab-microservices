@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Management.Infrastructure.Repositories;
 
+[ExcludeFromCodeCoverage]
 public class OutboxRepository(IDocumentSession session, ILogger<OutboxRepository> logger) : IOutboxRepository
 {
     #region Implementations

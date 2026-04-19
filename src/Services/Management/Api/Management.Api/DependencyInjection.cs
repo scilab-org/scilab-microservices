@@ -11,8 +11,11 @@ using Management.Infrastructure.ApiClients;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Api;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     #region Methods

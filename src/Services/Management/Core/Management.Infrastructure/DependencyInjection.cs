@@ -12,8 +12,11 @@ using Refit;
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Infrastructure;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     #region Methods

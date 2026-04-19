@@ -1,5 +1,8 @@
-﻿namespace Management.Application.Dtos.Abstractions;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Management.Application.Dtos.Abstractions;
+
+[ExcludeFromCodeCoverage]
 public abstract class EntityDto<T> : IDtoId<T>, IAuditableDto
 {
     #region Fields, Properties and Indexers

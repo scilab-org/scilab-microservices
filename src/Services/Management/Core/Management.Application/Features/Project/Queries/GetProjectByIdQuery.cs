@@ -8,6 +8,7 @@ namespace Management.Application.Features.Project.Queries;
 
 public sealed record GetProjectByIdQuery(Guid ProjectId, Guid UserId, List<string> Groups) : IQuery<GetProjectByIdResult>;
 
+[ExcludeFromCodeCoverage]
 public sealed class GetProjectByIdQueryHandler(IDocumentSession session, IMapper mapper)
     : IQueryHandler<GetProjectByIdQuery, GetProjectByIdResult>
 {

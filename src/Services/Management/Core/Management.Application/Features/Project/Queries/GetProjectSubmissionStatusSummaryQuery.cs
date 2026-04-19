@@ -8,6 +8,7 @@ namespace Management.Application.Features.Project.Queries;
 public record GetProjectSubmissionStatusSummaryQuery(Guid ProjectId)
     : IQuery<SubmissionStatusSummaryResult>;
 
+[ExcludeFromCodeCoverage]
 public class GetProjectSubmissionStatusSummaryQueryHandler(
     IDocumentSession session,
     ILabApiService labApiService)

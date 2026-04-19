@@ -16,6 +16,7 @@ public class DeleteProjectPaperByBankIdCommandValidator : AbstractValidator<Dele
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class DeleteProjectPaperByBankIdCommandHandler(IDocumentSession session)
     : ICommandHandler<DeleteProjectPaperByBankIdCommand, List<Guid>>
 {

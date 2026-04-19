@@ -1,8 +1,11 @@
 ﻿using Management.Application.Dtos.Abstractions;
 using Management.Domain.Enums;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Dtos.Projects;
 
+[ExcludeFromCodeCoverage]
 public class ProjectInfoDto : DtoId<Guid>
 {
     #region Fields, Properties and Indexers

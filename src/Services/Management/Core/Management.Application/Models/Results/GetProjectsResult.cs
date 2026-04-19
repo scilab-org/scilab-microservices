@@ -1,7 +1,10 @@
 ﻿using Management.Application.Dtos.Projects;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Models.Results;
 
+[ExcludeFromCodeCoverage]
 public sealed class GetProjectsResult
 {
     #region Fields, Properties and Indexers

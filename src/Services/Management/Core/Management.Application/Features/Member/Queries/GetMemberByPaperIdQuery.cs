@@ -15,6 +15,7 @@ public sealed class GetMemberByPaperIdQueryValidator : AbstractValidator<GetMemb
     }
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class GetMemberByPaperIdQueryHandler(IDocumentSession session)
     : IQueryHandler<GetMemberByPaperIdQuery, ProjectMemberDto>
 {

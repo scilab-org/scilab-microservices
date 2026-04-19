@@ -1,0 +1,10 @@
+global using Xunit;
+global using FluentAssertions;
+global using System;
+global using System.Collections.Generic;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using Common.Constants;
+global using Management.Domain.Abstractions;
+global using Management.Domain.Entities;
+global using Management.Domain.Exceptions;

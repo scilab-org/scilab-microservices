@@ -39,6 +39,7 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
     #endregion
 }
 
+[ExcludeFromCodeCoverage]
 public class UpdateProjectCommandHandler(
     IDocumentSession session,
     ILabApiService labApiService) : ICommandHandler<UpdateProjectCommand, Guid>

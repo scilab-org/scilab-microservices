@@ -5,8 +5,11 @@ using Management.Application.Dtos.Projects;
 using Management.Application.Models.Results;
 using Management.Domain.Entities;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Management.Application.Mappings;
 
+[ExcludeFromCodeCoverage]
 public class ManagementMappingProfile : Profile
 {
     #region Ctors

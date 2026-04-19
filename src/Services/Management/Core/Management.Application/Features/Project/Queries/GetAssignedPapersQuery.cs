@@ -9,6 +9,7 @@ using Marten.Pagination;
 
 namespace Management.Application.Features.Project.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetAssignedPapersQuery(
     Guid UserId,
     PaginationRequest Paging,
@@ -24,6 +25,7 @@ public sealed class GetAssignedPapersValidator : AbstractValidator<GetAssignedPa
     }
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class GetAssignedPapersQueryHandler(
     IDocumentSession session,
     ILabApiService labApiService)

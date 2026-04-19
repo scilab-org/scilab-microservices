@@ -8,6 +8,7 @@ using Marten.Pagination;
 
 namespace Management.Application.Features.Project.Queries;
 
+[ExcludeFromCodeCoverage]
 public sealed record GetMyProjectsQuery(
     Guid UserId,
     PaginationRequest Paging,
@@ -23,6 +24,7 @@ public sealed class GetMyProjectsValidator : AbstractValidator<GetMyProjectsQuer
     }
 }
 
+[ExcludeFromCodeCoverage]
 public sealed class GetMyProjectsQueryHandler(IDocumentSession session, IMapper mapper)
     : IQueryHandler<GetMyProjectsQuery, GetProjectsResult>
 {
