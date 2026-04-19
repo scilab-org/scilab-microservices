@@ -23,11 +23,6 @@ public class UpdatePaperCommandValidator : AbstractValidator<UpdatePaperCommand>
                     .WithMessage(MessageCode.PaperContextIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperContextIsRequired);
-                RuleFor(x => x.Dto.ConferenceJournalName)
-                    .NotEmpty()
-                    .WithMessage(MessageCode.PaperJournalIsRequired)
-                    .NotNull()
-                    .WithMessage(MessageCode.PaperJournalIsRequired);
             });
     }
 }
@@ -54,18 +49,15 @@ public class UpdatePaperCommandHandler(
             mainContribution: dto.MainContribution,
             researchAim: dto.ResearchAim,
             gapType: dto.GapType,
-            conferenceJournalName: dto.ConferenceJournalName,
-            conferenceJournalId: dto.ConferenceJournalId,
+            rule: DomainRules.Paper,
             conferenceJournalStartAt: dto.ConferenceJournalStartAt,
             conferenceJournalEndAt: dto.ConferenceJournalEndAt,
-            rule: DomainRules.Paper,
-            status: dto.Status ?? PaperStatus.Processing,
             lastModifiedBy: request.UserName
         );
 
-        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId.Value, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
-                          dto.ConferenceJournalId.ToString());
+                          paper.ConferenceJournalId.ToString());
 
         var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal);
         var paperContext = SectionRuleComposer.BuildPaperContext(paper);
