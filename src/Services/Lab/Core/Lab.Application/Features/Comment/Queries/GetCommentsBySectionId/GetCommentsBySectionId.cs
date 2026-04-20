@@ -15,17 +15,24 @@ public class GetCommentsBySectionIdQueryHandler(IDocumentSession session, IMappe
 
     public async Task<GetCommentsBySectionIdResult> Handle(GetCommentsBySectionIdQuery request, CancellationToken cancellationToken)
     {
-        var section = await session.LoadAsync<SectionEntity>(request.SectionId, cancellationToken);
-        if (section == null || section.CommentIds == null || !section.CommentIds.Any())
+        var mainSection = await session.LoadAsync<SectionEntity>(request.SectionId, cancellationToken);
+        if (mainSection == null || mainSection.CommentIds == null || !mainSection.CommentIds.Any())
         {
             return new GetCommentsBySectionIdResult(new List<CommentDto>());
         }
 
-        var comments = await session.LoadManyAsync<CommentEntity>(cancellationToken, section.CommentIds.ToArray());
+        var comments = await session.LoadManyAsync<CommentEntity>(cancellationToken, mainSection.CommentIds.ToArray());
         
         var sortedComments = comments.OrderByDescending(x => x.CreatedOnUtc).ToList();
 
+        var sections = await session.LoadManyAsync<SectionEntity>(cancellationToken, sortedComments.Select(x => x.SectionId).Distinct().ToArray());
+
         var commentDtos = mapper.Map<List<CommentDto>>(sortedComments);
+        foreach (var commentDto in commentDtos)
+        {
+            var commentSection = sections.FirstOrDefault(x => x.Id == commentDto.SectionId);
+            commentDto.SectionContent = commentSection?.Content;
+        }
 
         return new GetCommentsBySectionIdResult(commentDtos);
     }
