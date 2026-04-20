@@ -162,7 +162,7 @@ public class CreatePaperCommandHandler(
                     paperRule: paperRule,
                     projectRule: projectRule,
                     sectionRule: sectionRule,
-                    packages: [],
+                    packages: ["\\documentclass{article}", "\\usepackage{biblatex}"],
                     sectionContext: sectionContext,
                     projectContext: projectContext,
                     paperContext: paperContext
