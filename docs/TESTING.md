@@ -566,7 +566,7 @@ reportgenerator \
   -reports:"coverage-results/**/coverage.cobertura.xml" \
   -targetdir:"coverage-results/html" \
   -reporttypes:Html \
-  -assemblyfilters:"+User.*,+Management.*,+Lab.*"
+  -assemblyfilters:"+User.*,+Management.*,+Lab.Management,+Lab.Infrastructure,+Lab.Domain"
 
 open coverage-results/html/index.html
 ```
