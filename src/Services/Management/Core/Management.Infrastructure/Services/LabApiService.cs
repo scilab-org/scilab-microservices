@@ -224,7 +224,8 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             paperType: paperType,
             journalName: journalName,
             conferenceName: conferenceName,
-            tag: tag);
+            tag: tag,
+            existingPaperIds: existingSet.Count > 0 ? existingSet.ToArray() : null);
 
         if (!response.IsSuccessStatusCode)
             return (new List<PaperBankInfoDto>(), 0);
@@ -235,7 +236,6 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         var allItems = body?.Result?.Items ?? new List<LabPaperItem>();
 
         var filtered = allItems
-            .Where(p => !existingSet.Contains(p.Id))
             .Select(p => p.MapToDto())
             .ToList();
 

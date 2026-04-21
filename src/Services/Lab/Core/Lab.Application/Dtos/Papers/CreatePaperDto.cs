@@ -18,8 +18,8 @@ public class CreatePaperDto
     public string ResearchAim { get; init; } = null!;
     public Guid ConferenceJournalId { get; init; }
     public string ConferenceJournalName { get; init; } = null!;
-    public DateTimeOffset ConferenceJournalStartAt { get; set; }
-    public DateTimeOffset ConferenceJournalEndAt { get; set; }
+    public DateTimeOffset? ConferenceJournalStartAt { get; set; }
+    public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public List<CreateSectionDto>? Sections { get; init; }
 
     #endregion

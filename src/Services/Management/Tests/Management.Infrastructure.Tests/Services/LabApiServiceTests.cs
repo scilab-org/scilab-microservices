@@ -311,7 +311,7 @@ public sealed class LabApiServiceTests
             It.IsAny<string[]?>(), It.IsAny<string?>(), It.IsAny<string?>(),
             It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<DateTimeOffset?>(),
             It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<string?>(), It.IsAny<string[]?>()))
+            It.IsAny<string?>(), It.IsAny<string[]?>(), It.IsAny<Guid[]?>()))
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.InternalServerError));
 
         var (items, count) = await _sut.GetAvailablePapersAsync(Array.Empty<Guid>());
@@ -440,7 +440,7 @@ public sealed class LabApiServiceTests
             It.IsAny<string[]?>(), It.IsAny<string?>(), It.IsAny<string?>(),
             It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<DateTimeOffset?>(),
             It.IsAny<DateTimeOffset?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<string?>(), It.IsAny<string[]?>()))
+            It.IsAny<string?>(), It.IsAny<string[]?>(), It.IsAny<Guid[]?>()))
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = JsonContent.Create(body)

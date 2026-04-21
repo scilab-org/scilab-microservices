@@ -25,8 +25,8 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
         if (!filter.Title.IsNullOrWhiteSpace())
         {
-            var title = filter.Title.Trim();
-            query = query.Where(x => x.Title.Contains(title));
+            var title = filter.Title.Trim().ToLower();
+            query = query.Where(x => x.Title != null && x.Title.ToLower().Contains(title));
         }
 
         if (filter.Author?.Any() == true)
@@ -98,21 +98,33 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => x.IsDeleted());
         }
 
+        #region Filter for endpoint GetAvailablePapers
+
+        if (filter.ExistingPaperIds?.Any() == true)
+        {
+            var ids = filter.ExistingPaperIds.ToList();
+            query = query.Where(x => !ids.Contains(x.Id));
+        }
+
         if (filter.Tag?.Any() == true)
         {
             var tagNames = NormalizeTagNames(filter.Tag);
 
-            foreach (var searchTag in tagNames)
+            if (tagNames.Count > 0)
             {
-                var local = searchTag;
+                foreach (var searchTag in tagNames)
+                {
+                    var local = searchTag;
 
-                query = query.Where(p =>
-                    p.TagNames.Count != 0 &&
-                    p.TagNames.Any(t => t.Contains(local))
-                );
+                    query = query.Where(p =>
+                        p.TagNames.Count != 0 &&
+                        p.TagNames.Any(t => t.Contains(local))
+                    );
+                }
             }
         }
-
+        #endregion
+       
         #endregion
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -136,7 +148,10 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
     {
         if (tagNames == null) return new List<string>();
 
-        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
+        return tagNames
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim().ToLowerInvariant())
+            .ToList();
     }
 
     private List<string> NormalizeAuthorKeywords(string[]? authors)

@@ -23,7 +23,7 @@ public interface ILabServiceApi
         [AliasAs("pageNumber")] int pageNumber = 1,
         [AliasAs("pageSize")] int pageSize = 1000,
         [AliasAs("title")] string? title = null,
-        [AliasAs("author")] string[]? author = null,
+        [AliasAs("author"), Query(CollectionFormat.Multi)] string[]? author = null,
         [AliasAs("publisher")] string? publisher = null,
         [AliasAs("abstract")] string? @abstract = null,
         [AliasAs("doi")] string? doi = null,
@@ -33,7 +33,8 @@ public interface ILabServiceApi
         [AliasAs("paperType")] string? paperType = null,
         [AliasAs("journalName")] string? journalName = null,
         [AliasAs("conferenceName")] string? conferenceName = null,
-        [AliasAs("tag")] string[]? tag = null);
+        [AliasAs("tag"), Query(CollectionFormat.Multi)] string[]? tag = null,
+        [AliasAs("existingPaperIds"), Query(CollectionFormat.Multi)] Guid[]? existingPaperIds = null);
 
     /// <summary>
     /// GET /papers/{id} — returns a single paper (PaperEntity) by id.
@@ -79,7 +80,7 @@ public interface ILabServiceApi
         [AliasAs("pageNumber")] int pageNumber = 1,
         [AliasAs("pageSize")] int pageSize = 1000,
         [AliasAs("title")] string? title = null,
-        [AliasAs("author")] string[]? author = null,
+        [AliasAs("author"), Query(CollectionFormat.Multi)] string[]? author = null,
         [AliasAs("publisher")] string? publisher = null,
         [AliasAs("abstract")] string? @abstract = null,
         [AliasAs("doi")] string? doi = null,
@@ -89,7 +90,7 @@ public interface ILabServiceApi
         [AliasAs("paperType")] string? paperType = null,
         [AliasAs("journalName")] string? journalName = null,
         [AliasAs("conferenceName")] string? conferenceName = null,
-        [AliasAs("tag")] string[]? tag = null);
+        [AliasAs("tag"), Query(CollectionFormat.Multi)] string[]? tag = null);
 
     /// <summary>
     /// DELETE /paper-contributors/{id} — deletes a contributor by id.

@@ -64,16 +64,6 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .WithMessage(MessageCode.JournalNameIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.JournalNameIsRequired);
-                RuleFor(x => x.Dto.ConferenceJournalStartAt)
-                    .NotEmpty()
-                    .WithMessage(MessageCode.JournalStartAtIsRequired)
-                    .NotNull()
-                    .WithMessage(MessageCode.JournalStartAtIsRequired);
-                RuleFor(x => x.Dto.ConferenceJournalEndAt)
-                    .NotEmpty()
-                    .WithMessage(MessageCode.JournalEndAtIsRequired)
-                    .NotNull()
-                    .WithMessage(MessageCode.JournalEndAtIsRequired);
             });
     }
 }
