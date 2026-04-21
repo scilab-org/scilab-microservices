@@ -98,6 +98,7 @@ public sealed class GetAssignedPapersQueryHandler(
             .ToListAsync(cancellationToken);
 
         var paperToProjectMap = new Dictionary<Guid, Guid>();
+        var paperToSubProjectMap = new Dictionary<Guid, Guid>();
         foreach (var subProject in subProjects)
         {
             if (subProject.ParentProjectId.HasValue)
@@ -105,6 +106,7 @@ public sealed class GetAssignedPapersQueryHandler(
                 foreach (var paperId in subProject.PaperIds)
                 {
                     paperToProjectMap[paperId] = subProject.ParentProjectId.Value;
+                    paperToSubProjectMap[paperId] = subProject.Id;
                 }
             }
         }
@@ -132,12 +134,13 @@ public sealed class GetAssignedPapersQueryHandler(
         var assignedItems = items.Select(item => 
         {
             var projectId = paperToProjectMap.TryGetValue(item.Id, out var pid) ? pid : Guid.Empty;
+            var subProjectId = paperToSubProjectMap.TryGetValue(item.Id, out var spid) ? spid : (Guid?)null;
             return new AssignedPaperDto
             {
                 ProjectId = projectId,
                 ProjectCode = projectId != Guid.Empty && projectIdToCodeMap.TryGetValue(projectId, out var code) ? code : null,
                 Id = item.Id,
-                SubProjectId = item.SubProjectId,
+                SubProjectId = subProjectId,
                 Title = item.Title,
                 Authors = item.Authors,
                 Abstract = item.Abstract,

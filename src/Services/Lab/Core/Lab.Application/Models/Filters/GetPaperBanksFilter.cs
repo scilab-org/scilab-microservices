@@ -16,5 +16,6 @@ public record class GetPaperBanksFilter
     public string? ConferenceName { get; set; }
     public string? Ranking { get; set; }
     public string[]? Tag { get; set; }
+    public Guid[]? ExistingPaperIds { get; set; }
     public bool? IsDeleted { get; set; } = false;
 }

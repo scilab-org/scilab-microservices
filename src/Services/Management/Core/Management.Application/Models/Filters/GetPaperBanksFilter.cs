@@ -17,4 +17,5 @@ public class GetPaperBanksFilter
     public string? JournalName { get; set; }
     public string? ConferenceName { get; set; }
     public string[]? Tag { get; set; }
+    public Guid[]? ExistingPaperIds { get; set; }
 }
