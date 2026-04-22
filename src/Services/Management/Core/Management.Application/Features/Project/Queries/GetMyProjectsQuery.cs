@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Management.Application.Dtos.Domains;
 using Management.Application.Dtos.Projects;
 using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
@@ -36,7 +37,6 @@ public sealed class GetMyProjectsQueryHandler(IDocumentSession session, IMapper 
         var paging = request.Paging;
         var filter = request.Filter;
 
-        // Get all project IDs where the user is a member
         var memberProjectIds = await session.Query<MemberEntity>()
             .Where(x => x.UserId == userId)
             .Select(x => x.ProjectId)
@@ -69,9 +69,42 @@ public sealed class GetMyProjectsQueryHandler(IDocumentSession session, IMapper 
             .OrderByDescending(x => x.CreatedOnUtc)
             .ToPagedListAsync(paging.PageNumber, paging.PageSize, cancellationToken);
 
-        var items = mapper.Map<List<ProjectDto>>(result.ToList());
+        var projects = result.ToList();
+        var items = mapper.Map<List<ProjectDto>>(projects);
+        await PopulateDomainsAsync(projects, items, cancellationToken);
 
         return new GetProjectsResult(items, totalCount, paging);
+    }
+
+    private async Task PopulateDomainsAsync(
+        List<ProjectEntity> projects,
+        List<ProjectDto> projectDtos,
+        CancellationToken cancellationToken)
+    {
+        var domainIds = projects
+            .SelectMany(x => x.DomainIds ?? [])
+            .Distinct()
+            .ToList();
+
+        if (domainIds.Count == 0) return;
+
+        var domains = await session.Query<DomainEntity>()
+            .Where(x => domainIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        var domainMap = mapper.Map<List<DomainDto>>(domains)
+            .ToDictionary(x => x.Id, x => x);
+
+        foreach (var projectDto in projectDtos)
+        {
+            var project = projects.FirstOrDefault(x => x.Id == projectDto.Id);
+            if (project == null) continue;
+
+            projectDto.Domains = project.DomainIds
+                .Where(domainMap.ContainsKey)
+                .Select(id => domainMap[id])
+                .ToList();
+        }
     }
 
     #endregion

@@ -59,7 +59,7 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
             startDate: dto.StartDate,
             endDate: dto.EndDate,
             context: dto.Context,
-            domain: dto.Domain,
+            domainIds: dto.DomainIds,
             keypoint: dto.Keypoint);
 
         session.Store(entity);

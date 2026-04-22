@@ -53,15 +53,13 @@ public class UpdateProjectCommandHandler(
         var entity = await session.LoadAsync<ProjectEntity>(command.ProjectId, cancellationToken)
             ?? throw new NotFoundException(MessageCode.ProjectIsNotExists, command.ProjectId);
         
-        // if (entity.Domain != null && (entity.PaperIds.Any() || entity.DatasetIds.Any()))
-        //     throw new NoPermissionException("Cannot change domain after adding papers or datasets.");
-        
         var dto = command.Dto;
         var nextContext = dto.Context;
-        var nextDomain = dto.Domain ?? entity.Domain;
+        var nextDomains = dto.DomainIds;
         var nextKeypoint = dto.Keypoint;
         var requiresRuleSync = !string.Equals(entity.Context, nextContext, StringComparison.Ordinal)
-                               || !string.Equals(entity.Domain, nextDomain, StringComparison.Ordinal)
+                               || entity.DomainIds.Except(nextDomains).Any()
+                               || nextDomains.Except(entity.DomainIds).Any()
                                || !string.Equals(entity.Keypoint, nextKeypoint, StringComparison.Ordinal);
         
         entity.Update(
@@ -72,7 +70,7 @@ public class UpdateProjectCommandHandler(
             startDate: dto.StartDate,
             endDate: dto.EndDate,
             context: nextContext,
-            domain: nextDomain,
+            domainIds: nextDomains,
             keypoint: dto.Keypoint);
 
         var subProject = await session.Query<ProjectEntity>()
@@ -90,7 +88,7 @@ public class UpdateProjectCommandHandler(
             await labApiService.UpdateProjectRulesAsync(
                 paperIds,
                 nextContext,
-                nextDomain,
+                string.Join(",", nextDomains),
                 nextKeypoint,
                 cancellationToken);
 

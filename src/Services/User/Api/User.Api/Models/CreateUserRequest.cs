@@ -18,6 +18,8 @@ public class CreateUserRequest
 
     public string? GroupNames { get; set; }
 
+    public string? OcrId { get; set; }
+
     public IFormFile? AvatarImage { get; set; }
 
     #endregion

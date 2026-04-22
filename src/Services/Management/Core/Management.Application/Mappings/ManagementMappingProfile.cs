@@ -6,6 +6,7 @@ using Management.Application.Models.Results;
 using Management.Domain.Entities;
 
 using System.Diagnostics.CodeAnalysis;
+using Management.Application.Dtos.Domains;
 
 namespace Management.Application.Mappings;
 
@@ -19,6 +20,7 @@ public class ManagementMappingProfile : Profile
         CreateProjectMappings();
         CreateDatasetMappings();
         CreateMemberMappings();
+        CreateDomainMappings();
     }
 
     #endregion
@@ -47,6 +49,12 @@ public class ManagementMappingProfile : Profile
         // DatasetEntity -> DatasetDto
         CreateMap<MemberEntity, MemberDto>();
         
+    }
+    
+    private void CreateDomainMappings()
+    {
+        // Domain Models -> Dtos
+        CreateMap<DomainEntity, DomainDto>();
     }
     #endregion
 }

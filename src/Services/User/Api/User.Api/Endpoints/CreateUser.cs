@@ -54,6 +54,7 @@ public sealed class CreateUser : ICarterModule
             LastName = req.LastName,
             InitialPassword = req.InitialPassword,
             TemporaryPassword = req.TemporaryPassword,
+            OcrId = req.OcrId,
             GroupNames = ["app:user"]
         };
 

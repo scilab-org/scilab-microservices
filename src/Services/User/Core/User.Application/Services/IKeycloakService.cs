@@ -21,6 +21,7 @@ public interface IKeycloakService
         bool temporaryPassword = true,
         List<string>? groupNames = null,
         string? avatarUrl = null,
+        string? ocrId = null,
         CancellationToken cancellationToken = default);
 
     Task UpdateUserAsync(
@@ -30,6 +31,7 @@ public interface IKeycloakService
         bool? enabled,
         List<string>? groupNames,
         string? avatarUrl = null,
+        string? ocrId = null,
         CancellationToken cancellationToken = default);
 
     Task UpdateUserGroupsAsync(

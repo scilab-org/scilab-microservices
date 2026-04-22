@@ -1,6 +1,9 @@
 ﻿using Management.Application.Dtos.Abstractions;
+using Management.Application.Dtos.Domains;
 using Management.Domain.Enums;
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Management.Application.Dtos.Projects;
@@ -17,7 +20,7 @@ public class ProjectInfoDto : DtoId<Guid>
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
     public string? Context { get; set; }
-    public string? Domain { get; set; }
+    public List<DomainDto> Domains { get; set; } = [];
     public string? Keypoint { get; set; }
     public List<Guid> ConferenceJournalIds { get; set; } = [];
     #endregion

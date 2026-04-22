@@ -112,4 +112,20 @@ public sealed class ApiRoutes
 
         #endregion
     }
+
+    public static class Domain
+    {
+        #region Constants
+        public const string Tags = "Domains";
+
+        private const string BaseAdmin = "/admin/domains";
+        private const string Base = "/domains";
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetDomains = $"{Base}";
+        public const string GetDomainById = $"{Base}/{{id}}";
+
+        #endregion
+    }
 }

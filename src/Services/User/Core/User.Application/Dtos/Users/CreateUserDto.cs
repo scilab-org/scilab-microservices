@@ -16,6 +16,8 @@ public sealed class CreateUserDto
 
     public bool TemporaryPassword { get; set; } = true;
 
+    public string? OcrId { get; set; }
+
     public UploadFileBytes? AvatarImage { get; set; }
 
     public List<string>? GroupNames { get; set; }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Management.Application.Dtos.Domains;
 using Management.Application.Dtos.Projects;
 using Management.Application.Models.Filters;
 using Management.Application.Models.Results;
@@ -43,7 +44,6 @@ public sealed class GetProjectsQueryHandler(IDocumentSession session, IMapper ma
         if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
             query = query.Where(x => x.IsDeleted());
         
-        
         var totalCount = await query.CountAsync(cancellationToken);
         var result = await query
             .OrderByDescending(x => x.CreatedOnUtc)
@@ -51,10 +51,42 @@ public sealed class GetProjectsQueryHandler(IDocumentSession session, IMapper ma
 
         var projects = result.ToList();
         var items = mapper.Map<List<ProjectDto>>(projects);
+        await PopulateDomainsAsync(projects, items, cancellationToken);
 
         var reponse = new GetProjectsResult(items, totalCount, paging);
 
         return reponse;
+    }
+
+    private async Task PopulateDomainsAsync(
+        List<ProjectEntity> projects,
+        List<ProjectDto> projectDtos,
+        CancellationToken cancellationToken)
+    {
+        var domainIds = projects
+            .SelectMany(x => x.DomainIds ?? [])
+            .Distinct()
+            .ToList();
+
+        if (domainIds.Count == 0) return;
+
+        var domains = await session.Query<DomainEntity>()
+            .Where(x => domainIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        var domainMap = mapper.Map<List<DomainDto>>(domains)
+            .ToDictionary(x => x.Id, x => x);
+
+        foreach (var projectDto in projectDtos)
+        {
+            var project = projects.FirstOrDefault(x => x.Id == projectDto.Id);
+            if (project == null) continue;
+
+            projectDto.Domains = project.DomainIds
+                .Where(domainMap.ContainsKey)
+                .Select(id => domainMap[id])
+                .ToList();
+        }
     }
     
     

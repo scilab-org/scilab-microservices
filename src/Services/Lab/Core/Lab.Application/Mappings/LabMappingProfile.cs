@@ -1,8 +1,11 @@
 #region using
 
 using AutoMapper;
+using Lab.Application.Dtos.AuthorRoles;
 using Lab.Application.Dtos.Comments;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.Journals;
+using Lab.Application.Dtos.PaperAuthors;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Sections;
@@ -26,6 +29,9 @@ public sealed class LabMappingProfile : Profile
         CreatePaperMappings();
         CreatePaperBankMappings();
         CreateTagMappings();
+        CreateAuthorRoleMappings();
+        CreatePaperAuthorMappings();
+        CreateGapTypeMappings();
         CreateTemplateMappings();
         CreateSectionMappings();
         CreateCommentMappings();
@@ -34,6 +40,30 @@ public sealed class LabMappingProfile : Profile
     }
 
     #endregion
+
+    private void CreateAuthorRoleMappings()
+    {
+        CreateMap<AuthorRoleEntity, AuthorRoleDto>();
+        CreateMap<AuthorRoleEntity, GetAuthorRoleByIdResult>()
+            .ForMember(dest => dest.AuthorRole, opt => opt.MapFrom(src => src));
+    }
+
+    private void CreatePaperAuthorMappings()
+    {
+        CreateMap<PaperAuthorEntity, PaperAuthorDto>()
+            .ForMember(dest => dest.AuthorRoleName, opt => opt.Ignore())
+            .ForMember(dest => dest.AuthorRoleDescription, opt => opt.Ignore());
+
+        CreateMap<PaperAuthorEntity, GetPaperAuthorByIdResult>()
+            .ForMember(dest => dest.PaperAuthor, opt => opt.MapFrom(src => src));
+    }
+
+    private void CreateGapTypeMappings()
+    {
+        CreateMap<GapTypeEntity, GapTypeDto>();
+        CreateMap<GapTypeEntity, GetGapTypeByIdResult>()
+            .ForMember(dest => dest.GapType, opt => opt.MapFrom(src => src));
+    }
 
     #region Paper Mappings
 
