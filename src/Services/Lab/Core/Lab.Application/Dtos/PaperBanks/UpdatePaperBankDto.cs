@@ -1,6 +1,4 @@
-﻿using Lab.Domain.Enums;
-
-namespace Lab.Application.Dtos.PaperBanks;
+﻿namespace Lab.Application.Dtos.PaperBanks;
 
 public class UpdatePaperBankDto
 {
@@ -13,9 +11,9 @@ public class UpdatePaperBankDto
     public string? Abstract { get; init; }
     public string? Doi { get; init; }
     public string? Url { get; init; }
-    public string? Code { get; init; }
     public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; init; }
+    public UploadFileBytes UploadBibFile { get; set; } = null!;
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; init; }
     public string? Pages { get; init; }
@@ -24,7 +22,6 @@ public class UpdatePaperBankDto
     public Guid ConferenceJournalId { get; init; }
     public string? ReferenceContent { get; init; }
     public List<string>? Keywords { get; init; }
-    public IngestStatus? IngestStatus { get; init; }
 
     #endregion
 }

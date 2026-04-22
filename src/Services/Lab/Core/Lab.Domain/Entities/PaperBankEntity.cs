@@ -16,7 +16,6 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string? FilePath { get; set; }
     public string? BibFilePath { get; set; }
     public string? Url { get; set; }
-    public string? Code { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; } = false;
     public bool? IsAutoTagged { get; set; } = false;
@@ -42,7 +41,6 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? abstractText = null,
         string? doi = null,
         string? url = null,
-        string? code = null,
         string? parsedText = null,
         bool? isIngested = null,
         bool? isAutoTagged = null,
@@ -66,7 +64,6 @@ public sealed class PaperBankEntity : Entity<Guid>
             Abstract = abstractText,
             Doi = doi,
             Url = url,
-            Code = code,
             ParsedText = parsedText ?? string.Empty,
             IsIngested = isIngested ?? false,
             IsAutoTagged = isAutoTagged ?? false,
@@ -95,7 +92,6 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? abstractText = null,
         string? doi = null,
         string? url = null,
-        string? code = null,
         bool? isIngested = null,
         bool? isAutoTagged = null,
         DateTimeOffset? publicationDate = null,
@@ -115,7 +111,6 @@ public sealed class PaperBankEntity : Entity<Guid>
         Abstract = abstractText ?? Abstract;
         Doi = doi ?? Doi;
         Url = url ?? Url;
-        Code = code ?? Code;
         IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
         PublicationDate = publicationDate ?? PublicationDate;
@@ -137,11 +132,11 @@ public sealed class PaperBankEntity : Entity<Guid>
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
-    public void UpdateFilePath(string? pdfUrl, string? bibUrl)
+    public void UpdateFilePath(string? pdfUrl = null, string? bibUrl = null)
     {
         if (string.IsNullOrWhiteSpace(pdfUrl) && string.IsNullOrWhiteSpace(bibUrl)) return;
-        FilePath = pdfUrl;
-        BibFilePath = bibUrl;
+        FilePath = pdfUrl ?? FilePath;
+        BibFilePath = bibUrl ?? BibFilePath;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

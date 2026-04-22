@@ -74,7 +74,6 @@ public class CreatePaperBankCommandHandler(
             abstractText: dto.Abstract,
             doi: dto.Doi,
             url: dto.Url,
-            code: dto.Code,
             parsedText: dto.ParsedText,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,

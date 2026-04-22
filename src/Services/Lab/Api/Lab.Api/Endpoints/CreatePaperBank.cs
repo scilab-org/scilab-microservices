@@ -57,7 +57,7 @@ public sealed class CreatePaperBank : ICarterModule
         {
             using var ms = new MemoryStream();
             await req.BibFile.CopyToAsync(ms);
-            dto.UploadPdfFile = new UploadFileBytes()
+            dto.UploadBibFile = new UploadFileBytes()
             {
                 FileName = req.BibFile.FileName,
                 ContentType = req.BibFile.ContentType,

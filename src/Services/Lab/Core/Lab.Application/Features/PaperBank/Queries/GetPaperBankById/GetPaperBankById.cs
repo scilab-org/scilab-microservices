@@ -29,7 +29,12 @@ public class GetPaperBankByIdQueryHandler(IDocumentSession session, IMapper mapp
         if (paper == null)
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken)
+            ?? throw new NotFoundException(MessageCode.JournalIsNotExists, paper.ConferenceJournalId.ToString());
+
         var response = mapper.Map<PaperBankDto>(paper);
+
+        response.ConferenceJournalName = journal.Name;
 
         return new GetPaperBankByIdResult(response);
     }

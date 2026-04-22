@@ -11,9 +11,9 @@ public class UpdatePaperBankRequest
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? Url { get; set; }
-    public string? Code { get; set; }
     public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; set; }
+    public IFormFile? BibFile { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
     public string? Pages { get; set; }

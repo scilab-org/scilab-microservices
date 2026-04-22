@@ -14,7 +14,6 @@ public class PaperBankInfoDto : DtoId<Guid>
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? Url { get; set; }
-    public string? Code { get; set; }
     public string? FilePath { get; set; }
     public string? BibFilePath { get; set; }
     public string? ParsedText { get; set; }
@@ -25,6 +24,7 @@ public class PaperBankInfoDto : DtoId<Guid>
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
     public string? ConferenceJournalName { get; set; }
     public string? ReferenceContent { get; set; }
     public List<string> Keywords { get; set; } = new();

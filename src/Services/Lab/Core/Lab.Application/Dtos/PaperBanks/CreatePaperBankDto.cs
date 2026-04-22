@@ -13,7 +13,6 @@ public class CreatePaperBankDto
     public UploadFileBytes UploadPdfFile { get; set; } = null!;
     public UploadFileBytes UploadBibFile { get; set; } = null!;
     public string? Url { get; init; }
-    public string? Code { get; init; }
     public string? ParsedText { get; init; }
     public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; init; }

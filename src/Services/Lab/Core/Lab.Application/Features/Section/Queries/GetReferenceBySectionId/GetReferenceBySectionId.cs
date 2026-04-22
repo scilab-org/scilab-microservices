@@ -150,7 +150,6 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
             Url = paperBank.Url,
-            Code = paperBank.Code,
             FilePath = paperBank.FilePath,
             BibFilePath = paperBank.BibFilePath,
             IsIngested = paperBank.IsIngested,

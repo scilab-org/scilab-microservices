@@ -1,6 +1,4 @@
-﻿using Lab.Domain.Enums;
-
-namespace Lab.Api.Models.PaperBank;
+﻿namespace Lab.Api.Models.PaperBank;
 
 public class CreatePaperBankRequest
 {
@@ -15,13 +13,11 @@ public class CreatePaperBankRequest
     public IFormFile? PdfFile { get; set; }
     public IFormFile? BibFile { get; set; }
     public string? Url { get; set; }
-    public string? Code { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
-    public string? JournalName { get; set; }
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }
