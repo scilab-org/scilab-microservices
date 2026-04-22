@@ -22,7 +22,7 @@ public class DeleteTagCommandHandler(IDocumentSession session) : IRequestHandler
 
     public async Task<Unit> Handle(DeleteTagCommand request, CancellationToken cancellationToken)
     {
-        var dataset = await session.LoadAsync<TagEntity>(request.Id, cancellationToken)
+        var dataset = await session.LoadAsync<KeywordEntity>(request.Id, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.TagIsNotExists, request.Id.ToString());
 
         session.Delete(dataset);

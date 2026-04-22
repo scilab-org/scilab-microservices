@@ -30,9 +30,16 @@ public class CreateJournalCommandValidator : AbstractValidator<CreateJournalComm
                     .NotEmpty().WithMessage(MessageCode.JournalUrlIsRequired)
                     .NotNull().WithMessage(MessageCode.JournalUrlIsRequired);
 
-                RuleFor(x => x.Dto.TemplateId)
-                    .NotEmpty().WithMessage(MessageCode.TemplateIdIsRequired)
-                    .NotNull().WithMessage(MessageCode.TemplateIdIsRequired);
+                RuleFor(x => x.Dto.ISSN)
+                    .NotEmpty().WithMessage(MessageCode.JournalIssnIsRequired)
+                    .NotNull().WithMessage(MessageCode.JournalIssnIsRequired);
+
+                RuleFor(x => x.Dto.TemplateIds)
+                    .NotNull().WithMessage(MessageCode.TemplateIdIsRequired)
+                    .Must(ids => ids is { Count: > 0 }).WithMessage(MessageCode.TemplateIdIsRequired);
+
+                RuleFor(x => x.Dto.Type)
+                    .NotNull().WithMessage(MessageCode.JournalTypeIsRequired);
 
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
@@ -63,16 +70,20 @@ public class CreateJournalCommandHandler(
         if (existingJournal != null)
             throw new ClientValidationException(MessageCode.JournalNameAlreadyExists, request.Dto.Name);
 
-        var template = await session.LoadAsync<TemplateEntity>(request.Dto.TemplateId, cancellationToken)
-                       ?? throw new NotFoundException(MessageCode.TemplateIsNotExists, request.Dto.TemplateId);
+        var templates = await session.Query<TemplateEntity>()
+            .Where(x => request.Dto.TemplateIds.Contains(x.Id))
+            .Distinct()
+            .ToListAsync(cancellationToken);
 
         var entity = ConferenceJournalEntity.Create(
             id: Guid.NewGuid(),
             name: normalizedName,
             ranking: request.Dto.Ranking,
             url: request.Dto.Url,
+            issn: request.Dto.ISSN,
             style: request.Dto.Style,
-            templateId: template.Id,
+            type: request.Dto.Type,
+            templateIds: templates.Select(x => x.Id).ToList(),
             texFile: null,
             pdfFile: null,
             createdBy: request.UserName);

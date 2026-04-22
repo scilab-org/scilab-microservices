@@ -41,14 +41,26 @@ public sealed class CreatePaperBank : ICarterModule
 
         var dto = mapper.Map<CreatePaperBankDto>(req);
 
-        if (req.File != null)
+        if (req.PdfFile != null)
         {
             using var ms = new MemoryStream();
-            await req.File.CopyToAsync(ms);
-            dto.UploadFile = new UploadFileBytes()
+            await req.PdfFile.CopyToAsync(ms);
+            dto.UploadPdfFile = new UploadFileBytes()
             {
-                FileName = req.File.FileName,
-                ContentType = req.File.ContentType,
+                FileName = req.PdfFile.FileName,
+                ContentType = req.PdfFile.ContentType,
+                Bytes = ms.ToArray()
+            };
+        }
+
+        if (req.BibFile != null)
+        {
+            using var ms = new MemoryStream();
+            await req.BibFile.CopyToAsync(ms);
+            dto.UploadPdfFile = new UploadFileBytes()
+            {
+                FileName = req.BibFile.FileName,
+                ContentType = req.BibFile.ContentType,
                 Bytes = ms.ToArray()
             };
         }

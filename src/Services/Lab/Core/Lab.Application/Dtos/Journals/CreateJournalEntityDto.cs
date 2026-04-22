@@ -1,4 +1,6 @@
-﻿namespace Lab.Application.Dtos.Journals;
+﻿using Lab.Domain.Enums;
+
+namespace Lab.Application.Dtos.Journals;
 using Lab.Domain.Models;
 
 /// <summary>
@@ -7,7 +9,9 @@ using Lab.Domain.Models;
 public class CreateJournalEntityDto
 {
     public string Name { get; set; } = null!;
-    public Guid TemplateId { get; set; }
+    public string ISSN { get; set; } = null!;
+    public List<Guid> TemplateIds { get; set; } = [];
+    public ConferenceJournalType Type { get; set; }
     public string Ranking { get; set; } = null!;
     public string Url { get; set; } = null!;
     public string Style { get; set; } = null!;

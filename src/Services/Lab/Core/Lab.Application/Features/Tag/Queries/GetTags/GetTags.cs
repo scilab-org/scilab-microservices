@@ -19,7 +19,7 @@ public class GetTagsQueryHandler(IDocumentSession session, IMapper mapper) : IQu
     {
         var filter = request.Filter;
         var paging = request.Paging;
-        var query = session.Query<TagEntity>().AsQueryable();
+        var query = session.Query<KeywordEntity>().AsQueryable();
 
         if (!filter.Name.IsNullOrWhiteSpace())
         {

@@ -36,10 +36,17 @@ public class UpdatePaperCommandVaBanklidator : AbstractValidator<UpdatePaperBank
                             .When(x => x.BankDto.PublicationDate.HasValue)
                             .WithMessage(MessageCode.PaperPublicationDateInvalid);
                     });
+
                 RuleFor(x => x.BankDto.PublicationDate)
                     .LessThanOrEqualTo(DateTimeOffset.UtcNow)
                     .When(x => x.BankDto.PublicationDate.HasValue)
                     .WithMessage(MessageCode.PaperPublicationDateInvalid);
+
+                RuleFor(x => x.BankDto.ConferenceJournalId)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.JournalIdIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.JournalIdIsRequired);
             });
     }
 }
@@ -50,14 +57,17 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
     public async Task<Guid> Handle(UpdatePaperBankCommand request, CancellationToken cancellationToken)
     {
         var dto = request.BankDto;
-        var tagNames = NomalizeTagNames(dto.TagNames);
+        var keywords = NormalizeTagNames(dto.Keywords);
 
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = await session.LoadAsync<PaperBankEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id);
 
-        await EnsureTagsExistAsync(tagNames, cancellationToken);
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+                      ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, dto.ConferenceJournalId);
+
+        await EnsureTagsExistAsync(keywords, cancellationToken);
 
         entity.Update(
             title: dto.Title,
@@ -66,17 +76,17 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
             ranking: dto.Ranking,
             abstractText: dto.Abstract,
             doi: dto.Doi,
+            url: dto.Url,
+            code: dto.Code,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
             paperType: dto.PaperType,
-            journalName: dto.JournalName,
             pages: dto.Pages,
             number: dto.Number,
             volume: dto.Volume,
-            conferenceName: dto.ConferenceName,
+            conferenceJournalId: journal.Id,
             referenceContent: dto.ReferenceContent,
-            tagNames: tagNames,
             ingestStatus: dto.IngestStatus);
 
         session.Store(entity);
@@ -87,36 +97,36 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
 
     #region Methods
 
-    private List<string> NomalizeTagNames(List<string>? tagNames)
+    private List<string> NormalizeTagNames(List<string>? keywords)
     {
-        if (tagNames == null) return new List<string>();
+        if (keywords == null) return new List<string>();
 
-        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
+        return keywords.Select(x => x.Trim().ToLowerInvariant()).ToList();
     }
 
     private async Task EnsureTagsExistAsync(
-        List<string> tagNames,
+        List<string> keywords,
         CancellationToken cancellationToken)
     {
-        if (tagNames.Count == 0) return;
+        if (keywords.Count == 0) return;
 
         var existingTags = await session
-            .Query<TagEntity>()
-            .Where(x => tagNames.Contains(x.Name))
+            .Query<KeywordEntity>()
+            .Where(x => keywords.Contains(x.Name))
             .ToListAsync(cancellationToken);
 
         var existingTagNames = existingTags
             .Select(x => x.Name)
             .ToHashSet();
 
-        var newTagNames = tagNames
+        var newTagNames = keywords
             .Where(x => !existingTagNames.Contains(x))
             .Distinct()
             .ToList();
 
         foreach (var name in newTagNames)
         {
-            var tag = TagEntity.Create(Guid.NewGuid(), name);
+            var tag = KeywordEntity.Create(Guid.NewGuid(), name);
             session.Store(tag);
         }
     }

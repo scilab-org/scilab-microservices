@@ -33,10 +33,14 @@ public static class DependencyInjection
                 .SoftDeleted();
             opts.Schema.For<PaperBankEntity>()
                 .SoftDeleted()
-                .Index(pb => pb.TagNames);
-            opts.Schema.For<TagEntity>()
+                .Index(pb => pb.Keywords);
+            opts.Schema.For<KeywordEntity>()
                 .SoftDeleted()
                 .Index(t => t.Name, idx => { idx.IsUnique = true; });
+            opts.Schema.For<PaperVersionEntity>()
+                .SoftDeleted();
+            opts.Schema.For<PaperVersionFileEntity>()
+                .SoftDeleted();
             opts.Schema.For<ConferenceJournalEntity>()
                 .SoftDeleted();
             opts.Schema.For<PaperContributorEntity>()

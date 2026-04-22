@@ -28,7 +28,7 @@ public class GetTagByIdQueryHandler(IDocumentSession session, IMapper mapper)
 
     public async Task<GetTagByIdResult> Handle(GetTagByIdQuery request, CancellationToken cancellationToken)
     {
-        var tag = await session.LoadAsync<TagEntity>(request.Id, cancellationToken);
+        var tag = await session.LoadAsync<KeywordEntity>(request.Id, cancellationToken);
 
         if (tag == null)
             throw new NotFoundException(MessageCode.TagIsNotExists, request.Id.ToString());
