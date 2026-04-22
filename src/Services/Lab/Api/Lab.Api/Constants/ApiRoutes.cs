@@ -231,4 +231,64 @@ public sealed class ApiRoutes
         public const string GetTasksByPaperId = $"{Base}/paper/{{paperId}}";
         #endregion
     }
+    public static class AuthorRole
+    {
+        #region Constants
+
+        public const string Tags = "Author Roles";
+        private const string Base = "/author-roles";
+        private const string BaseAdmin = "/admin/author-roles";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetAuthorRoles= $"{Base}";
+        public const string GetAuthorRoleById = $"{Base}/{{id}}";
+        #endregion
+    }
+
+    public static class PaperAuthor
+    {
+        #region Constants
+
+        public const string Tags = "Paper Authors";
+        private const string Base = "/paper-authors";
+        private const string BaseAdmin = "/admin/paper-authors";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
+        public const string Delete = $"{Base}/{{id}}";
+        public const string GetPaperAuthors = $"{Base}";
+        public const string GetPaperAuthorById = $"{Base}/{{id}}";
+        #endregion
+    }
+
+    public static class GapType
+    {
+        #region Constants
+
+        public const string Tags = "Gap Types";
+        private const string Base = "/gap-types";
+        private const string BaseAdmin = "/admin/gap-types";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetGapTypes = $"{Base}";
+        public const string GetGapTypeById = $"{Base}/{{id}}";
+
+        #endregion
+    }
 }

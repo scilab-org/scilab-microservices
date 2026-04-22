@@ -1,5 +1,7 @@
 ﻿using Management.Domain.Enums;
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Management.Application.Dtos.Projects;
@@ -15,7 +17,7 @@ public class CreateProjectDto
     public ProjectStatus? Status { get; set; }
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
-    public string? Domain { get; set; }
+    public List<Guid> DomainIds { get; set; } = [];
     public string? Context { get; set; }
     public string? Keypoint { get; set; }
 

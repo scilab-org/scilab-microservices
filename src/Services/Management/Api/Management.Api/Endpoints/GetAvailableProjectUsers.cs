@@ -16,8 +16,8 @@ public sealed class GetAvailableProjectUsers : ICarterModule
             .WithTags(ApiRoutes.Project.Tags)
             .WithName(nameof(GetAvailableProjectUsers))
             .Produces<ApiGetResponse<GetAvailableProjectUsersResult>>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound);
-        // .RequireAuthorization();
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
     }
 
     #endregion

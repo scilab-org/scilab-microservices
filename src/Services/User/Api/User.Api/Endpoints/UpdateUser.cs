@@ -56,7 +56,8 @@ public sealed class UpdateUser : ICarterModule
             Enabled = req.Enabled,
             GroupNames = string.IsNullOrWhiteSpace(req.GroupNames)
                 ? null
-                : req.GroupNames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+                : req.GroupNames.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+            OcrId = req.OcrId
         };
 
         if (req.AvatarImage is { Length: > 0 })

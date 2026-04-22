@@ -70,6 +70,7 @@ public sealed class CreateUserCommandHandler(
             temporaryPassword: dto.TemporaryPassword,
             groupNames: dto.GroupNames,
             avatarUrl: avatarUrl,
+            ocrId: dto.OcrId,
             cancellationToken: cancellationToken);
 
         return keycloakUserId;
