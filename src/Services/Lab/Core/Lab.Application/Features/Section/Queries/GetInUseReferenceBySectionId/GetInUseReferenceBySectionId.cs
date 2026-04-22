@@ -23,7 +23,8 @@ public class GetInUseReferenceBySectionIdQueryValidator : AbstractValidator<GetI
 public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
     : ICommandHandler<GetInUseReferenceBySectionIdQuery, GetInUseReferenceBySectionIdResult>
 {
-    public async Task<GetInUseReferenceBySectionIdResult> Handle(GetInUseReferenceBySectionIdQuery request, CancellationToken cancellationToken)
+    public async Task<GetInUseReferenceBySectionIdResult> Handle(GetInUseReferenceBySectionIdQuery request,
+        CancellationToken cancellationToken)
     {
         var section = await session.LoadAsync<SectionEntity>(request.Id, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.SectionIsNotExists, request.Id.ToString());
@@ -53,7 +54,19 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             .Where(x => paperBankIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
-        var paperBankMap = paperBanks.ToDictionary(x => x.Id, ToPaperBankInfoDto);
+        var journalIds = paperBanks
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals));
         var items = paperBankIds
             .Where(paperBankMap.ContainsKey)
             .Select(id => paperBankMap[id])
@@ -78,7 +91,8 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
         };
     }
 
-    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank)
+    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank,
+        IReadOnlyList<ConferenceJournalEntity> journals)
     {
         return new PaperBankInfoDto
         {
@@ -89,19 +103,21 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             Ranking = paperBank.Ranking,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
+            Url = paperBank.Url,
+            Code = paperBank.Code,
             FilePath = paperBank.FilePath,
+            BibFilePath = paperBank.BibFilePath,
             ParsedText = paperBank.ParsedText,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
             PaperType = paperBank.PaperType,
-            JournalName = paperBank.JournalName,
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,
-            ConferenceName = paperBank.ConferenceName,
+            ConferenceJournalName = journals.FirstOrDefault(x => x.Id == paperBank.ConferenceJournalId)?.Name,
             ReferenceContent = paperBank.ReferenceContent,
-            TagNames = paperBank.TagNames,
+            Keywords = paperBank.Keywords,
             IngestStatus = paperBank.IngestStatus ?? IngestStatus.Pending
         };
     }

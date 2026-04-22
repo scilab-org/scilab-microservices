@@ -32,13 +32,11 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             .Distinct()
             .ToList();
 
-        var inUse = inUseIds.Count == 0
+        var inUsePaperBanks = inUseIds.Count == 0
             ? []
-            : (await session.Query<PaperBankEntity>()
+            : await session.Query<PaperBankEntity>()
                 .Where(x => inUseIds.Contains(x.Id))
-                .ToListAsync(cancellationToken))
-            .Select(ToPaperBankDto)
-            .ToList();
+                .ToListAsync(cancellationToken);
 
         var paper = await session.LoadAsync<PaperEntity>(section.PaperId, cancellationToken)
                     ?? throw new NotFoundException(MessageCode.PaperIsNotExists, section.PaperId.ToString());
@@ -62,13 +60,32 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             .Select(x => x.PaperId)
             .Distinct()
             .ToList();
+
         var otherPaperBanks = otherReferencePaperIds.Count == 0
             ? []
             : await session.Query<PaperBankEntity>()
                 .Where(x => otherReferencePaperIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
-        var otherPaperBankMap = otherPaperBanks.ToDictionary(x => x.Id, ToPaperBankDto);
+        var journalIds = inUsePaperBanks
+            .Concat(otherPaperBanks)
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var inUse = inUsePaperBanks
+            .Select(x => ToPaperBankDto(x, journals))
+            .ToList();
+
+        var otherPaperBankMap = otherPaperBanks
+            .ToDictionary(x => x.Id, x => ToPaperBankDto(x, journals));
 
         var allSectionIds = filteredReferences
             .SelectMany(x => x.SectionIds)
@@ -120,7 +137,9 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
         };
     }
 
-    private static ReferencePaperBankDto ToPaperBankDto(PaperBankEntity paperBank)
+    private static ReferencePaperBankDto ToPaperBankDto(
+        PaperBankEntity paperBank,
+        IReadOnlyList<ConferenceJournalEntity> journals)
     {
         return new ReferencePaperBankDto
         {
@@ -130,18 +149,20 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             Publisher = paperBank.Publisher,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
+            Url = paperBank.Url,
+            Code = paperBank.Code,
             FilePath = paperBank.FilePath,
+            BibFilePath = paperBank.BibFilePath,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
             PaperType = paperBank.PaperType,
-            JournalName = paperBank.JournalName,
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,
-            ConferenceName = paperBank.ConferenceName,
+            ConferenceJournalName = journals.FirstOrDefault(x => x.Id == paperBank.ConferenceJournalId)?.Name,
             ReferenceContent = paperBank.ReferenceContent,
-            TagNames = paperBank.TagNames
+            Keywords = paperBank.Keywords
         };
     }
 }

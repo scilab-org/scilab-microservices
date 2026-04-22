@@ -11,7 +11,8 @@ namespace Lab.Application.Features.PaperBank.Queries.GetPaperBanks;
 
 public record GetPaperBanksQuery(GetPaperBanksFilter Filter, PaginationRequest Paging) : IQuery<GetPaperBanksResult>;
 
-public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetPaperBanksQuery, GetPaperBanksResult>
+public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
+    : IQueryHandler<GetPaperBanksQuery, GetPaperBanksResult>
 {
     #region Implementations
 
@@ -26,7 +27,7 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
         if (!filter.Title.IsNullOrWhiteSpace())
         {
             var title = filter.Title.Trim().ToLower();
-            query = query.Where(x => x.Title != null && x.Title.ToLower().Contains(title));
+            query = query.Where(x => x.Title != null! && x.Title.ToLower().Contains(title));
         }
 
         if (filter.Author?.Any() == true)
@@ -60,12 +61,14 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
         if (filter.FromPublicationDate.HasValue)
         {
-            query = query.Where(x => x.PublicationDate.HasValue && x.PublicationDate.Value >= filter.FromPublicationDate.Value);
+            query = query.Where(x =>
+                x.PublicationDate.HasValue && x.PublicationDate.Value >= filter.FromPublicationDate.Value);
         }
 
         if (filter.ToPublicationDate.HasValue)
         {
-            query = query.Where(x => x.PublicationDate.HasValue && x.PublicationDate.Value <= filter.ToPublicationDate.Value);
+            query = query.Where(x =>
+                x.PublicationDate.HasValue && x.PublicationDate.Value <= filter.ToPublicationDate.Value);
         }
 
         if (!filter.PaperType.IsNullOrWhiteSpace())
@@ -74,16 +77,9 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => x.PaperType != null && x.PaperType.Contains(paperType));
         }
 
-        if (!filter.JournalName.IsNullOrWhiteSpace())
+        if (filter.JournalId.HasValue)
         {
-            var journalName = filter.JournalName.Trim();
-            query = query.Where(x => x.JournalName != null && x.JournalName.Contains(journalName));
-        }
-
-        if (!filter.ConferenceName.IsNullOrWhiteSpace())
-        {
-            var conferenceName = filter.ConferenceName.Trim();
-            query = query.Where(x => x.ConferenceName != null && x.ConferenceName.Contains(conferenceName));
+            query = query.Where(x => x.ConferenceJournalId != null && x.ConferenceJournalId == filter.JournalId);
         }
 
         if (!filter.Ranking.IsNullOrWhiteSpace())
@@ -106,25 +102,26 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => !ids.Contains(x.Id));
         }
 
-        if (filter.Tag?.Any() == true)
+        if (filter.Keyword?.Any() == true)
         {
-            var tagNames = NormalizeTagNames(filter.Tag);
+            var keywords = NormalizeKeywords(filter.Keyword);
 
-            if (tagNames.Count > 0)
+            if (keywords.Count > 0)
             {
-                foreach (var searchTag in tagNames)
+                foreach (var searchKeyword in keywords)
                 {
-                    var local = searchTag;
+                    var local = searchKeyword;
 
                     query = query.Where(p =>
-                        p.TagNames.Count != 0 &&
-                        p.TagNames.Any(t => t.Contains(local))
+                        p.Keywords.Count != 0 &&
+                        p.Keywords.Any(t => t.Contains(local))
                     );
                 }
             }
         }
+
         #endregion
-       
+
         #endregion
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -144,11 +141,11 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
     #region Methods
 
-    private List<string> NormalizeTagNames(string[]? tagNames)
+    private List<string> NormalizeKeywords(string[]? keywords)
     {
-        if (tagNames == null) return new List<string>();
+        if (keywords == null) return new List<string>();
 
-        return tagNames
+        return keywords
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Select(x => x.Trim().ToLowerInvariant())
             .ToList();

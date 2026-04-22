@@ -44,9 +44,11 @@ public sealed class CreateJournal : ICarterModule
 
         var dto = new CreateJournalEntityDto
         {
-            TemplateId = req.TemplateId,
             Name = req.Name,
+            TemplateIds = req.TemplateIds,
+            ISSN = req.ISSN,
             Ranking = req.Ranking,
+            Type = req.Type,
             Url = req.Url,
             Style = req.Style,
             TexUploadFile = await ToUploadFileAsync(req.TexFile),

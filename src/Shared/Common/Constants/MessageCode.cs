@@ -270,6 +270,10 @@ public sealed class MessageCode
 
     public const string JournalUrlIsRequired = "JOURNAL_URL_IS_REQUIRED";
 
+    public const string JournalIssnIsRequired = "JOURNAL_ISSN_IS_REQUIRED";
+
+    public const string JournalTypeIsRequired = "JOURNAL_TYPE_IS_REQUIRED";
+
     #endregion
 
     #region Task Management

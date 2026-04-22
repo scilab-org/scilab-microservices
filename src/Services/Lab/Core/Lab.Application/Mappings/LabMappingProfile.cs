@@ -70,9 +70,9 @@ public sealed class LabMappingProfile : Profile
 
     private void CreateTagMappings()
     {
-        CreateMap<TagEntity, TagDto>();
+        CreateMap<KeywordEntity, TagDto>();
 
-        CreateMap<TagEntity, GetTagByIdResult>()
+        CreateMap<KeywordEntity, GetTagByIdResult>()
             .ForMember(dest => dest.Tag, opt => opt.MapFrom(src => src));
     }
 

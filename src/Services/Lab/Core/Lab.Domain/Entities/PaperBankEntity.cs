@@ -14,18 +14,20 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
     public string? FilePath { get; set; }
+    public string? BibFilePath { get; set; }
+    public string? Url { get; set; }
+    public string? Code { get; set; }
     public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; } = false;
     public bool? IsAutoTagged { get; set; } = false;
     public DateTimeOffset? PublicationDate { get; set; }
     public string? PaperType { get; set; }
-    public string? JournalName { get; set; }
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }
-    public string? ConferenceName { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
     public string? ReferenceContent { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
     public IngestStatus? IngestStatus { get; set; }
 
     #endregion
@@ -39,18 +41,19 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? ranking = null,
         string? abstractText = null,
         string? doi = null,
+        string? url = null,
+        string? code = null,
         string? parsedText = null,
         bool? isIngested = null,
         bool? isAutoTagged = null,
         DateTimeOffset? publicationDate = null,
         string? paperType = null,
-        string? journalName = null,
         string? pages = null,
         string? number = null,
         string? volume = null,
-        string? conferenceName = null,
+        Guid? conferenceJournalId = null,
         string? referenceContent = null,
-        List<string>? tagNames = null,
+        List<string>? keywords = null,
         IngestStatus? ingestStatus = null)
     {
         return new PaperBankEntity()
@@ -62,18 +65,19 @@ public sealed class PaperBankEntity : Entity<Guid>
             Ranking = ranking,
             Abstract = abstractText,
             Doi = doi,
+            Url = url,
+            Code = code,
             ParsedText = parsedText ?? string.Empty,
             IsIngested = isIngested ?? false,
             IsAutoTagged = isAutoTagged ?? false,
             PublicationDate = publicationDate,
             PaperType = paperType,
-            JournalName = journalName,
             Pages = pages,
             Number = number,
             Volume = volume,
-            ConferenceName = conferenceName,
+            ConferenceJournalId = conferenceJournalId,
             ReferenceContent = referenceContent,
-            TagNames = tagNames ?? new(),
+            Keywords = keywords ?? new(),
             IngestStatus = ingestStatus ?? Enums.IngestStatus.Pending,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
@@ -90,18 +94,19 @@ public sealed class PaperBankEntity : Entity<Guid>
         string? ranking = null,
         string? abstractText = null,
         string? doi = null,
+        string? url = null,
+        string? code = null,
         bool? isIngested = null,
         bool? isAutoTagged = null,
         DateTimeOffset? publicationDate = null,
         string? paperType = null,
-        string? journalName = null,
         string? pages = null,
         string? number = null,
         string? volume = null,
-        string? conferenceName = null,
+        Guid? conferenceJournalId = null,
         string? referenceContent = null,
         IngestStatus? ingestStatus = null,
-        List<string>? tagNames = null)
+        List<string>? keywords = null)
     {
         Title = title ?? Title;
         Authors = authors ?? Authors;
@@ -109,18 +114,19 @@ public sealed class PaperBankEntity : Entity<Guid>
         Ranking = ranking ?? Ranking;
         Abstract = abstractText ?? Abstract;
         Doi = doi ?? Doi;
+        Url = url ?? Url;
+        Code = code ?? Code;
         IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
         PublicationDate = publicationDate ?? PublicationDate;
         PaperType = paperType ?? PaperType;
-        JournalName = journalName ?? JournalName;
         Pages = pages ?? Pages;
         Number = number ?? Number;
         Volume = volume ?? Volume;
-        ConferenceName = conferenceName ?? ConferenceName;
+        ConferenceJournalId = conferenceJournalId ?? ConferenceJournalId;
         ReferenceContent = referenceContent ?? ReferenceContent;
         IngestStatus = ingestStatus ?? IngestStatus;
-        TagNames = tagNames ?? TagNames;
+        Keywords = keywords ?? Keywords;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
@@ -131,11 +137,11 @@ public sealed class PaperBankEntity : Entity<Guid>
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
-    public void UpdateFilePath(string? url)
+    public void UpdateFilePath(string? pdfUrl, string? bibUrl)
     {
-        if (string.IsNullOrWhiteSpace(url)) return;
-
-        FilePath = url;
+        if (string.IsNullOrWhiteSpace(pdfUrl) && string.IsNullOrWhiteSpace(bibUrl)) return;
+        FilePath = pdfUrl;
+        BibFilePath = bibUrl;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 

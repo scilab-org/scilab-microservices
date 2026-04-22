@@ -1,30 +1,30 @@
-﻿using Lab.Domain.Enums;
-
-namespace Lab.Application.Dtos.PaperBanks;
+﻿namespace Lab.Application.Dtos.PaperBanks;
 
 public class CreatePaperBankDto
 {
     #region Fields, Properties and Indexers
 
     public string Title { get; init; } = null!;
-    public string? Authors { get; set; }
-    public string? Publisher { get; set; }
-    public string? Ranking { get; set; }
+    public string? Authors { get; init; }
+    public string? Publisher { get; init; }
+    public string? Ranking { get; init; }
     public string? Abstract { get; init; }
     public string? Doi { get; init; }
-    public UploadFileBytes UploadFile { get; set; } = null!;
-    public string? ParsedText { get; set; }
-    public bool? IsIngested { get; set; }
-    public bool? IsAutoTagged { get; set; }
-    public DateTimeOffset? PublicationDate { get; set; }
+    public UploadFileBytes UploadPdfFile { get; set; } = null!;
+    public UploadFileBytes UploadBibFile { get; set; } = null!;
+    public string? Url { get; init; }
+    public string? Code { get; init; }
+    public string? ParsedText { get; init; }
+    public bool? IsIngested { get; init; }
+    public bool? IsAutoTagged { get; init; }
+    public DateTimeOffset? PublicationDate { get; init; }
     public string? PaperType { get; init; }
-    public string? JournalName { get; init; }
     public string? Pages { get; init; }
-    public string? Number { get; set; }
+    public string? Number { get; init; }
     public string? Volume { get; init; }
-    public string? ConferenceName { get; init; }
+    public Guid ConferenceJournalId { get; init; }
     public string? ReferenceContent { get; init; }
-    public List<string>? TagNames { get; init; }
+    public List<string>? Keywords { get; init; }
 
     #endregion
 }

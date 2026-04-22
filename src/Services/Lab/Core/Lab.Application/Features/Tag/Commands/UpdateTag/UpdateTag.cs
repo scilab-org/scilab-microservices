@@ -23,7 +23,7 @@ public class UpdateTagCommandHandler(IDocumentSession session) : IRequestHandler
     {
         await session.BeginTransactionAsync(cancellationToken);
 
-        var entity = await session.LoadAsync<TagEntity>(request.Id, cancellationToken);
+        var entity = await session.LoadAsync<KeywordEntity>(request.Id, cancellationToken);
 
         if (entity == null)
             throw new ClientValidationException(MessageCode.TagIsNotExists, request.Id);
@@ -31,7 +31,7 @@ public class UpdateTagCommandHandler(IDocumentSession session) : IRequestHandler
         var nomalizeName = "";
         if(request.Name != null)
             nomalizeName = request.Name.Trim().ToLowerInvariant();
-        var existingTagName = await session.Query<TagEntity>()
+        var existingTagName = await session.Query<KeywordEntity>()
             .FirstOrDefaultAsync(x => x.Name == nomalizeName, cancellationToken);
 
         if (existingTagName != null)
