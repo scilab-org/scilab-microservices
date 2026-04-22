@@ -36,6 +36,15 @@ public class GetPaperBankByIdQueryHandler(IDocumentSession session, IMapper mapp
 
         response.ConferenceJournalName = journal.Name;
 
+        if (paper.GapTypeId.HasValue)
+        {
+            var gapType = await session.LoadAsync<GapTypeEntity>(paper.GapTypeId.Value, cancellationToken);
+            if (gapType != null)
+            {
+                response.GapTypeName = gapType.Name;
+            }
+        }
+
         return new GetPaperBankByIdResult(response);
     }
 }

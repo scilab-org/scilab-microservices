@@ -317,7 +317,7 @@ public sealed class MessageCode
     #endregion
 
     #region Domain Management
-    
+
     public const string DomainNameIsRequired = "DOMAIN_NAME_IS_REQUIRED";
     public const string DomainIdIsRequired = "DOMAIN_ID_IS_REQUIRED";
     public const string DomainIsNotExists = "DOMAIN_IS_NOT_EXISTS";
@@ -330,6 +330,12 @@ public sealed class MessageCode
     public const string AuthorRoleIdIsRequired = "AUTHOR_ROLE_ID_IS_REQUIRED";
     public const string AuthorRoleIsNotExists = "AUTHOR_ROLE_IS_NOT_EXISTS";
     public const string AuthorRoleNameAlreadyExists = "AUTHOR_ROLE_NAME_ALREADY_EXISTS";
-    
+
+    #endregion
+
+    #region GapType Management
+
+    public const string GapTypeIsNotExists = "GAP_TYPE_IS_NOT_EXISTS";
+
     #endregion
 }

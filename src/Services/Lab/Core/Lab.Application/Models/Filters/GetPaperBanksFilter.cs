@@ -9,7 +9,7 @@ public record GetPaperBanksFilter
     public string? Doi { get; set; }
     public DateTimeOffset? FromPublicationDate { get; set; }
     public DateTimeOffset? ToPublicationDate { get; set; }
-    public string? PaperType { get; set; }
+    public Guid? GapTypeId { get; set; }
     public Guid? JournalId { get; set; }
     public string? Ranking { get; set; }
     public string[]? Keyword { get; set; }

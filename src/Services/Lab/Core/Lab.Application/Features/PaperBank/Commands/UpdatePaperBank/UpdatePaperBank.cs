@@ -68,6 +68,9 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session, IMinIoCloud
         var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
                       ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, dto.ConferenceJournalId);
 
+        var gapType = await session.LoadAsync<GapTypeEntity>(dto.GapTypeId!, cancellationToken)
+                      ?? throw new ClientValidationException(MessageCode.GapTypeIsNotExists, dto.GapTypeId);
+
         await EnsureKeywordsExistAsync(keywords, cancellationToken);
 
         entity.Update(
@@ -81,7 +84,7 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session, IMinIoCloud
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
-            paperType: dto.PaperType,
+            gaptTypeId: gapType.Id,
             pages: dto.Pages,
             number: dto.Number,
             volume: dto.Volume,

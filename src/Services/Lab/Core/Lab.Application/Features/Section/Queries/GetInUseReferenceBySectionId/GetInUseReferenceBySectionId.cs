@@ -66,7 +66,19 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
                 .ToListAsync(cancellationToken)
             : [];
 
-        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals));
+        var gaptypeIds = paperBanks
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var gaptypes = gaptypeIds.Count > 0
+            ? await session.Query<GapTypeEntity>()
+                .Where(x => gaptypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals, gaptypes));
         var items = paperBankIds
             .Where(paperBankMap.ContainsKey)
             .Select(id => paperBankMap[id])
@@ -92,7 +104,7 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
     }
 
     private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank,
-        IReadOnlyList<ConferenceJournalEntity> journals)
+        IReadOnlyList<ConferenceJournalEntity> journals, IReadOnlyList<GapTypeEntity> gapTypes)
     {
         return new PaperBankInfoDto
         {
@@ -110,7 +122,8 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            PaperType = paperBank.PaperType,
+            GapTypeId = paperBank.GapTypeId,
+            GapTypeName = gapTypes.FirstOrDefault(x => x.Id == paperBank.GapTypeId)?.Name,
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,

@@ -27,7 +27,8 @@ public class GetPreviewReferenceQueryValidator : AbstractValidator<GetPreviewRef
 }
 
 public class
-    GetPreviewReferenceQueryHandler(IDocumentSession session) : ICommandHandler<GetPreviewReferenceQuery, GetInUseReferenceBySectionIdResult>
+    GetPreviewReferenceQueryHandler(IDocumentSession session)
+    : ICommandHandler<GetPreviewReferenceQuery, GetInUseReferenceBySectionIdResult>
 {
     public async Task<GetInUseReferenceBySectionIdResult> Handle(GetPreviewReferenceQuery request,
         CancellationToken cancellationToken)
@@ -56,7 +57,19 @@ public class
                 .ToListAsync(cancellationToken)
             : [];
 
-        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals));
+        var gaptypeIds = paperBanks
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var gaptypes = gaptypeIds.Count > 0
+            ? await session.Query<GapTypeEntity>()
+                .Where(x => gaptypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals, gaptypes));
         var items = requestedIds
             .Where(paperBankMap.ContainsKey)
             .Select(id => paperBankMap[id])
@@ -81,7 +94,8 @@ public class
         };
     }
 
-    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank, IReadOnlyList<ConferenceJournalEntity> journals)
+    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank,
+        IReadOnlyList<ConferenceJournalEntity> journals, IReadOnlyList<GapTypeEntity> gapTypes)
     {
         return new PaperBankInfoDto
         {
@@ -99,7 +113,8 @@ public class
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            PaperType = paperBank.PaperType,
+            GapTypeId = paperBank.GapTypeId,
+            GapTypeName = gapTypes.FirstOrDefault(x => x.Id == paperBank.GapTypeId)?.Name,
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,

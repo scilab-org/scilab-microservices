@@ -210,8 +210,11 @@ public sealed class CreateJournalCommandValidatorTests
     {
         var dto = new CreateJournalEntityDto
         {
-            Name = "", Ranking = "A", Url = "https://test.com",
-            TemplateId = Guid.NewGuid(), Style = "IEEE"
+            Name = "",
+            Ranking = "A",
+            Url = "https://test.com",
+            TemplateIds = [Guid.NewGuid()],
+            Style = "IEEE"
         };
         var command = new CreateJournalCommand(dto, "user");
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.Name);
@@ -222,8 +225,11 @@ public sealed class CreateJournalCommandValidatorTests
     {
         var dto = new CreateJournalEntityDto
         {
-            Name = "J", Ranking = "A", Url = "https://test.com",
-            TemplateId = Guid.NewGuid(), Style = "IEEE",
+            Name = "J",
+            Ranking = "A",
+            Url = "https://test.com",
+            TemplateIds = [Guid.NewGuid()],
+            Style = "IEEE",
             TexUploadFile = new UploadFileBytes { FileName = "file.pdf", ContentType = "app/pdf", Bytes = new byte[1] }
         };
         var command = new CreateJournalCommand(dto, "user");
@@ -235,8 +241,11 @@ public sealed class CreateJournalCommandValidatorTests
     {
         var dto = new CreateJournalEntityDto
         {
-            Name = "J", Ranking = "A", Url = "https://test.com",
-            TemplateId = Guid.NewGuid(), Style = "IEEE",
+            Name = "J",
+            Ranking = "A",
+            Url = "https://test.com",
+            TemplateIds = [Guid.NewGuid()],
+            Style = "IEEE",
             PdfUploadFile = new UploadFileBytes { FileName = "file.tex", ContentType = "app/tex", Bytes = new byte[1] }
         };
         var command = new CreateJournalCommand(dto, "user");
@@ -248,8 +257,11 @@ public sealed class CreateJournalCommandValidatorTests
     {
         var dto = new CreateJournalEntityDto
         {
-            Name = "J", Ranking = "A", Url = "https://test.com",
-            TemplateId = Guid.NewGuid(), Style = "IEEE"
+            Name = "J",
+            Ranking = "A",
+            Url = "https://test.com",
+            TemplateIds = [Guid.NewGuid()],
+            Style = "IEEE"
         };
         var command = new CreateJournalCommand(dto, "user");
         _validator.TestValidate(command).ShouldNotHaveValidationErrorFor(x => x.Dto.TexUploadFile);
@@ -260,8 +272,11 @@ public sealed class CreateJournalCommandValidatorTests
     {
         var dto = new CreateJournalEntityDto
         {
-            Name = "J", Ranking = "A", Url = "https://test.com",
-            TemplateId = Guid.NewGuid(), Style = "IEEE",
+            Name = "J",
+            Ranking = "A",
+            Url = "https://test.com",
+            TemplateIds = [Guid.NewGuid()],
+            Style = "IEEE",
             TexUploadFile = new UploadFileBytes { FileName = "template.tex", ContentType = "text/plain", Bytes = new byte[1] }
         };
         var command = new CreateJournalCommand(dto, "user");
@@ -273,8 +288,11 @@ public sealed class CreateJournalCommandValidatorTests
     {
         var dto = new CreateJournalEntityDto
         {
-            Name = "ICSE", Ranking = "A*", Url = "https://icse.org",
-            TemplateId = Guid.NewGuid(), Style = "IEEE"
+            Name = "ICSE",
+            Ranking = "A*",
+            Url = "https://icse.org",
+            TemplateIds = [Guid.NewGuid()],
+            Style = "IEEE"
         };
         var command = new CreateJournalCommand(dto, "user");
         _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
@@ -330,10 +348,15 @@ public sealed class CreatePaperCommandValidatorTests
         var dto = CreateValidPaperDto();
         var emptyTitleDto = new CreatePaperDto
         {
-            ProjectId = dto.ProjectId, Title = "", Template = dto.Template,
-            Context = dto.Context, Abstract = dto.Abstract,
-            ResearchGap = dto.ResearchGap, GapType = dto.GapType,
-            MainContribution = dto.MainContribution, ResearchAim = dto.ResearchAim,
+            ProjectId = dto.ProjectId,
+            Title = "",
+            Template = dto.Template,
+            Context = dto.Context,
+            Abstract = dto.Abstract,
+            ResearchGap = dto.ResearchGap,
+            GapType = dto.GapType,
+            MainContribution = dto.MainContribution,
+            ResearchAim = dto.ResearchAim,
             ConferenceJournalId = dto.ConferenceJournalId,
             ConferenceJournalName = dto.ConferenceJournalName,
             ConferenceJournalStartAt = dto.ConferenceJournalStartAt,
@@ -426,7 +449,7 @@ public sealed class CreatePaperBankCommandValidatorTests
         var dto = new CreatePaperBankDto
         {
             Title = "",
-            UploadFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] }
+            UploadPdfFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] }
         };
         var command = new CreatePaperBankCommand(dto);
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.Title);
@@ -435,9 +458,9 @@ public sealed class CreatePaperBankCommandValidatorTests
     [Fact]
     public void ShouldHaveError_WhenUploadFileIsNull()
     {
-        var dto = new CreatePaperBankDto { Title = "Title", UploadFile = null! };
+        var dto = new CreatePaperBankDto { Title = "Title", UploadPdfFile = null! };
         var command = new CreatePaperBankCommand(dto);
-        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.UploadFile);
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.UploadPdfFile);
     }
 
     [Fact]
@@ -446,7 +469,7 @@ public sealed class CreatePaperBankCommandValidatorTests
         var dto = new CreatePaperBankDto
         {
             Title = "Title",
-            UploadFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] },
+            UploadPdfFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] },
             PublicationDate = DateTimeOffset.UtcNow.AddDays(10)
         };
         var command = new CreatePaperBankCommand(dto);
@@ -459,7 +482,7 @@ public sealed class CreatePaperBankCommandValidatorTests
         var dto = new CreatePaperBankDto
         {
             Title = "Title",
-            UploadFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] },
+            UploadPdfFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] },
             PublicationDate = null
         };
         var command = new CreatePaperBankCommand(dto);
@@ -472,7 +495,7 @@ public sealed class CreatePaperBankCommandValidatorTests
         var dto = new CreatePaperBankDto
         {
             Title = "Paper Title",
-            UploadFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] },
+            UploadPdfFile = new UploadFileBytes { FileName = "f.pdf", ContentType = "app/pdf", Bytes = new byte[1] },
             PublicationDate = DateTimeOffset.UtcNow.AddDays(-1)
         };
         var command = new CreatePaperBankCommand(dto);
@@ -493,8 +516,10 @@ public sealed class CreatePaperContributorCommandValidatorTests
     {
         var dto = new CreatePaperContributorDto
         {
-            SectionRole = null!, PaperId = Guid.NewGuid(),
-            MemberIds = new List<Guid> { Guid.NewGuid() }, MarkSectionId = Guid.NewGuid()
+            SectionRole = null!,
+            PaperId = Guid.NewGuid(),
+            MemberIds = new List<Guid> { Guid.NewGuid() },
+            MarkSectionId = Guid.NewGuid()
         };
         var command = new CreatePaperContributorCommand(dto);
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.SectionRole);
@@ -505,8 +530,10 @@ public sealed class CreatePaperContributorCommandValidatorTests
     {
         var dto = new CreatePaperContributorDto
         {
-            SectionRole = "Author", PaperId = Guid.Empty,
-            MemberIds = new List<Guid> { Guid.NewGuid() }, MarkSectionId = Guid.NewGuid()
+            SectionRole = "Author",
+            PaperId = Guid.Empty,
+            MemberIds = new List<Guid> { Guid.NewGuid() },
+            MarkSectionId = Guid.NewGuid()
         };
         var command = new CreatePaperContributorCommand(dto);
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.PaperId);
@@ -517,8 +544,10 @@ public sealed class CreatePaperContributorCommandValidatorTests
     {
         var dto = new CreatePaperContributorDto
         {
-            SectionRole = "Author", PaperId = Guid.NewGuid(),
-            MemberIds = new List<Guid>(), MarkSectionId = Guid.NewGuid()
+            SectionRole = "Author",
+            PaperId = Guid.NewGuid(),
+            MemberIds = new List<Guid>(),
+            MarkSectionId = Guid.NewGuid()
         };
         var command = new CreatePaperContributorCommand(dto);
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.MemberIds);
@@ -529,8 +558,10 @@ public sealed class CreatePaperContributorCommandValidatorTests
     {
         var dto = new CreatePaperContributorDto
         {
-            SectionRole = "Author", PaperId = Guid.NewGuid(),
-            MemberIds = new List<Guid> { Guid.NewGuid() }, MarkSectionId = Guid.NewGuid()
+            SectionRole = "Author",
+            PaperId = Guid.NewGuid(),
+            MemberIds = new List<Guid> { Guid.NewGuid() },
+            MarkSectionId = Guid.NewGuid()
         };
         var command = new CreatePaperContributorCommand(dto);
         _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();

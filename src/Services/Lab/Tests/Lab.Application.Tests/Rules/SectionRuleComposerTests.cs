@@ -54,7 +54,7 @@ public sealed class SectionRuleComposerTests
             ConferenceJournalName = "ICSE"
         };
         var journal = ConferenceJournalEntity.Create(
-            Guid.NewGuid(), "ICSE 2024", "A*", null, "IEEE", Guid.NewGuid(), null, null);
+            Guid.NewGuid(), "ICSE 2024", "A*", null, null, "IEEE", ConferenceJournalType.Journal, [], null, null);
 
         var result = SectionRuleComposer.BuildPaperRule(dto, journal);
 
@@ -79,7 +79,7 @@ public sealed class SectionRuleComposerTests
             context: "Context", abstractText: "Abstract",
             researchGap: "Gap", gapType: "Type", researchAim: "Aim");
         var journal = ConferenceJournalEntity.Create(
-            Guid.NewGuid(), "Journal", "B", null, "ACM", Guid.NewGuid(), null, null);
+            Guid.NewGuid(), "Journal", "B", null, null, "ACM", ConferenceJournalType.Journal, [], null, null);
 
         var result = SectionRuleComposer.BuildPaperRule(paper, journal);
 

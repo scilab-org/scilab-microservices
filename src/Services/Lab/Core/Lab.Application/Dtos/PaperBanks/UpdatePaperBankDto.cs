@@ -15,7 +15,7 @@ public class UpdatePaperBankDto
     public bool? IsAutoTagged { get; init; }
     public UploadFileBytes UploadBibFile { get; set; } = null!;
     public DateTimeOffset? PublicationDate { get; set; }
-    public string? PaperType { get; init; }
+    public Guid? GapTypeId { get; init; }
     public string? Pages { get; init; }
     public string? Number { get; set; }
     public string? Volume { get; init; }

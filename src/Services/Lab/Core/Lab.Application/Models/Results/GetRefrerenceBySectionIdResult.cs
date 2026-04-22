@@ -30,8 +30,6 @@ public class ReferencePaperBankDto
 
     public string? Doi { get; set; }
 
-    public string? Code { get; set; }
-
     public string? Url { get; set; }
 
     public string? FilePath { get; set; }
@@ -44,7 +42,9 @@ public class ReferencePaperBankDto
 
     public DateTimeOffset? PublicationDate { get; set; }
 
-    public string? PaperType { get; set; }
+    public Guid? GapTypeId { get; set; }
+
+    public string? GapTypeName { get; set; }
 
     public string? Pages { get; set; }
 

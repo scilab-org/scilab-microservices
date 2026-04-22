@@ -71,10 +71,9 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
                 x.PublicationDate.HasValue && x.PublicationDate.Value <= filter.ToPublicationDate.Value);
         }
 
-        if (!filter.PaperType.IsNullOrWhiteSpace())
+        if (filter.GapTypeId.HasValue)
         {
-            var paperType = filter.PaperType.Trim();
-            query = query.Where(x => x.PaperType != null && x.PaperType.Contains(paperType));
+            query = query.Where(x => x.GapTypeId != null && x.GapTypeId == filter.GapTypeId);
         }
 
         if (filter.JournalId.HasValue)
@@ -137,12 +136,28 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             .Where(x => journalIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
+        var gapTypeIds = papers.Where(p => p.GapTypeId.HasValue).Select(p => p.GapTypeId!.Value).Distinct().ToList();
+        IReadOnlyList<GapTypeEntity> gapTypes = gapTypeIds.Count > 0
+            ? await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
         items.ForEach(item =>
         {
             var journal = journals.FirstOrDefault(x => x.Id == item.ConferenceJournalId);
             if (journal != null)
             {
                 item.ConferenceJournalName = journal.Name;
+            }
+
+            if (item.GapTypeId.HasValue)
+            {
+                var gapType = gapTypes.FirstOrDefault(x => x.Id == item.GapTypeId.Value);
+                if (gapType != null)
+                {
+                    item.GapTypeName = gapType.Name;
+                }
             }
         });
 

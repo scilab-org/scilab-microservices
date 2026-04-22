@@ -15,7 +15,7 @@ public class UpdatePaperBankRequest
     public bool? IsAutoTagged { get; set; }
     public IFormFile? BibFile { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
-    public string? PaperType { get; set; }
+    public Guid? GapTypeId { get; set; }
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }
