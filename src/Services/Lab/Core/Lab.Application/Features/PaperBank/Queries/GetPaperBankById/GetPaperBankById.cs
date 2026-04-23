@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
@@ -29,20 +30,31 @@ public class GetPaperBankByIdQueryHandler(IDocumentSession session, IMapper mapp
         if (paper == null)
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
-        var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken)
-            ?? throw new NotFoundException(MessageCode.JournalIsNotExists, paper.ConferenceJournalId.ToString());
-
         var response = mapper.Map<PaperBankDto>(paper);
 
-        response.ConferenceJournalName = journal.Name;
-
-        if (paper.GapTypeId.HasValue)
+        if (paper.ConferenceJournalId.HasValue)
         {
-            var gapType = await session.LoadAsync<GapTypeEntity>(paper.GapTypeId.Value, cancellationToken);
-            if (gapType != null)
+            var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId.Value, cancellationToken);
+            if (journal != null)
             {
-                response.GapTypeName = gapType.Name;
+                response.ConferenceJournalName = journal.Name;
             }
+        }
+
+        var gapTypeIds = paper.GapTypeIds ?? new List<Guid>();
+        if (gapTypeIds.Count > 0)
+        {
+            var gapTypes = await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+            response.GapTypes = gapTypes
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList();
         }
 
         return new GetPaperBankByIdResult(response);

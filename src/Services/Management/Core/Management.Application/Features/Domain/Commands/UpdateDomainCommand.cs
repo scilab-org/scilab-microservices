@@ -39,7 +39,7 @@ public sealed class UpdateDomainCommandHandler(IDocumentSession session)
         var entity = await session.LoadAsync<DomainEntity>(command.DomainId, cancellationToken)
             ?? throw new ClientValidationException(MessageCode.DomainIsNotExists, command.DomainId.ToString());
 
-        entity.Update(command.Dto.Name!, command.Dto.Description);
+        entity.Update(command.Dto.Name!);
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
 

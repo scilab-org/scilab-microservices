@@ -42,13 +42,36 @@ public class UpdatePaperCommandHandler(
 
         await session.BeginTransactionAsync(cancellationToken);
 
+        var gapTypeIds = (dto.GapTypeIds ?? [])
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var gapTypes = gapTypeIds.Count == 0
+            ? []
+            : await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        if (gapTypes.Count != gapTypeIds.Count)
+        {
+            var foundIds = gapTypes.Select(x => x.Id).ToHashSet();
+            var missingIds = gapTypeIds.Where(id => !foundIds.Contains(id)).ToList();
+            throw new NotFoundException(MessageCode.GapTypeIsNotExists, string.Join(", ", missingIds));
+        }
+
+        var gapTypeNames = gapTypes
+            .Select(x => x.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
         paper.Update(
             context: dto.Context,
             abstractText: dto.Abstract,
             researchGap: dto.ResearchGap,
             mainContribution: dto.MainContribution,
             researchAim: dto.ResearchAim,
-            gapType: dto.GapType,
+            gapTypeIds: gapTypeIds,
             rule: DomainRules.Paper,
             conferenceJournalStartAt: dto.ConferenceJournalStartAt,
             conferenceJournalEndAt: dto.ConferenceJournalEndAt,
@@ -59,7 +82,7 @@ public class UpdatePaperCommandHandler(
                       ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
                           paper.ConferenceJournalId.ToString());
 
-        var paperRule = SectionRuleComposer.BuildPaperRule(paper, journal);
+        var paperRule = SectionRuleComposer.BuildPaperRule(paper, gapTypeNames, journal);
         var paperContext = SectionRuleComposer.BuildPaperContext(paper);
         var sections = await session.Query<SectionEntity>()
             .Where(x => x.PaperId == paper.Id)

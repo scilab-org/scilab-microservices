@@ -7,7 +7,7 @@ public class UpdatePaperDto
     public string Context { get; init; } = null!;
     public string Abstract { get; init; } = null!;
     public string ResearchGap { get; init; } = null!;
-    public string GapType { get; init; } = null!;
+    public List<Guid>? GapTypeIds { get; init; }
     public string? MainContribution { get; init; } = null!;
     public string? ResearchAim { get; init; } = null!;
     public DateTimeOffset? ConferenceJournalStartAt { get; init; }

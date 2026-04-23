@@ -1,4 +1,4 @@
-﻿using Lab.Domain.Enums;
+﻿using Lab.Application.Dtos.GapTypes;
 
 namespace Lab.Application.Models.Results;
 
@@ -42,9 +42,7 @@ public class ReferencePaperBankDto
 
     public DateTimeOffset? PublicationDate { get; set; }
 
-    public Guid? GapTypeId { get; set; }
-
-    public string? GapTypeName { get; set; }
+    public List<GapTypeInfoDto> GapTypes { get; set; } = new();
 
     public string? Pages { get; set; }
 

@@ -104,6 +104,11 @@ public interface ILabApiService
         Guid paperId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns all paper authors for a given paperId from the Lab service.</summary>
+    Task<List<LabPaperContributorDto>> GetPaperAuthorsAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Returns all paper contributors for a given paperId from the Lab service.</summary>
     Task<List<LabPaperContributorDto>> GetPaperContributorsAsync(
         Guid paperId,

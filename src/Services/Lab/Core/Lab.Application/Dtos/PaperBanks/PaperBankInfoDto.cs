@@ -1,4 +1,5 @@
 ﻿using Lab.Application.Dtos.Abstractions;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Domain.Enums;
 
 namespace Lab.Application.Dtos.PaperBanks;
@@ -20,8 +21,7 @@ public class PaperBankInfoDto : DtoId<Guid>
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
-    public Guid? GapTypeId { get; set; }
-    public string? GapTypeName { get; set; }
+    public List<GapTypeInfoDto> GapTypes { get; set; } = new();
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }

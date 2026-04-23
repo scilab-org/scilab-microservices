@@ -17,7 +17,7 @@ public class CreatePaperBankDto
     public bool? IsIngested { get; init; }
     public bool? IsAutoTagged { get; init; }
     public DateTimeOffset? PublicationDate { get; init; }
-    public Guid? GapTypeId { get; init; }
+    public List<Guid>? GapTypeIds { get; init; }
     public string? Pages { get; init; }
     public string? Number { get; init; }
     public string? Volume { get; init; }

@@ -83,8 +83,15 @@ public sealed class UpdateProjectRulesCommandHandler(
                           ?? throw new NotFoundException(MessageCode.JournalIsNotExists,
                               paper.ConferenceJournalId.ToString());
 
+            var gapTypeNames = paper.GapTypeIds.Count == 0
+                ? []
+                : await session.Query<GapTypeEntity>()
+                    .Where(x => paper.GapTypeIds.Contains(x.Id))
+                    .Select(x => x.Name)
+                    .ToListAsync(cancellationToken);
+
             var paperRule = string.IsNullOrWhiteSpace(section.PaperRule)
-                ? SectionRuleComposer.BuildPaperRule(paper, journal)
+                ? SectionRuleComposer.BuildPaperRule(paper, gapTypeNames, journal)
                 : section.PaperRule;
 
             var sectionRule = string.IsNullOrWhiteSpace(section.SectionRule)

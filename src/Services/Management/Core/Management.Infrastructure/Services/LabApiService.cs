@@ -168,6 +168,32 @@ file sealed class LabPaperContributorItem
 }
 
 [ExcludeFromCodeCoverage]
+file sealed class LabPaperAuthorItem
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string? OcrId { get; set; }
+    public string Email { get; set; } = null!;
+    public Guid PaperId { get; set; }
+    public Guid AuthorRoleId { get; set; }
+    public string? AuthorRoleName { get; set; }
+    public string? AuthorRoleDescription { get; set; }
+    public Guid MemberId { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabGetPaperAuthorsResult
+{
+    public List<LabPaperAuthorItem> Items { get; set; } = new();
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabGetPaperAuthorsResponse
+{
+    public LabGetPaperAuthorsResult? Result { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperContributorsResult
 {
     public List<LabPaperContributorItem> Items { get; set; } = new();
@@ -548,6 +574,38 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<List<LabPaperContributorDto>> GetPaperAuthorsAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetPaperAuthorsAsync(paperId);
+            if (!response.IsSuccessStatusCode)
+                return new List<LabPaperContributorDto>();
+
+            var body = await response.Content
+                .ReadFromJsonAsync<LabGetPaperAuthorsResponse>(cancellationToken: cancellationToken);
+
+            return body?.Result?.Items?
+                .Select(x => new LabPaperContributorDto
+                {
+                    Id            = x.Id,
+                    PaperId       = x.PaperId,
+                    MemberId      = x.MemberId,
+                    MarkSectionId = x.AuthorRoleId,
+                    SectionId     = null,
+                    SectionRole   = x.AuthorRoleName,
+                    UserId        = x.MemberId
+                })
+                .ToList() ?? new List<LabPaperContributorDto>();
+        }
+        catch
+        {
+            return new List<LabPaperContributorDto>();
+        }
+    }
+
     public async Task<List<LabPaperContributorDto>> GetPaperContributorsAsync(
         Guid paperId,
         CancellationToken cancellationToken = default)
@@ -743,7 +801,6 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             return new List<LabSectionDto>();
         }
     }
-
 
     #endregion
 }

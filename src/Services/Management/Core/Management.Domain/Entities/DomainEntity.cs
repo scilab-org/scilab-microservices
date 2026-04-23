@@ -7,20 +7,17 @@ public class DomainEntity : Entity<Guid>
     #region Fields, Properties and Indexers
 
     public string Name { get; set; } = null!;
-    public string? Description { get; set; }
     
     #endregion
     #region Factories
     
     public static DomainEntity Create(Guid id,
-        string name,
-        string? description = null)
+        string name)
     {
         return new DomainEntity()
         {
             Id = id,
             Name = name,
-            Description = description,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -28,11 +25,9 @@ public class DomainEntity : Entity<Guid>
     #endregion
     
     #region Methods
-    public void Update(string name,
-        string? description = null)
+    public void Update(string name)
     {
         Name = name;
-        Description = description;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
  

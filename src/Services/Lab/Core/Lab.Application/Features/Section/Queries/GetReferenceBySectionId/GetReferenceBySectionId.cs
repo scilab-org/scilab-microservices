@@ -1,3 +1,4 @@
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
 using Marten;
@@ -81,8 +82,8 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             : [];
 
         var gaptypeIds = inUsePaperBanks
-            .Select(x => x.ConferenceJournalId)
-            .Where(x => x.HasValue)
+            .SelectMany(x => x.GapTypeIds ?? [])
+            .Where(x => x != Guid.Empty)
             .Distinct()
             .ToList();
 
@@ -168,8 +169,14 @@ public class GetReferenceBySectionIdQueryHandler(IDocumentSession session)
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            GapTypeId = paperBank.GapTypeId,
-            GapTypeName = gapTypes.FirstOrDefault(x => x.Id == paperBank.GapTypeId)?.Name,
+            GapTypes = gapTypes
+                .Where(x => (paperBank.GapTypeIds ?? []).Contains(x.Id))
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList(),
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,

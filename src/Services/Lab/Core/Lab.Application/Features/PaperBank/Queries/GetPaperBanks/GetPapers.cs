@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
@@ -73,7 +74,8 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
         if (filter.GapTypeId.HasValue)
         {
-            query = query.Where(x => x.GapTypeId != null && x.GapTypeId == filter.GapTypeId);
+            var gapTypeId = filter.GapTypeId.Value;
+            query = query.Where(x => x.GapTypeIds != null && x.GapTypeIds.Any(id => id == gapTypeId));
         }
 
         if (filter.JournalId.HasValue)
@@ -131,12 +133,23 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
         var papers = result.ToList();
         var items = mapper.Map<List<PaperBankDto>>(papers);
 
-        var journalIds = papers.Select(p => p.ConferenceJournalId).ToList();
-        var journals = await session.Query<ConferenceJournalEntity>()
-            .Where(x => journalIds.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var journalIds = papers
+            .Where(p => p.ConferenceJournalId.HasValue)
+            .Select(p => p.ConferenceJournalId!.Value)
+            .Distinct()
+            .ToList();
 
-        var gapTypeIds = papers.Where(p => p.GapTypeId.HasValue).Select(p => p.GapTypeId!.Value).Distinct().ToList();
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var gapTypeIds = papers
+            .SelectMany(p => p.GapTypeIds ?? new List<Guid>())
+            .Distinct()
+            .ToList();
+
         IReadOnlyList<GapTypeEntity> gapTypes = gapTypeIds.Count > 0
             ? await session.Query<GapTypeEntity>()
                 .Where(x => gapTypeIds.Contains(x.Id))
@@ -145,19 +158,29 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
         items.ForEach(item =>
         {
-            var journal = journals.FirstOrDefault(x => x.Id == item.ConferenceJournalId);
-            if (journal != null)
+            if (item.ConferenceJournalId.HasValue)
             {
-                item.ConferenceJournalName = journal.Name;
+                var journal = journals.FirstOrDefault(x => x.Id == item.ConferenceJournalId.Value);
+                if (journal != null)
+                {
+                    item.ConferenceJournalName = journal.Name;
+                }
             }
 
-            if (item.GapTypeId.HasValue)
+            var itemGapTypeIds = papers
+                .FirstOrDefault(p => p.Id == item.Id)?
+                .GapTypeIds ?? new List<Guid>();
+
+            if (itemGapTypeIds.Any())
             {
-                var gapType = gapTypes.FirstOrDefault(x => x.Id == item.GapTypeId.Value);
-                if (gapType != null)
-                {
-                    item.GapTypeName = gapType.Name;
-                }
+                item.GapTypes = gapTypes
+                    .Where(x => itemGapTypeIds.Contains(x.Id))
+                    .Select(x => new GapTypeInfoDto
+                    {
+                        Id = x.Id,
+                        Name = x.Name
+                    })
+                    .ToList();
             }
         });
 

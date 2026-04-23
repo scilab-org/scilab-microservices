@@ -78,7 +78,7 @@ public class CreatePaperBankCommandHandler(
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
-            gaptTypeId: dto.GapTypeId,
+            gapTypeIds: dto.GapTypeIds,
             pages: dto.Pages,
             number: dto.Number,
             volume: dto.Volume,

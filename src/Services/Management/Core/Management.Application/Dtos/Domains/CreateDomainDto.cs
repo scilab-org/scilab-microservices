@@ -8,7 +8,6 @@ public sealed class CreateDomainDto
     #region Fields, Properties and Indexers
 
     public required string Name { get; set; }
-    public string? Description { get; set; }
 
     #endregion
 }

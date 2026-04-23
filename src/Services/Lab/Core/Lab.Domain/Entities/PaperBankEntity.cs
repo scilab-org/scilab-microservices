@@ -20,7 +20,7 @@ public sealed class PaperBankEntity : Entity<Guid>
     public bool? IsIngested { get; set; } = false;
     public bool? IsAutoTagged { get; set; } = false;
     public DateTimeOffset? PublicationDate { get; set; }
-    public Guid? GapTypeId { get; set; }
+    public List<Guid>? GapTypeIds { get; set; } = new();
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }
@@ -45,7 +45,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         bool? isIngested = null,
         bool? isAutoTagged = null,
         DateTimeOffset? publicationDate = null,
-        Guid? gaptTypeId = null,
+        List<Guid>? gapTypeIds = null,
         string? pages = null,
         string? number = null,
         string? volume = null,
@@ -68,7 +68,7 @@ public sealed class PaperBankEntity : Entity<Guid>
             IsIngested = isIngested ?? false,
             IsAutoTagged = isAutoTagged ?? false,
             PublicationDate = publicationDate,
-            GapTypeId = gaptTypeId,
+            GapTypeIds = gapTypeIds,
             Pages = pages,
             Number = number,
             Volume = volume,
@@ -95,7 +95,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         bool? isIngested = null,
         bool? isAutoTagged = null,
         DateTimeOffset? publicationDate = null,
-        Guid? gaptTypeId = null,
+        List<Guid>? gapTypeIds = null,
         string? pages = null,
         string? number = null,
         string? volume = null,
@@ -114,7 +114,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         IsIngested = isIngested ?? IsIngested;
         IsAutoTagged = isAutoTagged ?? IsAutoTagged;
         PublicationDate = publicationDate ?? PublicationDate;
-        GapTypeId = gaptTypeId ?? GapTypeId;
+        GapTypeIds = gapTypeIds ?? GapTypeIds;
         Pages = pages ?? Pages;
         Number = number ?? Number;
         Volume = volume ?? Volume;

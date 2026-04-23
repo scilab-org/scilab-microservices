@@ -128,6 +128,7 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 OcrId = u.OcrId,
+                Orcid = u.OcrId,
                 Enabled = u.Enabled
             })
             .ToList();

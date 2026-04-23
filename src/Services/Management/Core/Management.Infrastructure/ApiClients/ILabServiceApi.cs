@@ -67,6 +67,12 @@ public interface ILabServiceApi
     Task<HttpResponseMessage> GetSectionsByPaperIdAsync([AliasAs("id")] Guid paperId);
 
     /// <summary>
+    /// GET /paper-authors/{paperId} — returns paper authors for a paper.
+    /// </summary>
+    [Get("/paper-authors")]
+    Task<HttpResponseMessage> GetPaperAuthorsAsync([AliasAs("paperId")] Guid paperId);
+
+    /// <summary>
     /// GET /paper-contributors/papers/{paperId}/contributors — returns contributors for a paper.
     /// </summary>
     [Get("/paper-contributors/papers/{paperId}/contributors")]

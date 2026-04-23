@@ -35,7 +35,7 @@ public sealed class CreateDomainCommandHandler(IDocumentSession session)
     {
         var id = Guid.NewGuid();
 
-        var entity = DomainEntity.Create(id, command.Dto.Name!, command.Dto.Description);
+        var entity = DomainEntity.Create(id, command.Dto.Name!);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

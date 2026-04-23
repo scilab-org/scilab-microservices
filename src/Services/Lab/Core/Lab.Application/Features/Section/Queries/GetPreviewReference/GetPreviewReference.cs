@@ -1,6 +1,7 @@
+using Lab.Application.Dtos.GapTypes;
+using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Models.Results;
-using Lab.Application.Dtos.PaperBanks;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
@@ -113,8 +114,14 @@ public class
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            GapTypeId = paperBank.GapTypeId,
-            GapTypeName = gapTypes.FirstOrDefault(x => x.Id == paperBank.GapTypeId)?.Name,
+            GapTypes = gapTypes
+                .Where(x => (paperBank.GapTypeIds ?? []).Contains(x.Id))
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList(),
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,

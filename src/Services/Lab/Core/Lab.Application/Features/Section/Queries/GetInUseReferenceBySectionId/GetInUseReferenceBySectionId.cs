@@ -1,3 +1,4 @@
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
@@ -67,8 +68,8 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             : [];
 
         var gaptypeIds = paperBanks
-            .Select(x => x.ConferenceJournalId)
-            .Where(x => x.HasValue)
+            .SelectMany(x => x.GapTypeIds ?? [])
+            .Where(x => x != Guid.Empty)
             .Distinct()
             .ToList();
 
@@ -122,9 +123,15 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            GapTypeId = paperBank.GapTypeId,
-            GapTypeName = gapTypes.FirstOrDefault(x => x.Id == paperBank.GapTypeId)?.Name,
-            Pages = paperBank.Pages,
+            GapTypes = gapTypes
+                .Where(x => (paperBank.GapTypeIds ?? []).Contains(x.Id))
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList(),
+            Pages = paperBank.Pages,    
             Number = paperBank.Number,
             Volume = paperBank.Volume,
             ConferenceJournalId = paperBank.ConferenceJournalId,

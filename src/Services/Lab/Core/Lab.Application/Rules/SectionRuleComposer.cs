@@ -22,24 +22,24 @@ public static class SectionRuleComposer
         return contentBuilder.ToString().TrimEnd();
     }
 
-    public static string BuildPaperRule(CreatePaperDto paperDto, ConferenceJournalEntity journal)
+    public static string BuildPaperRule(CreatePaperDto paperDto, IEnumerable<string>? gapTypeNames, ConferenceJournalEntity journal)
     {
         return BuildPaperRule(
             paperDto.Context,
             paperDto.Abstract,
             paperDto.ResearchGap,
-            paperDto.GapType,
+            gapTypeNames,
             paperDto.ResearchAim,
             journal);
     }
 
-    public static string BuildPaperRule(PaperEntity paper, ConferenceJournalEntity journal)
+    public static string BuildPaperRule(PaperEntity paper, IEnumerable<string>? gapTypeNames, ConferenceJournalEntity journal)
     {
         return BuildPaperRule(
             paper.Context,
             paper.Abstract,
             paper.ResearchGap,
-            paper.GapType,
+            gapTypeNames,
             paper.ResearchAim,
             journal);
     }
@@ -81,7 +81,7 @@ public static class SectionRuleComposer
         string? context,
         string? abstractText,
         string? researchGap,
-        string? gapType,
+        IEnumerable<string>? gapTypeNames,
         string? researchAim,
         ConferenceJournalEntity journal)
     {
@@ -93,7 +93,18 @@ public static class SectionRuleComposer
         AppendBlock(contentBuilder, "Context", context);
         AppendBlock(contentBuilder, "Abstract", abstractText);
         AppendBlock(contentBuilder, "Research Gap", researchGap);
-        AppendBlock(contentBuilder, "Gap Type", gapType);
+
+        var resolvedGapTypes = gapTypeNames?
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (resolvedGapTypes is { Count: > 0 })
+        {
+            AppendBlock(contentBuilder, "Gap Type", string.Join("\n", resolvedGapTypes));
+        }
+
         AppendBlock(contentBuilder, "Research Aim", researchAim);
         AppendBlock(contentBuilder, "Journal Name", journal.Name);
         AppendBlock(contentBuilder, "Journal Style", journal.Style);

@@ -65,12 +65,6 @@ public class GetPapersQueryHandler(IDocumentSession session, IMapper mapper) : I
             query = query.Where(x => x.ResearchAim != null && x.ResearchAim.Contains(researchAim));
         }
 
-        if (!filter.GapType.IsNullOrWhiteSpace())
-        {
-            var gapType = filter.GapType.Trim();
-            query = query.Where(x => x.GapType != null && x.GapType.Contains(gapType));
-        }
-
         if (filter.ConferenceJournalId.HasValue)
         {
             query = query.Where(x => x.ConferenceJournalId == filter.ConferenceJournalId.Value);

@@ -18,6 +18,7 @@ public sealed class UserInfoDto
     public string? LastName { get; set; }
 
     public string? OcrId { get; set; }
+    public string? Orcid { get; set; }
 
     public bool Enabled { get; set; }
 
