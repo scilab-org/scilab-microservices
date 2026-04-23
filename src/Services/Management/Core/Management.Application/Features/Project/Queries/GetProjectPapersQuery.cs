@@ -42,11 +42,11 @@ public class GetProjectPapersQueryHandler(
         if (!paperIds.Any())
             return new GetProjectPapersResult(new List<PaperBankInfoDto>(), 0, query.Paging);
 
-        // Fetch paper details from Lab service with title/tags filter and paging
+        // Fetch paper details from Lab service with title/keywords filter and paging
         var (items, totalCount) = await labApiService.GetPaperBanksByIdsPagedAsync(
             paperIds: paperIds,
             title: query.Filter.Title,
-            tags: query.Filter.Tag,
+            keywords: query.Filter.Keyword,
             pageNumber: query.Paging.PageNumber,
             pageSize: query.Paging.PageSize,
             cancellationToken: cancellationToken);

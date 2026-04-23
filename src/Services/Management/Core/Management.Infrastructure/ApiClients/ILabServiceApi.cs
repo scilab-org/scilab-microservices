@@ -33,7 +33,7 @@ public interface ILabServiceApi
         [AliasAs("paperType")] string? paperType = null,
         [AliasAs("journalName")] string? journalName = null,
         [AliasAs("conferenceName")] string? conferenceName = null,
-        [AliasAs("tag"), Query(CollectionFormat.Multi)] string[]? tag = null,
+        [AliasAs("keyword"), Query(CollectionFormat.Multi)] string[]? keywords = null,
         [AliasAs("existingPaperIds"), Query(CollectionFormat.Multi)] Guid[]? existingPaperIds = null);
 
     /// <summary>

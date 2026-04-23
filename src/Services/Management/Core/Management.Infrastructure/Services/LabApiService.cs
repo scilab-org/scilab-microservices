@@ -40,7 +40,7 @@ file sealed class LabPaperItem
     public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
 }
 
 // GET /papers/sample  =>  { "result": { "items": [...], "paging": {...} } }
@@ -102,7 +102,7 @@ file sealed class LabPaperFull
     public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
     public string? CreatedBy { get; set; }
 }
 
@@ -229,7 +229,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         string? paperType = null,
         string? journalName = null,
         string? conferenceName = null,
-        string[]? tag = null,
+        string[]? keywords = null,
         int pageNumber = 1,
         int pageSize = 1000,
         CancellationToken cancellationToken = default)
@@ -250,7 +250,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             paperType: paperType,
             journalName: journalName,
             conferenceName: conferenceName,
-            tag: tag,
+            keywords: keywords,
             existingPaperIds: existingSet.Count > 0 ? existingSet.ToArray() : null);
 
         if (!response.IsSuccessStatusCode)
@@ -401,7 +401,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         string? number = null,
         string? volume = null,
         string? referenceContent = null,
-        string[]? tags = null,
+        string[]? keywords = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -454,19 +454,19 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
                 .ToList();
         }
 
-        // Apply optional tags filter — AND semantics: paper must contain ALL requested tags
-        if (tags is { Length: > 0 })
+        // Apply optional keywords filter — AND semantics: paper must contain ALL requested keywords
+        if (keywords is { Length: > 0 })
         {
-            var normalizedTags = tags
-                .Select(t => t.Trim().ToLowerInvariant())
-                .Where(t => t.Length > 0)
+            var normalizedKeywords = keywords
+                .Select(k => k.Trim().ToLowerInvariant())
+                .Where(k => k.Length > 0)
                 .ToList();
 
-            foreach (var tag in normalizedTags)
+            foreach (var keyword in normalizedKeywords)
             {
-                var local = tag;
+                var local = keyword;
                 allPapers = allPapers
-                    .Where(p => p.TagNames.Any(t => t.ToLowerInvariant().Contains(local)))
+                    .Where(p => p.Keywords.Any(k => k.ToLowerInvariant().Contains(local)))
                     .ToList();
             }
         }
@@ -840,7 +840,7 @@ file static class LabPaperItemMapper
         Volume          = p.Volume,
         ConferenceName  = p.ConferenceName,
         ReferenceContent = p.ReferenceContent,
-        TagNames        = p.TagNames
+        Keywords        = p.Keywords
     };
 
     internal static PaperInfoDto MapToPaperDto(this LabPaperFull p) => new()
@@ -864,7 +864,7 @@ file static class LabPaperItemMapper
         Volume          = p.Volume,
         ConferenceName  = p.ConferenceName,
         ReferenceContent = p.ReferenceContent,
-        TagNames        = p.TagNames,
+        Keywords        = p.Keywords,
         CreatedBy       = p.CreatedBy
     };
 }
