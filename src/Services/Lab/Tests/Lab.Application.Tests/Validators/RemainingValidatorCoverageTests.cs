@@ -317,7 +317,8 @@ public sealed class UpdatePaperBankCommandValidatorTests
     private static UpdatePaperBankDto CreateValidUpdatePaperBankDto() => new()
     {
         Title = "Paper",
-        PublicationDate = DateTimeOffset.UtcNow.AddDays(-1)
+        PublicationDate = DateTimeOffset.UtcNow.AddDays(-1),
+        ConferenceJournalId = Guid.NewGuid()
     };
 }
 

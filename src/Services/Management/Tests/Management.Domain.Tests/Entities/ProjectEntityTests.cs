@@ -17,8 +17,8 @@ public sealed class ProjectEntityTests
         var endDate = DateTimeOffset.UtcNow.AddMonths(6);
         var parentProjectId = Guid.NewGuid();
         const string context = "AI Research";
-        const string domain = "Machine Learning";
         const string keypoint = "Accuracy improvement";
+        var domainIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
         const string createdBy = "admin";
 
         // Act
@@ -32,7 +32,7 @@ public sealed class ProjectEntityTests
             endDate: endDate,
             parentProjectId: parentProjectId,
             context: context,
-            domain: domain,
+            domainIds: domainIds,
             keypoint: keypoint,
             createdBy: createdBy);
 
@@ -46,7 +46,7 @@ public sealed class ProjectEntityTests
         entity.EndDate.Should().Be(endDate);
         entity.ParentProjectId.Should().Be(parentProjectId);
         entity.Context.Should().Be(context);
-        entity.Domain.Should().Be(domain);
+        entity.DomainIds.Should().BeEquivalentTo(domainIds);
         entity.Keypoint.Should().Be(keypoint);
         entity.CreatedBy.Should().Be(createdBy);
         entity.CreatedOnUtc.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));
@@ -122,7 +122,7 @@ public sealed class ProjectEntityTests
             description: "New Desc",
             code: "NEW",
             context: "New Context",
-            domain: "New Domain",
+            domainIds: new List<Guid> { Guid.NewGuid() },
             keypoint: "New Keypoint",
             status: ProjectStatus.Completed,
             startDate: DateTimeOffset.UtcNow,
@@ -133,7 +133,6 @@ public sealed class ProjectEntityTests
         entity.Description.Should().Be("New Desc");
         entity.Code.Should().Be("NEW");
         entity.Context.Should().Be("New Context");
-        entity.Domain.Should().Be("New Domain");
         entity.Keypoint.Should().Be("New Keypoint");
         entity.Status.Should().Be(ProjectStatus.Completed);
         entity.LastModifiedOnUtc.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));

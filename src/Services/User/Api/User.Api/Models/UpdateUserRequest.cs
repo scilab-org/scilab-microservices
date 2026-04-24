@@ -15,7 +15,6 @@ public class UpdateUserRequest
     public string? GroupNames { get; set; }
 
     public IFormFile? AvatarImage { get; set; }
-    public string? OcrId { get; set; }
 
     #endregion
 }

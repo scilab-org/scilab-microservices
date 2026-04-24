@@ -10,7 +10,7 @@ public static class ProjectTestData
         DateTimeOffset? startDate = null,
         DateTimeOffset? endDate = null,
         string? context = null,
-        string? domain = null,
+        List<Guid>? domainIds = null,
         string? keypoint = null)
     {
         return new CreateProjectDto
@@ -22,7 +22,7 @@ public static class ProjectTestData
             StartDate = startDate,
             EndDate = endDate,
             Context = context,
-            Domain = domain,
+            DomainIds = domainIds ?? [],
             Keypoint = keypoint
         };
     }
@@ -35,7 +35,7 @@ public static class ProjectTestData
         DateTimeOffset? startDate = null,
         DateTimeOffset? endDate = null,
         string? context = null,
-        string? domain = null,
+        List<Guid>? domainIds = null,
         string? keypoint = null)
     {
         return new UpdateProjectDto
@@ -47,7 +47,7 @@ public static class ProjectTestData
             StartDate = startDate,
             EndDate = endDate,
             Context = context,
-            Domain = domain,
+            DomainIds = domainIds ?? [],
             Keypoint = keypoint
         };
     }
@@ -60,7 +60,7 @@ public static class ProjectTestData
         List<Guid>? paperIds = null,
         List<Guid>? conferenceJournalIds = null,
         string? context = null,
-        string? domain = null,
+        List<Guid>? domainIds = null,
         string? keypoint = null,
         string? createdBy = null)
     {
@@ -72,7 +72,7 @@ public static class ProjectTestData
             paperIds: paperIds,
             conferenceJournalIds: conferenceJournalIds,
             context: context,
-            domain: domain,
+            domainIds: domainIds,
             keypoint: keypoint,
             createdBy: createdBy);
     }

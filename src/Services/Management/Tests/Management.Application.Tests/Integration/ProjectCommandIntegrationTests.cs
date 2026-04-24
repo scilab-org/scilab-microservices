@@ -152,7 +152,7 @@ public class UpdateProjectCommandHandlerIntegrationTests
     public async Task Handle_Should_UpdateProject_WithoutRuleSync()
     {
         await using var session = _fixture.CreateSession();
-        var project = ProjectEntity.Create(Guid.NewGuid(), name: "Old", context: "ctx", domain: "dom", keypoint: "kp");
+        var project = ProjectEntity.Create(Guid.NewGuid(), name: "Old", context: "ctx", domainIds: new List<Guid> { Guid.NewGuid() }, keypoint: "kp");
         session.Store(project);
         await session.SaveChangesAsync();
 
@@ -162,7 +162,7 @@ public class UpdateProjectCommandHandlerIntegrationTests
         {
             Name = "Updated",
             Context = "ctx",
-            Domain = "dom",
+            DomainIds = project.DomainIds,
             Keypoint = "kp"
         });
 
@@ -181,7 +181,7 @@ public class UpdateProjectCommandHandlerIntegrationTests
     {
         await using var session = _fixture.CreateSession();
         var projectId = Guid.NewGuid();
-        var project = ProjectEntity.Create(projectId, name: "P", context: "oldCtx", domain: "oldDom", keypoint: "oldKp");
+        var project = ProjectEntity.Create(projectId, name: "P", context: "oldCtx", domainIds: new List<Guid> { Guid.NewGuid() }, keypoint: "oldKp");
         session.Store(project);
 
         var paperId = Guid.NewGuid();
@@ -191,6 +191,7 @@ public class UpdateProjectCommandHandlerIntegrationTests
         await session.SaveChangesAsync();
 
         var labMock = new Mock<ILabApiService>();
+        var nextDomainIds = new List<Guid> { Guid.NewGuid() };
         labMock.Setup(x => x.UpdateProjectRulesAsync(
                 It.IsAny<IEnumerable<Guid>>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
@@ -201,7 +202,7 @@ public class UpdateProjectCommandHandlerIntegrationTests
         {
             Name = "Updated",
             Context = "newCtx",
-            Domain = "newDom",
+            DomainIds = nextDomainIds,
             Keypoint = "newKp"
         });
 
@@ -209,7 +210,7 @@ public class UpdateProjectCommandHandlerIntegrationTests
 
         labMock.Verify(x => x.UpdateProjectRulesAsync(
             It.Is<IEnumerable<Guid>>(ids => ids.Contains(paperId)),
-            "newCtx", "newDom", "newKp",
+            "newCtx", string.Join(",", nextDomainIds), "newKp",
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

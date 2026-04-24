@@ -9,11 +9,13 @@ public sealed class PaperEntityTests
         var journalId = Guid.NewGuid();
         var refs = new List<Reference> { new() { PaperId = Guid.NewGuid() } };
 
+        var gapTypeIds = new List<Guid> { Guid.NewGuid() };
+
         var entity = PaperEntity.Create(id, "Test Paper",
             template: "IMRAD", context: "AI Research",
             abstractText: "Abstract text", researchGap: "Gap",
             mainContribution: "Contribution", researchAim: "Aim",
-            rule: "Rule", gapType: "Type1",
+            rule: "Rule", gapTypeIds: gapTypeIds,
             conferenceJournalName: "Journal", conferenceJournalId: journalId,
             conferenceJournalStartAt: DateTimeOffset.UtcNow,
             conferenceJournalEndAt: DateTimeOffset.UtcNow.AddDays(3),
@@ -29,7 +31,7 @@ public sealed class PaperEntityTests
         entity.MainContribution.Should().Be("Contribution");
         entity.ResearchAim.Should().Be("Aim");
         entity.Rule.Should().Be("Rule");
-        entity.GapType.Should().Be("Type1");
+        entity.GapTypeIds.Should().BeEquivalentTo(gapTypeIds);
         entity.ConferenceJournalName.Should().Be("Journal");
         entity.ConferenceJournalId.Should().Be(journalId);
         entity.Status.Should().Be(PaperStatus.Draft);
@@ -60,12 +62,12 @@ public sealed class PaperEntityTests
             conferenceJournalName: "New Journal", conferenceJournalId: journalId,
             conferenceJournalStartAt: DateTimeOffset.UtcNow,
             conferenceJournalEndAt: DateTimeOffset.UtcNow.AddDays(5),
-            status: PaperStatus.Released, gapType: "NewType",
+            status: PaperStatus.Released, gapTypeIds: new List<Guid> { Guid.NewGuid() },
             references: new List<Reference>(), lastModifiedBy: "editor");
 
         entity.Title.Should().Be("New Title");
         entity.Template.Should().Be("IEEE");
-        entity.GapType.Should().Be("NewType");
+        entity.GapTypeIds.Should().ContainSingle();
         entity.Status.Should().Be(PaperStatus.Released);
         entity.LastModifiedBy.Should().Be("editor");
     }

@@ -240,7 +240,7 @@ public sealed class UpdatePaperCommandValidatorTests
         Context = context,
         Abstract = "abstract",
         ResearchGap = "gap",
-        GapType = "type",
+        GapTypeIds = [Guid.NewGuid()],
         MainContribution = "contribution",
         ResearchAim = "aim",
         ConferenceJournalStartAt = DateTimeOffset.UtcNow,

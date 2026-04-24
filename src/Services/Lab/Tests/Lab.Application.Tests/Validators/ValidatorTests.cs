@@ -289,9 +289,11 @@ public sealed class CreateJournalCommandValidatorTests
         var dto = new CreateJournalEntityDto
         {
             Name = "ICSE",
+            ISSN = "1234-5678",
             Ranking = "A*",
             Url = "https://icse.org",
             TemplateIds = [Guid.NewGuid()],
+            Type = ConferenceJournalType.Journal,
             Style = "IEEE"
         };
         var command = new CreateJournalCommand(dto, "user");
@@ -321,7 +323,7 @@ public sealed class UpdateJournalCommandValidatorTests
     [Fact]
     public void ShouldNotHaveError_WhenValid()
     {
-        var dto = new UpdateJournalEntityDto { Name = "ICSE", Ranking = "A*", Url = "https://icse.org" };
+        var dto = new UpdateJournalEntityDto { Name = "ICSE", Ranking = "A*", Url = "https://icse.org", ISSN = "1234-5678", Type = ConferenceJournalType.Journal, TemplateIds = [Guid.NewGuid()] };
         var command = new UpdateJournalCommand(dto, Guid.NewGuid(), "user");
         _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
     }
@@ -354,7 +356,7 @@ public sealed class CreatePaperCommandValidatorTests
             Context = dto.Context,
             Abstract = dto.Abstract,
             ResearchGap = dto.ResearchGap,
-            GapType = dto.GapType,
+            GapTypeIds = dto.GapTypeIds,
             MainContribution = dto.MainContribution,
             ResearchAim = dto.ResearchAim,
             ConferenceJournalId = dto.ConferenceJournalId,
@@ -382,7 +384,7 @@ public sealed class CreatePaperCommandValidatorTests
         Context = "Context",
         Abstract = "Abstract",
         ResearchGap = "Gap",
-        GapType = "Type",
+        GapTypeIds = [Guid.NewGuid()],
         MainContribution = "Contribution",
         ResearchAim = "Aim",
         ConferenceJournalId = Guid.NewGuid(),

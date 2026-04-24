@@ -64,7 +64,6 @@ public sealed class KeycloakService : IKeycloakService
         bool temporaryPassword = true,
         List<string>? groupNames = null,
         string? avatarUrl = null,
-        string? ocrId = null,
         CancellationToken cancellationToken = default)
     {
         string? createdUserId = null;
@@ -177,7 +176,6 @@ public sealed class KeycloakService : IKeycloakService
         bool? enabled,
         List<string>? groupNames,
         string? avatarUrl = null,
-        string? ocrId = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -695,8 +693,7 @@ public sealed class KeycloakService : IKeycloakService
         Email = user.Email,
         FirstName = user.FirstName,
         LastName = user.LastName,
-        OcrId = user.OcrId ?? (user.Attributes?.TryGetValue("ocrId", out var ocrValues) == true ? ocrValues.FirstOrDefault() : null),
-        Enabled = user.Enabled,
+         Enabled = user.Enabled,
         EmailVerified = user.EmailVerified,
         CreatedTimestamp = user.CreatedTimestamp,
         AvatarUrl = user.Attributes?.TryGetValue("avatarUrl", out var avatarValues) == true

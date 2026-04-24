@@ -48,7 +48,7 @@ public sealed class SectionRuleComposerTests
             Context = "AI Research",
             Abstract = "Abstract text",
             ResearchGap = "Gap text",
-            GapType = "Methodological",
+            GapTypeIds = new List<Guid> { Guid.NewGuid() },
             ResearchAim = "Aim text",
             ConferenceJournalId = Guid.NewGuid(),
             ConferenceJournalName = "ICSE"
@@ -56,7 +56,7 @@ public sealed class SectionRuleComposerTests
         var journal = ConferenceJournalEntity.Create(
             Guid.NewGuid(), "ICSE 2024", "A*", null, null, "IEEE", ConferenceJournalType.Journal, [], null, null);
 
-        var result = SectionRuleComposer.BuildPaperRule(dto, journal);
+        var result = SectionRuleComposer.BuildPaperRule(dto, new[] { "Methodological" }, journal);
 
         result.Should().Contain("Level 2 (Important)");
         result.Should().Contain("AI Research");
@@ -77,11 +77,11 @@ public sealed class SectionRuleComposerTests
     {
         var paper = PaperEntity.Create(Guid.NewGuid(), "Title",
             context: "Context", abstractText: "Abstract",
-            researchGap: "Gap", gapType: "Type", researchAim: "Aim");
+            researchGap: "Gap", gapTypeIds: new List<Guid> { Guid.NewGuid() }, researchAim: "Aim");
         var journal = ConferenceJournalEntity.Create(
             Guid.NewGuid(), "Journal", "B", null, null, "ACM", ConferenceJournalType.Journal, [], null, null);
 
-        var result = SectionRuleComposer.BuildPaperRule(paper, journal);
+        var result = SectionRuleComposer.BuildPaperRule(paper, new[] { "Type" }, journal);
 
         result.Should().Contain("Level 2 (Important)");
         result.Should().Contain("Context");
