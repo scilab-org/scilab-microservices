@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
@@ -11,7 +12,8 @@ namespace Lab.Application.Features.PaperBank.Queries.GetPaperBanks;
 
 public record GetPaperBanksQuery(GetPaperBanksFilter Filter, PaginationRequest Paging) : IQuery<GetPaperBanksResult>;
 
-public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper) : IQueryHandler<GetPaperBanksQuery, GetPaperBanksResult>
+public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
+    : IQueryHandler<GetPaperBanksQuery, GetPaperBanksResult>
 {
     #region Implementations
 
@@ -26,7 +28,7 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
         if (!filter.Title.IsNullOrWhiteSpace())
         {
             var title = filter.Title.Trim().ToLower();
-            query = query.Where(x => x.Title != null && x.Title.ToLower().Contains(title));
+            query = query.Where(x => x.Title != null! && x.Title.ToLower().Contains(title));
         }
 
         if (filter.Author?.Any() == true)
@@ -60,30 +62,25 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
         if (filter.FromPublicationDate.HasValue)
         {
-            query = query.Where(x => x.PublicationDate.HasValue && x.PublicationDate.Value >= filter.FromPublicationDate.Value);
+            query = query.Where(x =>
+                x.PublicationDate.HasValue && x.PublicationDate.Value >= filter.FromPublicationDate.Value);
         }
 
         if (filter.ToPublicationDate.HasValue)
         {
-            query = query.Where(x => x.PublicationDate.HasValue && x.PublicationDate.Value <= filter.ToPublicationDate.Value);
+            query = query.Where(x =>
+                x.PublicationDate.HasValue && x.PublicationDate.Value <= filter.ToPublicationDate.Value);
         }
 
-        if (!filter.PaperType.IsNullOrWhiteSpace())
+        if (filter.GapTypeId.HasValue)
         {
-            var paperType = filter.PaperType.Trim();
-            query = query.Where(x => x.PaperType != null && x.PaperType.Contains(paperType));
+            var gapTypeId = filter.GapTypeId.Value;
+            query = query.Where(x => x.GapTypeIds != null && x.GapTypeIds.Any(id => id == gapTypeId));
         }
 
-        if (!filter.JournalName.IsNullOrWhiteSpace())
+        if (filter.JournalId.HasValue)
         {
-            var journalName = filter.JournalName.Trim();
-            query = query.Where(x => x.JournalName != null && x.JournalName.Contains(journalName));
-        }
-
-        if (!filter.ConferenceName.IsNullOrWhiteSpace())
-        {
-            var conferenceName = filter.ConferenceName.Trim();
-            query = query.Where(x => x.ConferenceName != null && x.ConferenceName.Contains(conferenceName));
+            query = query.Where(x => x.ConferenceJournalId != null && x.ConferenceJournalId == filter.JournalId);
         }
 
         if (!filter.Ranking.IsNullOrWhiteSpace())
@@ -106,25 +103,26 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
             query = query.Where(x => !ids.Contains(x.Id));
         }
 
-        if (filter.Tag?.Any() == true)
+        if (filter.Keyword?.Any() == true)
         {
-            var tagNames = NormalizeTagNames(filter.Tag);
+            var keywords = NormalizeKeywords(filter.Keyword);
 
-            if (tagNames.Count > 0)
+            if (keywords.Count > 0)
             {
-                foreach (var searchTag in tagNames)
+                foreach (var searchKeyword in keywords)
                 {
-                    var local = searchTag;
+                    var local = searchKeyword;
 
                     query = query.Where(p =>
-                        p.TagNames.Count != 0 &&
-                        p.TagNames.Any(t => t.Contains(local))
+                        p.Keywords.Count != 0 &&
+                        p.Keywords.Any(t => t.Contains(local))
                     );
                 }
             }
         }
+
         #endregion
-       
+
         #endregion
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -135,6 +133,57 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
         var papers = result.ToList();
         var items = mapper.Map<List<PaperBankDto>>(papers);
 
+        var journalIds = papers
+            .Where(p => p.ConferenceJournalId.HasValue)
+            .Select(p => p.ConferenceJournalId!.Value)
+            .Distinct()
+            .ToList();
+
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var gapTypeIds = papers
+            .SelectMany(p => p.GapTypeIds ?? new List<Guid>())
+            .Distinct()
+            .ToList();
+
+        IReadOnlyList<GapTypeEntity> gapTypes = gapTypeIds.Count > 0
+            ? await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        items.ForEach(item =>
+        {
+            if (item.ConferenceJournalId.HasValue)
+            {
+                var journal = journals.FirstOrDefault(x => x.Id == item.ConferenceJournalId.Value);
+                if (journal != null)
+                {
+                    item.ConferenceJournalName = journal.Name;
+                }
+            }
+
+            var itemGapTypeIds = papers
+                .FirstOrDefault(p => p.Id == item.Id)?
+                .GapTypeIds ?? new List<Guid>();
+
+            if (itemGapTypeIds.Any())
+            {
+                item.GapTypes = gapTypes
+                    .Where(x => itemGapTypeIds.Contains(x.Id))
+                    .Select(x => new GapTypeInfoDto
+                    {
+                        Id = x.Id,
+                        Name = x.Name
+                    })
+                    .ToList();
+            }
+        });
+
         var response = new GetPaperBanksResult(items, totalCount, paging);
 
         return response;
@@ -144,11 +193,11 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
 
     #region Methods
 
-    private List<string> NormalizeTagNames(string[]? tagNames)
+    private List<string> NormalizeKeywords(string[]? keywords)
     {
-        if (tagNames == null) return new List<string>();
+        if (keywords == null) return new List<string>();
 
-        return tagNames
+        return keywords
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Select(x => x.Trim().ToLowerInvariant())
             .ToList();

@@ -64,6 +64,7 @@ public class GetSubProjectMembersQueryHandler(
                     Email     = u.Email,
                     FirstName = u.FirstName,
                     LastName  = u.LastName,
+                    Orcid     = u.OcrId,
                     Enabled   = u.Enabled,
                     Role      = m.ProjectRole,
                     JoinedAt  = m.JoinedAt

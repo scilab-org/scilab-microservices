@@ -1,4 +1,5 @@
 ﻿using Lab.Application.Dtos.Abstractions;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Domain.Enums;
 
 namespace Lab.Application.Dtos.Papers;
@@ -14,7 +15,7 @@ public  class PaperInfoDto : DtoId<Guid>
     public string? MainContribution { get; set; }
     public string? ResearchAim { get; set; }
     public string? Rule { get; set; }
-    public string? GapType { get; set; }
+    public List<GapTypeInfoDto> GapTypes { get; set; } = new();
     public Guid? ConferenceJournalId { get; set; }
     public string? ConferenceJournalName { get; set; }
     public DateTimeOffset? ConferenceJournalStartAt { get; set; }

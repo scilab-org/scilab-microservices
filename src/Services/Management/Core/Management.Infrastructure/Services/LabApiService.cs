@@ -40,7 +40,7 @@ file sealed class LabPaperItem
     public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
 }
 
 // GET /papers/sample  =>  { "result": { "items": [...], "paging": {...} } }
@@ -102,7 +102,7 @@ file sealed class LabPaperFull
     public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
     public string? CreatedBy { get; set; }
 }
 
@@ -168,6 +168,32 @@ file sealed class LabPaperContributorItem
 }
 
 [ExcludeFromCodeCoverage]
+file sealed class LabPaperAuthorItem
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string? OcrId { get; set; }
+    public string Email { get; set; } = null!;
+    public Guid PaperId { get; set; }
+    public Guid AuthorRoleId { get; set; }
+    public string? AuthorRoleName { get; set; }
+    public string? AuthorRoleDescription { get; set; }
+    public Guid MemberId { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabGetPaperAuthorsResult
+{
+    public List<LabPaperAuthorItem> Items { get; set; } = new();
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabGetPaperAuthorsResponse
+{
+    public LabGetPaperAuthorsResult? Result { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
 file sealed class LabGetPaperContributorsResult
 {
     public List<LabPaperContributorItem> Items { get; set; } = new();
@@ -203,7 +229,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         string? paperType = null,
         string? journalName = null,
         string? conferenceName = null,
-        string[]? tag = null,
+        string[]? keywords = null,
         int pageNumber = 1,
         int pageSize = 1000,
         CancellationToken cancellationToken = default)
@@ -224,7 +250,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
             paperType: paperType,
             journalName: journalName,
             conferenceName: conferenceName,
-            tag: tag,
+            keywords: keywords,
             existingPaperIds: existingSet.Count > 0 ? existingSet.ToArray() : null);
 
         if (!response.IsSuccessStatusCode)
@@ -375,7 +401,7 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         string? number = null,
         string? volume = null,
         string? referenceContent = null,
-        string[]? tags = null,
+        string[]? keywords = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -428,19 +454,19 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
                 .ToList();
         }
 
-        // Apply optional tags filter — AND semantics: paper must contain ALL requested tags
-        if (tags is { Length: > 0 })
+        // Apply optional keywords filter — AND semantics: paper must contain ALL requested keywords
+        if (keywords is { Length: > 0 })
         {
-            var normalizedTags = tags
-                .Select(t => t.Trim().ToLowerInvariant())
-                .Where(t => t.Length > 0)
+            var normalizedKeywords = keywords
+                .Select(k => k.Trim().ToLowerInvariant())
+                .Where(k => k.Length > 0)
                 .ToList();
 
-            foreach (var tag in normalizedTags)
+            foreach (var keyword in normalizedKeywords)
             {
-                var local = tag;
+                var local = keyword;
                 allPapers = allPapers
-                    .Where(p => p.TagNames.Any(t => t.ToLowerInvariant().Contains(local)))
+                    .Where(p => p.Keywords.Any(k => k.ToLowerInvariant().Contains(local)))
                     .ToList();
             }
         }
@@ -545,6 +571,38 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         catch
         {
             return false;
+        }
+    }
+
+    public async Task<List<LabPaperContributorDto>> GetPaperAuthorsAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetPaperAuthorsAsync(paperId);
+            if (!response.IsSuccessStatusCode)
+                return new List<LabPaperContributorDto>();
+
+            var body = await response.Content
+                .ReadFromJsonAsync<LabGetPaperAuthorsResponse>(cancellationToken: cancellationToken);
+
+            return body?.Result?.Items?
+                .Select(x => new LabPaperContributorDto
+                {
+                    Id            = x.Id,
+                    PaperId       = x.PaperId,
+                    MemberId      = x.MemberId,
+                    MarkSectionId = x.AuthorRoleId,
+                    SectionId     = null,
+                    SectionRole   = x.AuthorRoleName,
+                    UserId        = x.MemberId
+                })
+                .ToList() ?? new List<LabPaperContributorDto>();
+        }
+        catch
+        {
+            return new List<LabPaperContributorDto>();
         }
     }
 
@@ -744,7 +802,6 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
-
     #endregion
 }
 
@@ -783,7 +840,7 @@ file static class LabPaperItemMapper
         Volume          = p.Volume,
         ConferenceName  = p.ConferenceName,
         ReferenceContent = p.ReferenceContent,
-        TagNames        = p.TagNames
+        Keywords        = p.Keywords
     };
 
     internal static PaperInfoDto MapToPaperDto(this LabPaperFull p) => new()
@@ -807,7 +864,7 @@ file static class LabPaperItemMapper
         Volume          = p.Volume,
         ConferenceName  = p.ConferenceName,
         ReferenceContent = p.ReferenceContent,
-        TagNames        = p.TagNames,
+        Keywords        = p.Keywords,
         CreatedBy       = p.CreatedBy
     };
 }

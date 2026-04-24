@@ -37,9 +37,19 @@ public class GetJournalByIdQueryHandler(
 
         var response = mapper.Map<JournalDto>(journal);
 
-        var template = await session.LoadAsync<TemplateEntity>(journal.TemplateId, cancellationToken);
+        var templates = journal.TemplateIds is { Count: > 0 }
+            ? await session.Query<TemplateEntity>()
+                .Where(x => journal.TemplateIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
 
-        response.TemplateCode = template?.Code ?? "N/A";
+        response.Templates = templates
+            .Select(x => new JournalTemplateDto
+            {
+                Id = x.Id,
+                Code = x.Code!
+            })
+            .ToList();
 
         var projects = new List<ProjectJournalInfo>();
         if (journal.ProjectIds != null && journal.ProjectIds.Count != 0)

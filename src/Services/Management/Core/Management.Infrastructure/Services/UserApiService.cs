@@ -16,6 +16,7 @@ file sealed class UserServiceItem
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public string? OcrId { get; set; }
     public bool Enabled { get; set; }
     public List<UserServiceGroup>? Groups { get; set; }
 }
@@ -126,6 +127,8 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
                 Email = u.Email,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
+                OcrId = u.OcrId,
+                Orcid = u.OcrId,
                 Enabled = u.Enabled
             })
             .ToList();
@@ -162,6 +165,7 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
                     Email     = u.Email,
                     FirstName = u.FirstName,
                     LastName  = u.LastName,
+                    OcrId     = u.OcrId,
                     Enabled   = u.Enabled,
                     Groups    = u.Groups?.Select(g => g.Name).ToList() ?? new List<string>()
                 });

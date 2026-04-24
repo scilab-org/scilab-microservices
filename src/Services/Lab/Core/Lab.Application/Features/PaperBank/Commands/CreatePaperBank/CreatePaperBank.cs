@@ -9,7 +9,6 @@ using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
 using MediatR;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace Lab.Application.Features.PaperBank.Commands.CreatePaperBank;
 
@@ -35,26 +34,36 @@ public class CreatePaperBankCommandValidator : AbstractValidator<CreatePaperBank
                     .When(x => x.Dto.PublicationDate.HasValue)
                     .WithMessage(MessageCode.PaperPublicationDateInvalid);
 
-                RuleFor(x => x.Dto.UploadFile)
+                RuleFor(x => x.Dto.UploadPdfFile)
                     .NotNull()
                     .WithMessage(MessageCode.PaperFileIsRequired);
+
+                RuleFor(x => x.Dto.ConferenceJournalId)
+                    .NotNull()
+                    .WithMessage(MessageCode.JournalIdIsRequired);
             });
     }
 }
 
-public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloudService minIo, IOutboxRepository outboxRepo)
-    : IRequestHandler<CreatePaperBankCommand, Guid>
+public class CreatePaperBankCommandHandler(
+    IDocumentSession session,
+    IMinIoCloudService minIo,
+    IOutboxRepository outboxRepo)
+    : ICommandHandler<CreatePaperBankCommand, Guid>
 {
     #region Implementations
 
     public async Task<Guid> Handle(CreatePaperBankCommand request, CancellationToken cancellationToken)
     {
         var dto = request.Dto;
-        var tagNames = NomalizeTagNames(dto.TagNames);
+        var keywords = NormalizeKeywords(dto.Keywords);
 
         await session.BeginTransactionAsync(cancellationToken);
 
-        await EnsureTagsExistAsync(tagNames, cancellationToken);
+        await EnsureTagsExistAsync(keywords, cancellationToken);
+
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+                      ?? throw new NotFoundException(MessageCode.JournalIsNotExists, dto.ConferenceJournalId);
 
         var entity = PaperBankEntity.Create(
             id: Guid.NewGuid(),
@@ -64,34 +73,34 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             ranking: dto.Ranking,
             abstractText: dto.Abstract,
             doi: dto.Doi,
+            url: dto.Url,
             parsedText: dto.ParsedText,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
-            paperType: dto.PaperType,
-            journalName: dto.JournalName,
+            gapTypeIds: dto.GapTypeIds,
             pages: dto.Pages,
             number: dto.Number,
             volume: dto.Volume,
-            conferenceName: dto.ConferenceName,
+            conferenceJournalId: dto.ConferenceJournalId,
             referenceContent: dto.ReferenceContent,
-            tagNames: tagNames,
+            keywords: keywords,
             ingestStatus: IngestStatus.Pending);
 
-        await UploadFileAsync(dto.UploadFile, entity, cancellationToken);
+        var (pdfFile, bibFile) = await UploadFilesAsync(dto, cancellationToken);
+        entity.UpdateFilePath(pdfFile, bibFile);
 
         session.Store(entity);
 
-        //publish event to outbox (for paper ingestion)
         var message = new PaperIngestionEvent
         {
             PaperId = entity.Id,
             PaperName = entity.Title,
             ParsedText = entity.ParsedText ?? string.Empty,
-            ReferenceKey = GenerateReferenceKey(entity),         
+            ReferenceKey = GenerateReferenceKey(entity),
             Authors = entity.Authors ?? string.Empty,
             Publisher = entity.Publisher ?? string.Empty,
-            JournalName = entity.JournalName ?? string.Empty,
+            JournalName = journal.Name ?? string.Empty,
             Volume = entity.Volume ?? string.Empty,
             Pages = entity.Pages ?? string.Empty,
             Doi = entity.Doi ?? string.Empty,
@@ -115,47 +124,51 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
 
     #region Methods
 
-    private async Task UploadFileAsync(UploadFileBytes? file,
-        PaperBankEntity entity,
+    private async Task<(string? PdfFile, string? BibFile)> UploadFilesAsync(
+        CreatePaperBankDto dto,
         CancellationToken cancellationToken)
     {
-        if (file == null) return;
+        var pdfFile = await UploadFileAsync(dto.UploadPdfFile, cancellationToken);
+        var bibFile = await UploadFileAsync(dto.UploadBibFile, cancellationToken);
 
-        var result = await minIo.UploadFilesAsync(entity.Id.ToString(), [file],
+        return (pdfFile, bibFile);
+    }
+
+    private async Task<string?> UploadFileAsync(UploadFileBytes? file, CancellationToken cancellationToken)
+    {
+        if (file == null) return null;
+
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+        var shortId = Guid.NewGuid().ToString("N")[..8];
+        var name = $"{fileNameWithoutExtension}-{shortId}";
+
+        var result = await minIo.UploadFilesAsync(
+            name,
+            [file],
             AppConstants.Bucket.Papers,
             true,
             cancellationToken);
 
-        var uploaded = result.FirstOrDefault();
-
-        if (uploaded != null)
-        {
-            entity.UpdateFilePath(uploaded.PublicURL);
-        }
+        return result.FirstOrDefault()?.PublicURL;
     }
 
     private static string GenerateReferenceKey(PaperBankEntity entity)
     {
         var year = entity.PublicationDate?.Year.ToString() ?? string.Empty;
 
-        // Normalise " and " separators (case-insensitive) → ", "
         var authors = entity.Authors ?? string.Empty;
         var normalizedAuthors = Regex.Replace(authors, @"\s+and\s+", ", ", RegexOptions.IgnoreCase);
 
-        // First non-empty token after splitting on ","
         var firstAuthorToken = normalizedAuthors
             .Split(',')
             .Select(p => p.Trim())
             .FirstOrDefault(p => !string.IsNullOrEmpty(p));
 
-        // Fallback chain: first author token → title → "Paper"
         var raw = firstAuthorToken
-            ?? (string.IsNullOrWhiteSpace(entity.Title) ? "Paper" : entity.Title);
+                  ?? (string.IsNullOrWhiteSpace(entity.Title) ? "Paper" : entity.Title);
 
-        // Strip non-alphanumeric characters
         var authorToken = Regex.Replace(raw, @"[^A-Za-z0-9]+", string.Empty);
 
-        // Prefix "Paper" if the token starts with a digit
         if (authorToken.Length > 0 && char.IsDigit(authorToken[0]))
             authorToken = "Paper" + authorToken;
 
@@ -170,36 +183,35 @@ public class CreatePaperBankCommandHandler(IDocumentSession session, IMinIoCloud
             ? date.Value.ToString("MMMM yyyy", CultureInfo.InvariantCulture)
             : null;
 
-    private List<string> NomalizeTagNames(List<string>? tagNames)
+    private List<string> NormalizeKeywords(List<string>? keywords)
     {
-        if (tagNames == null) return new List<string>();
-
-        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
+        if (keywords == null) return new List<string>();
+        return keywords.Select(x => x.Trim().ToLowerInvariant()).ToList();
     }
 
     private async Task EnsureTagsExistAsync(
-        List<string> tagNames,
+        List<string> keywords,
         CancellationToken cancellationToken)
     {
-        if (tagNames.Count == 0) return;
+        if (keywords.Count == 0) return;
 
         var existingTags = await session
-            .Query<TagEntity>()
-            .Where(x => tagNames.Contains(x.Name))
+            .Query<KeywordEntity>()
+            .Where(x => keywords.Contains(x.Name))
             .ToListAsync(cancellationToken);
 
         var existingTagNames = existingTags
             .Select(x => x.Name)
             .ToHashSet();
 
-        var newTagNames = tagNames
+        var newTagNames = keywords
             .Where(x => !existingTagNames.Contains(x))
             .Distinct()
             .ToList();
 
         foreach (var name in newTagNames)
         {
-            var tag = TagEntity.Create(Guid.NewGuid(), name);
+            var tag = KeywordEntity.Create(Guid.NewGuid(), name);
             session.Store(tag);
         }
     }

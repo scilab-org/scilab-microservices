@@ -1,12 +1,12 @@
 namespace Lab.Domain.Tests.Entities;
 
-public sealed class TagEntityTests
+public sealed class KeywordEntityTests
 {
     [Fact]
     public void Create_ShouldInitializeCorrectly()
     {
         var id = Guid.NewGuid();
-        var entity = TagEntity.Create(id, "Machine Learning");
+        var entity = KeywordEntity.Create(id, "Machine Learning");
 
         entity.Id.Should().Be(id);
         entity.Name.Should().Be("Machine Learning");
@@ -16,7 +16,7 @@ public sealed class TagEntityTests
     [Fact]
     public void Update_ShouldUpdateName()
     {
-        var entity = TagEntity.Create(Guid.NewGuid(), "Old Tag");
+        var entity = KeywordEntity.Create(Guid.NewGuid(), "Old Tag");
         entity.Update("New Tag");
         entity.Name.Should().Be("New Tag");
     }
@@ -24,7 +24,7 @@ public sealed class TagEntityTests
     [Fact]
     public void Update_ShouldKeepExisting_WhenNameIsNull()
     {
-        var entity = TagEntity.Create(Guid.NewGuid(), "Tag");
+        var entity = KeywordEntity.Create(Guid.NewGuid(), "Tag");
         entity.Update(null);
         entity.Name.Should().Be("Tag");
     }

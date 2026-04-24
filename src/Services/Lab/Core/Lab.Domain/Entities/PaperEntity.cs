@@ -17,7 +17,7 @@ public sealed class PaperEntity : Entity<Guid>
     public string? MainContribution { get; set; }
     public string? ResearchAim { get; set; }
     public string? Rule { get; set; }
-    public string? GapType { get; set; }
+    public List<Guid> GapTypeIds { get; set; } = new();
     public string? ConferenceJournalName { get; set; }
     public Guid? ConferenceJournalId { get; set; }
     public DateTimeOffset? ConferenceJournalStartAt { get; set; }
@@ -38,7 +38,7 @@ public sealed class PaperEntity : Entity<Guid>
         string? mainContribution = null,
         string? researchAim = null,
         string? rule = null,
-        string? gapType = null,
+        List<Guid>? gapTypeIds = null,
         string? conferenceJournalName = null,
         Guid? conferenceJournalId = null,
         DateTimeOffset? conferenceJournalStartAt = null,
@@ -58,7 +58,7 @@ public sealed class PaperEntity : Entity<Guid>
             MainContribution = mainContribution,
             ResearchAim = researchAim,
             Rule = rule,
-            GapType = gapType,
+            GapTypeIds = gapTypeIds ?? new(),
             ConferenceJournalName = conferenceJournalName,
             ConferenceJournalId = conferenceJournalId,
             ConferenceJournalStartAt = conferenceJournalStartAt,
@@ -88,7 +88,7 @@ public sealed class PaperEntity : Entity<Guid>
         DateTimeOffset? conferenceJournalStartAt = null,
         DateTimeOffset? conferenceJournalEndAt = null,
         PaperStatus? status = null,
-        string? gapType = null,
+        List<Guid>? gapTypeIds = null,
         List<Reference>? references = null,
         string? lastModifiedBy = null)
     {
@@ -100,7 +100,7 @@ public sealed class PaperEntity : Entity<Guid>
         MainContribution = mainContribution ?? MainContribution;
         ResearchAim = researchAim ?? ResearchAim;
         Rule = rule ?? Rule;
-        GapType = gapType ?? GapType;
+        GapTypeIds = gapTypeIds ?? GapTypeIds;
         ConferenceJournalName = conferenceJournalName ?? ConferenceJournalName;
         ConferenceJournalId = conferenceJournalId ?? ConferenceJournalId;
         ConferenceJournalStartAt = conferenceJournalStartAt ?? ConferenceJournalStartAt;

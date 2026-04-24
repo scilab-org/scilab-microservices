@@ -23,7 +23,7 @@ public interface ILabApiService
         string? paperType = null,
         string? journalName = null,
         string? conferenceName = null,
-        string[]? tag = null,
+        string[]? keywords = null,
         int pageNumber = 1,
         int pageSize = 1000,
         CancellationToken cancellationToken = default);
@@ -71,7 +71,7 @@ public interface ILabApiService
 
     /// <summary>
     /// Fetches PaperBank details for the given set of paperIds from the Lab service,
-    /// with optional title and tags filters and paging applied (client-side).
+    /// with optional title and keywords filters and paging applied (client-side).
     /// </summary>
     Task<(List<PaperBankInfoDto> Items, long TotalCount)> GetPaperBanksByIdsPagedAsync(
         IEnumerable<Guid> paperIds,
@@ -80,7 +80,7 @@ public interface ILabApiService
         string? number = null,
         string? volume = null,
         string? referenceContent = null,
-        string[]? tags = null,
+        string[]? keywords = null,
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
@@ -101,6 +101,11 @@ public interface ILabApiService
 
     /// <summary>Returns all sections for a given paperId from the Lab service.</summary>
     Task<List<LabSectionDto>> GetSectionsByPaperIdAsync(
+        Guid paperId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Returns all paper authors for a given paperId from the Lab service.</summary>
+    Task<List<LabPaperContributorDto>> GetPaperAuthorsAsync(
         Guid paperId,
         CancellationToken cancellationToken = default);
 

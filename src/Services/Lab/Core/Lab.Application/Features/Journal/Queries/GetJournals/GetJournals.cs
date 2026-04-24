@@ -28,30 +28,34 @@ public class GetJournalsQueryHandler(
             query = query.Where(x => x.Name.Contains(name));
         }
 
-        if (!filter.TemplateCode.IsNullOrWhiteSpace())
+        if (filter.TemplateId.HasValue && filter.TemplateId.Value != Guid.Empty)
         {
-            var code = filter.TemplateCode.Trim().ToLower();
-            var template = await session.Query<TemplateEntity>()
-                .FirstOrDefaultAsync(x => x.Code!.ToLower().Contains(code), cancellationToken);
-            var templateId = template?.Id ?? Guid.Empty;
-
-            query = query.Where(x => x.TemplateId == templateId);
+            query = query.Where(x => x.TemplateIds != null && x.TemplateIds.Contains(filter.TemplateId.Value));
         }
 
-        if (!filter.ProjectId.IsNullOrWhiteSpace())
+        if (filter.ProjectId.HasValue && filter.ProjectId.Value != Guid.Empty)
         {
-            if (Guid.TryParse(filter.ProjectId, out var projectId))
-            {
-                query = query.Where(x => x.ProjectIds != null && x.ProjectIds.Contains(projectId));
-            }
+            query = query.Where(x => x.ProjectIds != null && x.ProjectIds.Contains(filter.ProjectId.Value));
         }
 
-        if (!filter.PaperId.IsNullOrWhiteSpace())
+        if (filter.PaperId.HasValue && filter.PaperId.Value != Guid.Empty)
         {
-            if (Guid.TryParse(filter.PaperId, out var paperId))
-            {
-                query = query.Where(x => x.PaperIds != null && x.PaperIds.Contains(paperId));
-            }
+            query = query.Where(x => x.PaperIds != null && x.PaperIds.Contains(filter.PaperId.Value));
+        }
+
+        if (!filter.ISSN.IsNullOrWhiteSpace())
+        {
+            query = query.Where(x => x.ISSN != null && x.ISSN.Contains(filter.ISSN));
+        }
+
+        if (!filter.Ranking.IsNullOrWhiteSpace())
+        {
+            query = query.Where(x => x.Ranking != null && x.Ranking.Contains(filter.Ranking));
+        }
+
+        if (filter.Type.HasValue)
+        {
+            query = query.Where(x => x.Type == filter.Type);
         }
 
         if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)
@@ -69,10 +73,29 @@ public class GetJournalsQueryHandler(
 
         if (items.Count > 0)
         {
-            foreach (var item in items)
+            var allTemplateIds = journals
+                .SelectMany(x => x.TemplateIds ?? [])
+                .Distinct()
+                .ToList();
+
+            var templates = allTemplateIds.Count > 0
+                ? await session.Query<TemplateEntity>()
+                    .Where(x => allTemplateIds.Contains(x.Id))
+                    .ToListAsync(cancellationToken)
+                : [];
+
+            var templateMap = templates.ToDictionary(x => x.Id, x => new JournalTemplateDto
             {
-                var template = await session.LoadAsync<TemplateEntity>(item.TemplateId, cancellationToken);
-                item.TemplateCode = template?.Code ?? "N/A";
+                Id = x.Id,
+                Code = x.Code!
+            });
+
+            foreach (var (item, journal) in items.Zip(journals))
+            {
+                item.Templates = (journal.TemplateIds ?? [])
+                    .Where(templateMap.ContainsKey)
+                    .Select(id => templateMap[id])
+                    .ToList();
             }
         }
 

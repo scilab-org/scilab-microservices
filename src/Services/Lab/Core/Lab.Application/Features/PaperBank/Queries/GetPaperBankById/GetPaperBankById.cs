@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
@@ -30,6 +31,31 @@ public class GetPaperBankByIdQueryHandler(IDocumentSession session, IMapper mapp
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         var response = mapper.Map<PaperBankDto>(paper);
+
+        if (paper.ConferenceJournalId.HasValue)
+        {
+            var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId.Value, cancellationToken);
+            if (journal != null)
+            {
+                response.ConferenceJournalName = journal.Name;
+            }
+        }
+
+        var gapTypeIds = paper.GapTypeIds ?? new List<Guid>();
+        if (gapTypeIds.Count > 0)
+        {
+            var gapTypes = await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+            response.GapTypes = gapTypes
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList();
+        }
 
         return new GetPaperBankByIdResult(response);
     }

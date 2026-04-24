@@ -46,6 +46,7 @@ public sealed class ApiRoutes
         public const string DeleteSubProjectMembers = $"{BaseProjectManager}/{{subProjectId}}/members/remove";
         public const string DeleteSubProjectPaper = $"{BaseProjectManager}/{{subProjectId}}";
         public const string GetAvailableSubProjectMembers = $"{Base}/{{subProjectId}}/members/available";
+        public const string GetAvailablePaperAuthorMembers = $"{Base}/{{subProjectId}}/paper-authors/available";
         public const string GetSubProjectMembers = $"{Base}/{{subProjectId}}/members";
         public const string GetMemberByPaperId = $"{Base}/papers/{{paperId}}/member";
         public const string GetSubProjectMembersByPaperId = $"{Base}/papers/{{paperId}}/members";
@@ -109,6 +110,22 @@ public sealed class ApiRoutes
         public const string Update = $"{BaseProjectManager}/{{datasetId}}";
         public const string Delete = $"{BaseProjectManager}/{{datasetId}}";
         public const string GetDatasets = $"{Base}";
+
+        #endregion
+    }
+
+    public static class Domain
+    {
+        #region Constants
+        public const string Tags = "Domains";
+
+        private const string BaseAdmin = "/admin/domains";
+        private const string Base = "/domains";
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetDomains = $"{Base}";
+        public const string GetDomainById = $"{Base}/{{id}}";
 
         #endregion
     }

@@ -53,7 +53,7 @@ public class GetAvailablePapersQueryHandler(
             paperType: filter.PaperType,
             journalName: filter.JournalName,
             conferenceName: filter.ConferenceName,
-            tag: filter.Tag,
+            keywords: filter.Keyword,
             pageNumber: paging.PageNumber,
             pageSize: paging.PageSize,
             cancellationToken: cancellationToken);

@@ -1,6 +1,10 @@
 ﻿using Management.Domain.Abstractions;
 using Management.Domain.Enums;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Management.Domain.Entities;
 
 public sealed class ProjectEntity : Entity<Guid>
@@ -14,7 +18,7 @@ public sealed class ProjectEntity : Entity<Guid>
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
     public string? Context { get; set; }
-    public string? Domain { get; set; }
+    public List<Guid> DomainIds { get; set; } = new();
     public string? Keypoint { get; set; }
     public Guid? ParentProjectId { get; set; }
     public List<Guid> DatasetIds { get; set; } = new();
@@ -34,7 +38,7 @@ public sealed class ProjectEntity : Entity<Guid>
         DateTimeOffset? endDate = null,
         Guid? parentProjectId = null,
         string? context = null,
-        string? domain = null,
+        List<Guid>? domainIds = null,
         string? keypoint = null,
         List<Guid>? paperIds = null,
         List<Guid>? conferenceJournalIds = null,
@@ -53,7 +57,7 @@ public sealed class ProjectEntity : Entity<Guid>
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
             ParentProjectId = parentProjectId,
             Context = context,
-            Domain = domain,
+            DomainIds = domainIds?.Distinct().ToList() ?? new List<Guid>(),
             Keypoint = keypoint,
             PaperIds = paperIds?.Distinct().ToList() ?? new List<Guid>(),
             ConferenceJournalIds = conferenceJournalIds?.Distinct().ToList() ?? new List<Guid>(),
@@ -69,7 +73,7 @@ public sealed class ProjectEntity : Entity<Guid>
         string? description = null,
         string? code = null,
         string? context = null,
-        string? domain = null,
+        List<Guid>? domainIds = null,
         string? keypoint = null,
         ProjectStatus? status = null,
         DateTimeOffset? startDate = null,
@@ -81,11 +85,11 @@ public sealed class ProjectEntity : Entity<Guid>
         Description = description ?? Description;
         Code = code ?? Code;
         Context = context ?? Context;
-        Domain = domain ?? Domain;
+        DomainIds = domainIds ?? DomainIds;
         Keypoint = keypoint ?? Keypoint;
         StartDate = startDate ?? StartDate;
         Status = status ?? Status;
-        EndDate = endDate ?? endDate;
+        EndDate = endDate ?? EndDate;
         ConferenceJournalIds = conferenceJournalIds ?? ConferenceJournalIds;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }

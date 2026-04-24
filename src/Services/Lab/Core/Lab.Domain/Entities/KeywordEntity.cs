@@ -2,7 +2,7 @@
 
 namespace Lab.Domain.Entities;
 
-public sealed class TagEntity : Entity<Guid>
+public sealed class KeywordEntity : Entity<Guid>
 {
     #region Fields, Properties and Indexers
 
@@ -12,10 +12,10 @@ public sealed class TagEntity : Entity<Guid>
 
     #region Factories
 
-    public static TagEntity Create(Guid id,
+    public static KeywordEntity Create(Guid id,
         string name)
     {
-        return new TagEntity()
+        return new KeywordEntity()
         {
             Id = id,
             Name = name,

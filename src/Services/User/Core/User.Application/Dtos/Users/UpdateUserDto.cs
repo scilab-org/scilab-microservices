@@ -15,6 +15,7 @@ public sealed class UpdateUserDto
     public UploadFileBytes? AvatarImage { get; set; }
 
     public List<string>? GroupNames { get; set; }
+    public string? OcrId { get; set; }
 
     #endregion
 }

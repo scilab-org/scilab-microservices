@@ -1,3 +1,4 @@
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Models.Results;
 using Lab.Domain.Entities;
@@ -23,7 +24,8 @@ public class GetInUseReferenceBySectionIdQueryValidator : AbstractValidator<GetI
 public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
     : ICommandHandler<GetInUseReferenceBySectionIdQuery, GetInUseReferenceBySectionIdResult>
 {
-    public async Task<GetInUseReferenceBySectionIdResult> Handle(GetInUseReferenceBySectionIdQuery request, CancellationToken cancellationToken)
+    public async Task<GetInUseReferenceBySectionIdResult> Handle(GetInUseReferenceBySectionIdQuery request,
+        CancellationToken cancellationToken)
     {
         var section = await session.LoadAsync<SectionEntity>(request.Id, cancellationToken)
                       ?? throw new NotFoundException(MessageCode.SectionIsNotExists, request.Id.ToString());
@@ -53,7 +55,31 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             .Where(x => paperBankIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
-        var paperBankMap = paperBanks.ToDictionary(x => x.Id, ToPaperBankInfoDto);
+        var journalIds = paperBanks
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var gaptypeIds = paperBanks
+            .SelectMany(x => x.GapTypeIds ?? [])
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var gaptypes = gaptypeIds.Count > 0
+            ? await session.Query<GapTypeEntity>()
+                .Where(x => gaptypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals, gaptypes));
         var items = paperBankIds
             .Where(paperBankMap.ContainsKey)
             .Select(id => paperBankMap[id])
@@ -78,7 +104,8 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
         };
     }
 
-    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank)
+    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank,
+        IReadOnlyList<ConferenceJournalEntity> journals, IReadOnlyList<GapTypeEntity> gapTypes)
     {
         return new PaperBankInfoDto
         {
@@ -89,19 +116,28 @@ public class GetInUseReferenceBySectionIdQueryHandler(IDocumentSession session)
             Ranking = paperBank.Ranking,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
+            Url = paperBank.Url,
             FilePath = paperBank.FilePath,
+            BibFilePath = paperBank.BibFilePath,
             ParsedText = paperBank.ParsedText,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            PaperType = paperBank.PaperType,
-            JournalName = paperBank.JournalName,
-            Pages = paperBank.Pages,
+            GapTypes = gapTypes
+                .Where(x => (paperBank.GapTypeIds ?? []).Contains(x.Id))
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList(),
+            Pages = paperBank.Pages,    
             Number = paperBank.Number,
             Volume = paperBank.Volume,
-            ConferenceName = paperBank.ConferenceName,
+            ConferenceJournalId = paperBank.ConferenceJournalId,
+            ConferenceJournalName = journals.FirstOrDefault(x => x.Id == paperBank.ConferenceJournalId)?.Name,
             ReferenceContent = paperBank.ReferenceContent,
-            TagNames = paperBank.TagNames,
+            Keywords = paperBank.Keywords,
             IngestStatus = paperBank.IngestStatus ?? IngestStatus.Pending
         };
     }

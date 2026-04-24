@@ -64,6 +64,7 @@ public sealed class KeycloakService : IKeycloakService
         bool temporaryPassword = true,
         List<string>? groupNames = null,
         string? avatarUrl = null,
+        string? ocrId = null,
         CancellationToken cancellationToken = default)
     {
         string? createdUserId = null;
@@ -110,7 +111,13 @@ public sealed class KeycloakService : IKeycloakService
                     { "avatarUrl", [avatarUrl] }
                 };
             }
-
+            if (!string.IsNullOrWhiteSpace(ocrId))
+            {
+                createUserRequest.Attributes = new Dictionary<string, List<string>>
+                {
+                    { "ocrId", [ocrId] }
+                };
+            }
             var response = await _keycloakApi.CreateUserAsync(_realm, createUserRequest, accessToken);
 
             if (response.StatusCode == HttpStatusCode.Conflict)
@@ -170,6 +177,7 @@ public sealed class KeycloakService : IKeycloakService
         bool? enabled,
         List<string>? groupNames,
         string? avatarUrl = null,
+        string? ocrId = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -180,7 +188,13 @@ public sealed class KeycloakService : IKeycloakService
             {
                 FirstName = firstName,
                 LastName = lastName,
-                Enabled = enabled
+                Enabled = enabled,
+                Attributes = ocrId is not null
+                    ? new Dictionary<string, List<string>>
+                    {
+                        { "ocrId", [ocrId] }
+                    }
+                    : null
             };
 
             if (ocrId != null || avatarUrl != null)
@@ -687,6 +701,9 @@ public sealed class KeycloakService : IKeycloakService
         CreatedTimestamp = user.CreatedTimestamp,
         AvatarUrl = user.Attributes?.TryGetValue("avatarUrl", out var avatarValues) == true
             ? avatarValues.FirstOrDefault()
+            : null,
+        OcrId = user.Attributes?.TryGetValue("ocrId", out var ocrIdValues) == true
+            ? ocrIdValues.FirstOrDefault()
             : null,
         Groups = groups?.Select(MapToGroupDto).ToList() ?? [],
     };

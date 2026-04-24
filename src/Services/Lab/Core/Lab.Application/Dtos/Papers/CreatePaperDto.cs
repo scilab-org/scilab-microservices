@@ -13,7 +13,7 @@ public class CreatePaperDto
     public string Context { get; init; } = null!;
     public string? Abstract { get; init; } = null!;
     public string ResearchGap { get; init; } = null!;
-    public string GapType { get; init; } = null!;
+    public List<Guid> GapTypeIds { get; init; } = new();
     public string MainContribution { get; init; } = null!;
     public string ResearchAim { get; init; } = null!;
     public Guid ConferenceJournalId { get; init; }

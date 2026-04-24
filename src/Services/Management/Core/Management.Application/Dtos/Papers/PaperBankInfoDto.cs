@@ -25,7 +25,7 @@ public class PaperBankInfoDto
     public string? Volume { get; set; }
     public string? ConferenceName { get; set; }
     public string? ReferenceContent { get; set; }
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
     public string? CreatedBy { get; set; }
     #endregion
 }

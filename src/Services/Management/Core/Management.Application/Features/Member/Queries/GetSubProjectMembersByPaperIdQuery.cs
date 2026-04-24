@@ -63,6 +63,7 @@ public sealed class GetSubProjectMembersByPaperIdQueryHandler(
                 Email     = u?.Email,
                 FirstName = u?.FirstName,
                 LastName  = u?.LastName,
+                Orcid     = u?.OcrId,
                 Enabled   = u?.Enabled ?? false
             };
         }).ToList();

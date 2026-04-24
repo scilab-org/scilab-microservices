@@ -2,6 +2,7 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Swagger.Extensions;
 using Common.Constants;
+using Common.Models;
 using Lab.Api.Constants;
 using Lab.Api.Models.PaperBank;
 using Lab.Application.Dtos.PaperBanks;
@@ -32,6 +33,18 @@ public class UpdatePaperBank : ICarterModule
         if (req == null) throw new ClientValidationException(MessageCode.BadRequest);
 
         var dto = mapper.Map<UpdatePaperBankDto>(req);
+
+        if (req.BibFile != null)
+        {
+            using var ms = new MemoryStream();
+            await req.BibFile.CopyToAsync(ms);
+            dto.UploadBibFile = new UploadFileBytes()
+            {
+                FileName = req.BibFile.FileName,
+                ContentType = req.BibFile.ContentType,
+                Bytes = ms.ToArray()
+            };
+        }
 
         var command = new UpdatePaperBankCommand(id, dto);
         var result = await sender.Send(command);

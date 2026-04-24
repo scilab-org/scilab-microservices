@@ -24,6 +24,8 @@ public sealed class ProjectMemberDto
 
     public string? LastName { get; set; }
 
+    public string? Orcid { get; set; }
+
     public bool Enabled { get; set; }
 
     public string Role { get; set; } = default!;

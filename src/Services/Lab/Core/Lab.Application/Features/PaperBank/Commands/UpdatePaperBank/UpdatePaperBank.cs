@@ -1,4 +1,5 @@
 ﻿using Lab.Application.Dtos.PaperBanks;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using MediatR;
@@ -36,28 +37,46 @@ public class UpdatePaperCommandVaBanklidator : AbstractValidator<UpdatePaperBank
                             .When(x => x.BankDto.PublicationDate.HasValue)
                             .WithMessage(MessageCode.PaperPublicationDateInvalid);
                     });
+
                 RuleFor(x => x.BankDto.PublicationDate)
                     .LessThanOrEqualTo(DateTimeOffset.UtcNow)
                     .When(x => x.BankDto.PublicationDate.HasValue)
                     .WithMessage(MessageCode.PaperPublicationDateInvalid);
+
+                RuleFor(x => x.BankDto.ConferenceJournalId)
+                    .NotEmpty()
+                    .WithMessage(MessageCode.JournalIdIsRequired)
+                    .NotNull()
+                    .WithMessage(MessageCode.JournalIdIsRequired);
             });
     }
 }
 
-public class UpdatePaperCommandBankHandler(IDocumentSession session)
+public class UpdatePaperCommandBankHandler(IDocumentSession session, IMinIoCloudService minIo)
     : IRequestHandler<UpdatePaperBankCommand, Guid>
 {
     public async Task<Guid> Handle(UpdatePaperBankCommand request, CancellationToken cancellationToken)
     {
         var dto = request.BankDto;
-        var tagNames = NomalizeTagNames(dto.TagNames);
+        var keywords = NormalizeKeywords(dto.Keywords);
 
         await session.BeginTransactionAsync(cancellationToken);
 
         var entity = await session.LoadAsync<PaperBankEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.PaperIsNotExists, request.Id);
 
-        await EnsureTagsExistAsync(tagNames, cancellationToken);
+        var journal = await session.LoadAsync<ConferenceJournalEntity>(dto.ConferenceJournalId, cancellationToken)
+                      ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, dto.ConferenceJournalId);
+
+        var gapTypeIds = dto.GapTypeIds ?? [];
+        foreach (var gapTypeId in gapTypeIds)
+        {
+            var exists = await session.LoadAsync<GapTypeEntity>(gapTypeId, cancellationToken);
+            if (exists == null)
+                throw new ClientValidationException(MessageCode.GapTypeIsNotExists, gapTypeId);
+        }
+
+        await EnsureKeywordsExistAsync(keywords, cancellationToken);
 
         entity.Update(
             title: dto.Title,
@@ -66,18 +85,20 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
             ranking: dto.Ranking,
             abstractText: dto.Abstract,
             doi: dto.Doi,
+            url: dto.Url,
             isIngested: dto.IsIngested,
             isAutoTagged: dto.IsAutoTagged,
             publicationDate: dto.PublicationDate,
-            paperType: dto.PaperType,
-            journalName: dto.JournalName,
+            gapTypeIds: gapTypeIds,
             pages: dto.Pages,
             number: dto.Number,
             volume: dto.Volume,
-            conferenceName: dto.ConferenceName,
+            conferenceJournalId: journal.Id,
             referenceContent: dto.ReferenceContent,
-            tagNames: tagNames,
-            ingestStatus: dto.IngestStatus);
+            keywords: keywords);
+
+        var bibFile = await UploadFilesAsync(dto, cancellationToken);
+        entity.UpdateFilePath(bibUrl: bibFile);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);
@@ -87,36 +108,63 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session)
 
     #region Methods
 
-    private List<string> NomalizeTagNames(List<string>? tagNames)
-    {
-        if (tagNames == null) return new List<string>();
-
-        return tagNames.Select(x => x.Trim().ToLowerInvariant()).ToList();
-    }
-
-    private async Task EnsureTagsExistAsync(
-        List<string> tagNames,
+    private async Task<string?> UploadFilesAsync(
+        UpdatePaperBankDto dto,
         CancellationToken cancellationToken)
     {
-        if (tagNames.Count == 0) return;
+        var bibFile = await UploadFileAsync(dto.UploadBibFile, cancellationToken);
+
+        return bibFile;
+    }
+
+    private async Task<string?> UploadFileAsync(UploadFileBytes? file, CancellationToken cancellationToken)
+    {
+        if (file == null) return null;
+
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+        var shortId = Guid.NewGuid().ToString("N")[..8];
+        var name = $"{fileNameWithoutExtension}-{shortId}";
+
+        var result = await minIo.UploadFilesAsync(
+            name,
+            [file],
+            AppConstants.Bucket.Papers,
+            true,
+            cancellationToken);
+
+        return result.FirstOrDefault()?.PublicURL;
+    }
+
+    private List<string> NormalizeKeywords(List<string>? keywords)
+    {
+        if (keywords == null) return new List<string>();
+
+        return keywords.Select(x => x.Trim().ToLowerInvariant()).ToList();
+    }
+
+    private async Task EnsureKeywordsExistAsync(
+        List<string> keywords,
+        CancellationToken cancellationToken)
+    {
+        if (keywords.Count == 0) return;
 
         var existingTags = await session
-            .Query<TagEntity>()
-            .Where(x => tagNames.Contains(x.Name))
+            .Query<KeywordEntity>()
+            .Where(x => keywords.Contains(x.Name))
             .ToListAsync(cancellationToken);
 
         var existingTagNames = existingTags
             .Select(x => x.Name)
             .ToHashSet();
 
-        var newTagNames = tagNames
+        var newTagNames = keywords
             .Where(x => !existingTagNames.Contains(x))
             .Distinct()
             .ToList();
 
         foreach (var name in newTagNames)
         {
-            var tag = TagEntity.Create(Guid.NewGuid(), name);
+            var tag = KeywordEntity.Create(Guid.NewGuid(), name);
             session.Store(tag);
         }
     }

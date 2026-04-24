@@ -10,10 +10,10 @@ public sealed class PaperBankEntityTests
             authors: "Author1", publisher: "Publisher1", ranking: "A",
             abstractText: "Abstract", doi: "10.1234", parsedText: "parsed",
             isIngested: true, isAutoTagged: true,
-            publicationDate: DateTimeOffset.UtcNow, paperType: "journal",
-            journalName: "Journal1", pages: "1-10", number: "1",
-            volume: "5", conferenceName: "Conf1", referenceContent: "ref",
-            tagNames: new List<string> { "tag1" }, ingestStatus: IngestStatus.Success);
+            publicationDate: DateTimeOffset.UtcNow,
+            pages: "1-10", number: "1",
+            volume: "5", referenceContent: "ref",
+            keywords: new List<string> { "tag1" }, ingestStatus: IngestStatus.Success);
 
         entity.Id.Should().Be(id);
         entity.Title.Should().Be("Test Paper");
@@ -25,14 +25,11 @@ public sealed class PaperBankEntityTests
         entity.ParsedText.Should().Be("parsed");
         entity.IsIngested.Should().BeTrue();
         entity.IsAutoTagged.Should().BeTrue();
-        entity.PaperType.Should().Be("journal");
-        entity.JournalName.Should().Be("Journal1");
         entity.Pages.Should().Be("1-10");
         entity.Number.Should().Be("1");
         entity.Volume.Should().Be("5");
-        entity.ConferenceName.Should().Be("Conf1");
         entity.ReferenceContent.Should().Be("ref");
-        entity.TagNames.Should().ContainSingle("tag1");
+        entity.Keywords.Should().ContainSingle("tag1");
         entity.IngestStatus.Should().Be(IngestStatus.Success);
         entity.CreatedOnUtc.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));
     }
@@ -45,7 +42,7 @@ public sealed class PaperBankEntityTests
         entity.ParsedText.Should().Be(string.Empty);
         entity.IsIngested.Should().BeFalse();
         entity.IsAutoTagged.Should().BeFalse();
-        entity.TagNames.Should().BeEmpty();
+        entity.Keywords.Should().BeEmpty();
         entity.IngestStatus.Should().Be(IngestStatus.Pending);
     }
 
@@ -57,17 +54,17 @@ public sealed class PaperBankEntityTests
         entity.Update(title: "New Title", authors: "New Author", publisher: "New Pub",
             ranking: "B", abstractText: "New Abstract", doi: "10.5678",
             isIngested: true, isAutoTagged: true,
-            publicationDate: DateTimeOffset.UtcNow, paperType: "conf",
-            journalName: "J2", pages: "11-20", number: "2",
-            volume: "10", conferenceName: "C2", referenceContent: "ref2",
-            ingestStatus: IngestStatus.Failed, tagNames: new List<string> { "t2" });
+            publicationDate: DateTimeOffset.UtcNow,
+            pages: "11-20", number: "2",
+            volume: "10", referenceContent: "ref2",
+            ingestStatus: IngestStatus.Failed, keywords: new List<string> { "t2" });
 
         entity.Title.Should().Be("New Title");
         entity.Authors.Should().Be("New Author");
         entity.Publisher.Should().Be("New Pub");
         entity.Ranking.Should().Be("B");
         entity.IngestStatus.Should().Be(IngestStatus.Failed);
-        entity.TagNames.Should().ContainSingle("t2");
+        entity.Keywords.Should().ContainSingle("t2");
     }
 
     [Fact]

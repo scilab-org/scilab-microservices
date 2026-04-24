@@ -32,6 +32,17 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
                     .NotEmpty().WithMessage(MessageCode.JournalUrlIsRequired)
                     .NotNull().WithMessage(MessageCode.JournalUrlIsRequired);
 
+                RuleFor(x => x.Dto.ISSN)
+                    .NotEmpty().WithMessage(MessageCode.JournalIssnIsRequired)
+                    .NotNull().WithMessage(MessageCode.JournalIssnIsRequired);
+
+                RuleFor(x => x.Dto.TemplateIds)
+                    .NotNull().WithMessage(MessageCode.TemplateIdIsRequired)
+                    .Must(ids => ids is { Count: > 0 }).WithMessage(MessageCode.TemplateIdIsRequired);
+
+                RuleFor(x => x.Dto.Type)
+                    .NotNull().WithMessage(MessageCode.JournalTypeIsRequired);
+
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
                     .WithMessage(MessageCode.JournalTexFileInvalidExtension);
@@ -44,7 +55,8 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
 }
 
 public class UpdateJournalCommandHandler(
-    IDocumentSession session, IMinIoCloudService minIo) : IRequestHandler<UpdateJournalCommand, Guid>
+    IDocumentSession session,
+    IMinIoCloudService minIo) : IRequestHandler<UpdateJournalCommand, Guid>
 {
     #region Implementations
 
@@ -57,11 +69,19 @@ public class UpdateJournalCommandHandler(
         var entity = await session.LoadAsync<ConferenceJournalEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.JournalIsNotExists, request.Id);
 
+        var templates = await session.Query<TemplateEntity>()
+            .Where(x => request.Dto.TemplateIds.Contains(x.Id))
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         entity.Update(
             name: dto.Name,
             ranking: dto.Ranking,
             url: dto.Url,
             style: dto.Style,
+            issn: dto.ISSN,
+            type: dto.Type,
+            templateIds: templates.Select(x => x.Id).ToList(),
             lastModifiedBy: request.UserName);
 
         var (texFile, pdfFile) = await UploadFilesAsync(request.Dto, cancellationToken);

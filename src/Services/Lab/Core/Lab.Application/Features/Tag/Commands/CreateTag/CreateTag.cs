@@ -26,13 +26,13 @@ public class CreateTagCommandHandler(IDocumentSession session) : IRequestHandler
 
 		var nomalizeName = request.Name.Trim().ToLowerInvariant();
 
-        var existingTag = await session.Query<TagEntity>()
+        var existingTag = await session.Query<KeywordEntity>()
             .FirstOrDefaultAsync(x => x.Name == nomalizeName, cancellationToken);
 
         if (existingTag != null)
             throw new ClientValidationException(MessageCode.TagNameAlreadyExists, request.Name);
 
-        var entity = TagEntity.Create(
+        var entity = KeywordEntity.Create(
             id: Guid.NewGuid(),
             name: nomalizeName);
 

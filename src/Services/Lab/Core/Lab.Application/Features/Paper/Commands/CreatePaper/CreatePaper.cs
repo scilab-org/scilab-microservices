@@ -39,7 +39,7 @@ public class CreatePaperCommandValidator : AbstractValidator<CreatePaperCommand>
                     .WithMessage(MessageCode.PaperResearchGapIsRequired)
                     .NotNull()
                     .WithMessage(MessageCode.PaperResearchGapIsRequired);
-                RuleFor(x => x.Dto.GapType)
+                RuleFor(x => x.Dto.GapTypeIds)
                     .NotEmpty()
                     .WithMessage(MessageCode.PaperGapTypeIsRequired)
                     .NotNull()
@@ -92,6 +92,29 @@ public class CreatePaperCommandHandler(
                           dto.ConferenceJournalId.ToString());
         var paperId = Guid.NewGuid();
 
+        var gapTypeIds = (dto.GapTypeIds ?? [])
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var gapTypes = gapTypeIds.Count == 0
+            ? []
+            : await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        if (gapTypes.Count != gapTypeIds.Count)
+        {
+            var foundIds = gapTypes.Select(x => x.Id).ToHashSet();
+            var missingIds = gapTypeIds.Where(id => !foundIds.Contains(id)).ToList();
+            throw new NotFoundException(MessageCode.GapTypeIsNotExists, string.Join(", ", missingIds));
+        }
+
+        var gapTypeNames = gapTypes
+            .Select(x => x.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
         var projectIds = journal.ProjectIds ?? [];
         projectIds.Add(dto.ProjectId);
         projectIds = projectIds.Distinct().ToList();
@@ -104,7 +127,8 @@ public class CreatePaperCommandHandler(
         session.Update(journal);
 
         var projectRule = SectionRuleComposer.BuildProjectRule(project);
-        var paperRule = SectionRuleComposer.BuildPaperRule(dto, journal);
+
+        var paperRule = SectionRuleComposer.BuildPaperRule(dto, gapTypeNames, journal);
         var projectContext = SectionRuleComposer.BuildProjectContext(project);
         var paperContext = SectionRuleComposer.BuildPaperContext(dto);
 
@@ -117,7 +141,7 @@ public class CreatePaperCommandHandler(
             researchGap: dto.ResearchGap,
             mainContribution: dto.MainContribution,
             researchAim: dto.ResearchAim,
-            gapType: dto.GapType,
+            gapTypeIds: dto.GapTypeIds,
             conferenceJournalName: dto.ConferenceJournalName,
             conferenceJournalId: dto.ConferenceJournalId,
             conferenceJournalStartAt: dto.ConferenceJournalStartAt,

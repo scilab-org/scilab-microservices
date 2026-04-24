@@ -11,7 +11,6 @@ public record class GetPapersFilter
     public string? ResearchGap { get; set; }
     public string? MainContribution { get; set; }
     public string? ResearchAim { get; set; }
-    public string? GapType { get; set; }
     public Guid? ConferenceJournalId { get; set; }
     public PaperStatus? Status { get; set; }
     public bool? IsDeleted { get; set; } = false;

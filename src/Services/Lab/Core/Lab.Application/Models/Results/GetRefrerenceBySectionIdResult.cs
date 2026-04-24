@@ -1,4 +1,4 @@
-﻿using Lab.Domain.Enums;
+﻿using Lab.Application.Dtos.GapTypes;
 
 namespace Lab.Application.Models.Results;
 
@@ -30,9 +30,11 @@ public class ReferencePaperBankDto
 
     public string? Doi { get; set; }
 
+    public string? Url { get; set; }
+
     public string? FilePath { get; set; }
 
-    public PaperStatus? Status { get; set; }
+    public string? BibFilePath { get; set; }
 
     public bool? IsIngested { get; set; }
 
@@ -40,21 +42,19 @@ public class ReferencePaperBankDto
 
     public DateTimeOffset? PublicationDate { get; set; }
 
-    public string? PaperType { get; set; }
+    public List<GapTypeInfoDto> GapTypes { get; set; } = new();
 
-    public string? JournalName { get; set; }
-
-    public string? Pages {get; set;}
+    public string? Pages { get; set; }
 
     public string? Number { get; set; }
 
-    public string? Volume {get; set;}
+    public string? Volume { get; set; }
 
-    public string? ConferenceName { get; set; }
+    public string? ConferenceJournalName { get; set; }
 
     public string? ReferenceContent { get; set; }
 
-    public List<string> TagNames { get; set; } = new();
+    public List<string> Keywords { get; set; } = new();
 }
 
 public class ReferenceSectionDto

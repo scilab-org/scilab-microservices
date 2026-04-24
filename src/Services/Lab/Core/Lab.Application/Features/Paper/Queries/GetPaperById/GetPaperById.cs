@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Lab.Application.Dtos.Papers;
 using Lab.Application.Models.Results;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using MediatR;
@@ -20,7 +21,9 @@ public class GetPaperByIdQueryValidator : AbstractValidator<GetPaperByIdQuery>
     }
 }
 
-public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper, Lab.Application.Services.IManagementApiService managementApiService)
+public class GetPaperByIdQueryHandler(IDocumentSession session, 
+    IMapper mapper, 
+    IManagementApiService managementApiService)
     : IRequestHandler<GetPaperByIdQuery, GetPaperByIdResult>
 {
     public async Task<GetPaperByIdResult> Handle(GetPaperByIdQuery request, CancellationToken cancellationToken)
@@ -31,6 +34,21 @@ public class GetPaperByIdQueryHandler(IDocumentSession session, IMapper mapper, 
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         var response = mapper.Map<PaperDto>(paper);
+        var gapTypeIds = paper.GapTypeIds ?? new List<Guid>();
+
+        var gapTypes = gapTypeIds.Count == 0
+            ? []
+            : await session.Query<GapTypeEntity>()
+                .Where(x => gapTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        response.GapTypes = gapTypes
+            .Select(x => new Lab.Application.Dtos.GapTypes.GapTypeInfoDto
+            {
+                Id = x.Id,
+                Name = x.Name
+            })
+            .ToList();
 
         var latestHistory = await session.Query<PaperStatusHistoryEntity>()
             .Where(h => h.PaperId == paper.Id)

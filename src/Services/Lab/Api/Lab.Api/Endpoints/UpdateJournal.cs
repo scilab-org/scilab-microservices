@@ -50,6 +50,8 @@ public sealed class UpdateJournal : ICarterModule
             Ranking = request.Ranking,
             Url = request.Url,
             Style = request.Style,
+            ISSN = request.ISSN,
+            TemplateIds = request.TemplateIds,
             TexUploadFile = await ToUploadFileAsync(request.TexFile),
             PdfUploadFile = await ToUploadFileAsync(request.PdfFile)
         };

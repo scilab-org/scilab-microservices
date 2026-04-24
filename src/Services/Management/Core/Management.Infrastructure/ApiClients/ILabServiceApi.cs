@@ -33,7 +33,7 @@ public interface ILabServiceApi
         [AliasAs("paperType")] string? paperType = null,
         [AliasAs("journalName")] string? journalName = null,
         [AliasAs("conferenceName")] string? conferenceName = null,
-        [AliasAs("tag"), Query(CollectionFormat.Multi)] string[]? tag = null,
+        [AliasAs("keyword"), Query(CollectionFormat.Multi)] string[]? keywords = null,
         [AliasAs("existingPaperIds"), Query(CollectionFormat.Multi)] Guid[]? existingPaperIds = null);
 
     /// <summary>
@@ -65,6 +65,12 @@ public interface ILabServiceApi
     /// </summary>
     [Get("/papers/{id}/sections")]
     Task<HttpResponseMessage> GetSectionsByPaperIdAsync([AliasAs("id")] Guid paperId);
+
+    /// <summary>
+    /// GET /paper-authors/{paperId} — returns paper authors for a paper.
+    /// </summary>
+    [Get("/paper-authors")]
+    Task<HttpResponseMessage> GetPaperAuthorsAsync([AliasAs("paperId")] Guid paperId);
 
     /// <summary>
     /// GET /paper-contributors/papers/{paperId}/contributors — returns contributors for a paper.

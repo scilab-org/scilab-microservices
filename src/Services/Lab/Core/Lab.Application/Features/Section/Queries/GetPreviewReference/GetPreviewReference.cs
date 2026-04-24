@@ -1,6 +1,7 @@
+using Lab.Application.Dtos.GapTypes;
+using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Models.Results;
-using Lab.Application.Dtos.PaperBanks;
 using Lab.Domain.Entities;
 using Lab.Domain.Enums;
 using Marten;
@@ -27,7 +28,8 @@ public class GetPreviewReferenceQueryValidator : AbstractValidator<GetPreviewRef
 }
 
 public class
-    GetPreviewReferenceQueryHandler(IDocumentSession session) : ICommandHandler<GetPreviewReferenceQuery, GetInUseReferenceBySectionIdResult>
+    GetPreviewReferenceQueryHandler(IDocumentSession session)
+    : ICommandHandler<GetPreviewReferenceQuery, GetInUseReferenceBySectionIdResult>
 {
     public async Task<GetInUseReferenceBySectionIdResult> Handle(GetPreviewReferenceQuery request,
         CancellationToken cancellationToken)
@@ -44,7 +46,31 @@ public class
             .Where(x => requestedIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
-        var paperBankMap = paperBanks.ToDictionary(x => x.Id, ToPaperBankInfoDto);
+        var journalIds = paperBanks
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var gaptypeIds = paperBanks
+            .Select(x => x.ConferenceJournalId)
+            .Where(x => x.HasValue)
+            .Distinct()
+            .ToList();
+
+        var gaptypes = gaptypeIds.Count > 0
+            ? await session.Query<GapTypeEntity>()
+                .Where(x => gaptypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        var paperBankMap = paperBanks.ToDictionary(x => x.Id, x => ToPaperBankInfoDto(x, journals, gaptypes));
         var items = requestedIds
             .Where(paperBankMap.ContainsKey)
             .Select(id => paperBankMap[id])
@@ -69,7 +95,8 @@ public class
         };
     }
 
-    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank)
+    private static PaperBankInfoDto ToPaperBankInfoDto(PaperBankEntity paperBank,
+        IReadOnlyList<ConferenceJournalEntity> journals, IReadOnlyList<GapTypeEntity> gapTypes)
     {
         return new PaperBankInfoDto
         {
@@ -80,19 +107,28 @@ public class
             Ranking = paperBank.Ranking,
             Abstract = paperBank.Abstract,
             Doi = paperBank.Doi,
+            Url = paperBank.Url,
             FilePath = paperBank.FilePath,
+            BibFilePath = paperBank.BibFilePath,
             ParsedText = paperBank.ParsedText,
             IsIngested = paperBank.IsIngested,
             IsAutoTagged = paperBank.IsAutoTagged,
             PublicationDate = paperBank.PublicationDate,
-            PaperType = paperBank.PaperType,
-            JournalName = paperBank.JournalName,
+            GapTypes = gapTypes
+                .Where(x => (paperBank.GapTypeIds ?? []).Contains(x.Id))
+                .Select(x => new GapTypeInfoDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToList(),
             Pages = paperBank.Pages,
             Number = paperBank.Number,
             Volume = paperBank.Volume,
-            ConferenceName = paperBank.ConferenceName,
+            ConferenceJournalId = paperBank.ConferenceJournalId,
+            ConferenceJournalName = journals.FirstOrDefault(x => x.Id == paperBank.ConferenceJournalId)?.Name,
             ReferenceContent = paperBank.ReferenceContent,
-            TagNames = paperBank.TagNames,
+            Keywords = paperBank.Keywords,
             IngestStatus = paperBank.IngestStatus ?? IngestStatus.Pending
         };
     }
