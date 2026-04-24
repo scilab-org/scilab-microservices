@@ -23,6 +23,9 @@ public sealed class KeycloakUserResponse
 
     [JsonPropertyName("firstName")]
     public string? FirstName { get; set; }
+    
+    [JsonPropertyName("ocrId")]
+    public string? OcrId { get; set; }
 
     [JsonPropertyName("lastName")]
     public string? LastName { get; set; }

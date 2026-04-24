@@ -35,6 +35,11 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
                     .EmailAddress()
                     .WithMessage(MessageCode.InvalidEmail);
 
+                RuleFor(x => x.Dto.OcrId)
+                    .Matches(@"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+                    .WithMessage(MessageCode.BadRequest)
+                    .When(x => x.Dto.OcrId != null);
+
                 RuleFor(x => x.Dto.InitialPassword)
                     .NotEmpty()
                     .WithMessage(MessageCode.InitialPasswordIsRequired)
@@ -66,6 +71,7 @@ public sealed class CreateUserCommandHandler(
             email: dto.Email,
             firstName: dto.FirstName,
             lastName: dto.LastName,
+            ocrId: dto.OcrId,
             initialPassword: dto.InitialPassword,
             temporaryPassword: dto.TemporaryPassword,
             groupNames: dto.GroupNames,

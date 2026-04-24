@@ -4,9 +4,11 @@ public sealed class UpdateUserDto
 {
     #region Fields, Properties and Indexers
 
-    public string? FirstName { get; set; }
+    public required string FirstName { get; set; }
 
-    public string? LastName { get; set; }
+    public required string LastName { get; set; }
+    
+    public string? OcrId { get; set; }
 
     public bool Enabled { get; set; } = true;
 

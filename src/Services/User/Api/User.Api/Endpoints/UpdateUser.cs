@@ -53,6 +53,7 @@ public sealed class UpdateUser : ICarterModule
         {
             FirstName = req.FirstName,
             LastName = req.LastName,
+            OcrId = req.OcrId,
             Enabled = req.Enabled,
             GroupNames = string.IsNullOrWhiteSpace(req.GroupNames)
                 ? null

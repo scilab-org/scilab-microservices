@@ -23,6 +23,11 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
         RuleFor(x => x.Dto)
             .NotNull()
             .WithMessage(MessageCode.BadRequest);
+
+        RuleFor(x => x.Dto.OcrId)
+            .Matches(@"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+            .WithMessage(MessageCode.BadRequest)
+            .When(x => x.Dto.OcrId != null);
     }
 
     #endregion
@@ -49,6 +54,7 @@ public sealed class UpdateUserCommandHandler(
             userId: command.UserId,
             firstName: dto.FirstName,
             lastName: dto.LastName,
+            ocrId: dto.OcrId,
             enabled: dto.Enabled,
             groupNames: dto.GroupNames,
             avatarUrl: avatarUrl,

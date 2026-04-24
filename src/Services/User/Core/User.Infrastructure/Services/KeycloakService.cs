@@ -57,8 +57,9 @@ public sealed class KeycloakService : IKeycloakService
     public async Task<string> CreateUserAsync(
         string username,
         string email,
-        string? firstName,
-        string? lastName,
+        string firstName,
+        string lastName,
+        string? ocrId,
         string initialPassword,
         bool temporaryPassword = true,
         List<string>? groupNames = null,
@@ -94,9 +95,17 @@ public sealed class KeycloakService : IKeycloakService
                 RequiredActions = ["CONFIGURE_TOTP"]
             };
 
-            if (!string.IsNullOrWhiteSpace(avatarUrl))
+            if (ocrId != null)
             {
                 createUserRequest.Attributes = new Dictionary<string, List<string>>
+                {
+                    { "ocrId", [ocrId] }
+                };
+            }
+            
+            if (!string.IsNullOrWhiteSpace(avatarUrl))
+            {
+                createUserRequest.Attributes ??= new Dictionary<string, List<string>>
                 {
                     { "avatarUrl", [avatarUrl] }
                 };
@@ -155,8 +164,9 @@ public sealed class KeycloakService : IKeycloakService
 
     public async Task UpdateUserAsync(
         string userId,
-        string? firstName,
-        string? lastName,
+        string firstName,
+        string lastName,
+        string? ocrId,
         bool? enabled,
         List<string>? groupNames,
         string? avatarUrl = null,
@@ -173,12 +183,13 @@ public sealed class KeycloakService : IKeycloakService
                 Enabled = enabled
             };
 
-            if (avatarUrl is not null)
+            if (ocrId != null || avatarUrl != null)
             {
-                request.Attributes = new Dictionary<string, List<string>>
-                {
-                    { "avatarUrl", [avatarUrl] }
-                };
+                request.Attributes = new Dictionary<string, List<string>>();
+                if (ocrId != null)
+                    request.Attributes["ocrId"] = [ocrId];
+                if (avatarUrl != null)
+                    request.Attributes["avatarUrl"] = [avatarUrl];
             }
 
             await _keycloakApi.UpdateUserAsync(_realm, userId, request, accessToken);
@@ -670,6 +681,7 @@ public sealed class KeycloakService : IKeycloakService
         Email = user.Email,
         FirstName = user.FirstName,
         LastName = user.LastName,
+        OcrId = user.OcrId ?? (user.Attributes?.TryGetValue("ocrId", out var ocrValues) == true ? ocrValues.FirstOrDefault() : null),
         Enabled = user.Enabled,
         EmailVerified = user.EmailVerified,
         CreatedTimestamp = user.CreatedTimestamp,

@@ -15,8 +15,9 @@ public interface IKeycloakService
     Task<string> CreateUserAsync(
         string username,
         string email,
-        string? firstName,
-        string? lastName,
+        string firstName,
+        string lastName,
+        string? ocrId,
         string initialPassword,
         bool temporaryPassword = true,
         List<string>? groupNames = null,
@@ -25,8 +26,9 @@ public interface IKeycloakService
 
     Task UpdateUserAsync(
         string userId,
-        string? firstName,
-        string? lastName,
+        string firstName,
+        string lastName,
+        string? ocrId,
         bool? enabled,
         List<string>? groupNames,
         string? avatarUrl = null,
