@@ -34,6 +34,7 @@ public sealed class UpdateUserCommandHandlerTests : BaseTest
                 userId,
                 dto.FirstName,
                 dto.LastName,
+                dto.OcrId,
                 dto.Enabled,
                 dto.GroupNames,
                 null,
@@ -81,6 +82,7 @@ public sealed class UpdateUserCommandHandlerTests : BaseTest
                 userId,
                 dto.FirstName,
                 dto.LastName,
+                dto.OcrId,
                 dto.Enabled,
                 dto.GroupNames,
                 avatarPublicUrl,
@@ -125,6 +127,7 @@ public sealed class UpdateUserCommandHandlerTests : BaseTest
                 userId,
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),
                 It.IsAny<bool?>(),
                 It.IsAny<List<string>?>(),
                 AppConstants.Bucket.DefaultAvatar,
@@ -139,6 +142,7 @@ public sealed class UpdateUserCommandHandlerTests : BaseTest
         _keycloakService.Verify(
             s => s.UpdateUserAsync(
                 userId,
+                It.IsAny<string?>(),
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
                 It.IsAny<bool?>(),

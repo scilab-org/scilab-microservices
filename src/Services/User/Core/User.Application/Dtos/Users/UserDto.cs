@@ -30,8 +30,6 @@ public sealed class UserDto
     public long CreatedTimestamp { get; set; }
 
     public string? AvatarUrl { get; set; }
-    
-    public string? OcrId { get; set; }
     public List<GroupDto> Groups { get; set; } = [];
 
     #endregion

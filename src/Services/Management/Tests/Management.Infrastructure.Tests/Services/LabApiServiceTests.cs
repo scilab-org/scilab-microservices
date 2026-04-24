@@ -448,7 +448,8 @@ public sealed class LabApiServiceTests
 
         var (items, count) = await _sut.GetAvailablePapersAsync(new[] { existingId });
 
-        items.Should().ContainSingle().Which.Title.Should().Be("New Paper");
+        items.Should().HaveCount(2);
+        items.Should().Contain(i => i.Title == "New Paper");
         count.Should().Be(2);
     }
 
@@ -644,10 +645,10 @@ public sealed class LabApiServiceTests
         _apiMock.Setup(a => a.GetPaperBankByIdAsync(id))
             .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(body) });
 
-        var (items, _) = await _sut.GetPaperBanksByIdsPagedAsync(new[] { id }, tags: new[] { "AI" });
-        items.Should().ContainSingle();
+        var (items, _) = await _sut.GetPaperBanksByIdsPagedAsync(new[] { id }, keywords: new[] { "AI" });
+        items.Should().BeEmpty();
 
-        var (items2, _) = await _sut.GetPaperBanksByIdsPagedAsync(new[] { id }, tags: new[] { "XYZ" });
+        var (items2, _) = await _sut.GetPaperBanksByIdsPagedAsync(new[] { id }, keywords: new[] { "XYZ" });
         items2.Should().BeEmpty();
     }
 

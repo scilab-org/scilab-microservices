@@ -58,7 +58,6 @@ public sealed class UpdateUserCommandHandler(
             enabled: dto.Enabled,
             groupNames: dto.GroupNames,
             avatarUrl: avatarUrl,
-            ocrId: dto.OcrId,
             cancellationToken: cancellationToken);
 
         return true;

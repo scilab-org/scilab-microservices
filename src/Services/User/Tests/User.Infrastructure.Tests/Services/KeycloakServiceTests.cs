@@ -591,6 +591,7 @@ public sealed class KeycloakServiceTests
             email: "john@example.com",
             firstName: "John",
             lastName: "Doe",
+            ocrId: null,
             initialPassword: "Pass123!",
             groupNames: [],
             cancellationToken: CancellationToken.None);
@@ -611,7 +612,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "existing-user", "e@e.com", null, null, "pass",
+            "existing-user", "e@e.com", null, null, null, "pass",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -819,7 +820,7 @@ public sealed class KeycloakServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.UpdateUserAsync(userId, "John", "Doe", true, null, cancellationToken: CancellationToken.None);
+        await _sut.UpdateUserAsync(userId, "John", "Doe", null, true, null, cancellationToken: CancellationToken.None);
 
         // Assert
         _keycloakApiMock.Verify(
@@ -840,7 +841,7 @@ public sealed class KeycloakServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.UpdateUserAsync(userId, "John", "Doe", true, null, avatarUrl: "http://img/avatar.png",
+        await _sut.UpdateUserAsync(userId, "John", "Doe", null, true, null, avatarUrl: "http://img/avatar.png",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -877,7 +878,7 @@ public sealed class KeycloakServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.UpdateUserAsync(userId, "John", "Doe", true, ["NewGroup"],
+        await _sut.UpdateUserAsync(userId, "John", "Doe", null, true, ["NewGroup"],
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -899,7 +900,7 @@ public sealed class KeycloakServiceTests
             .ThrowsAsync(apiEx);
 
         // Act
-        var act = () => _sut.UpdateUserAsync(userId, "John", "Doe", true, null,
+        var act = () => _sut.UpdateUserAsync(userId, "John", "Doe", null, true, null,
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -918,7 +919,7 @@ public sealed class KeycloakServiceTests
             .ThrowsAsync(new HttpRequestException("server error"));
 
         // Act
-        var act = () => _sut.UpdateUserAsync(userId, "John", "Doe", true, null,
+        var act = () => _sut.UpdateUserAsync(userId, "John", "Doe", null, true, null,
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -1045,7 +1046,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var result = await _sut.CreateUserAsync(
-            "johndoe", "j@e.com", "John", "Doe", "pass",
+            "johndoe", "j@e.com", "John", "Doe", null, "pass",
             avatarUrl: "http://img/avatar.png",
             cancellationToken: CancellationToken.None);
 
@@ -1072,7 +1073,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -1100,7 +1101,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var result = await _sut.CreateUserAsync(
-            "johndoe", "j@e.com", "John", "Doe", "pass",
+            "johndoe", "j@e.com", "John", "Doe", null, "pass",
             groupNames: ["Developers"],
             cancellationToken: CancellationToken.None);
 
@@ -1130,7 +1131,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             groupNames: ["MissingGroup"],
             cancellationToken: CancellationToken.None);
 
@@ -1151,7 +1152,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -1179,7 +1180,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             groupNames: ["MissingGroup"],
             cancellationToken: CancellationToken.None);
 
@@ -1199,7 +1200,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "existing", "e@e.com", null, null, "pass",
+            "existing", "e@e.com", null, null, null, "pass",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -1234,7 +1235,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var result = await _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             groupNames: ["NestedGroup"],
             cancellationToken: CancellationToken.None);
 
@@ -1264,7 +1265,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             groupNames: ["MissingGroup"],
             cancellationToken: CancellationToken.None);
 
@@ -1296,7 +1297,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             groupNames: ["Developers"],
             cancellationToken: CancellationToken.None);
 
@@ -1456,7 +1457,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -1478,7 +1479,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -1510,7 +1511,7 @@ public sealed class KeycloakServiceTests
 
         // Act
         var act = () => _sut.CreateUserAsync(
-            "johndoe", "j@e.com", null, null, "pass",
+            "johndoe", "j@e.com", null, null, null, "pass",
             groupNames: ["SomeGroup"],
             cancellationToken: CancellationToken.None);
 
@@ -1552,7 +1553,7 @@ public sealed class KeycloakServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.UpdateUserAsync(userId, "John", "Doe", true, ["NewGroup"],
+        await _sut.UpdateUserAsync(userId, "John", "Doe", null, true, ["NewGroup"],
             cancellationToken: CancellationToken.None);
 
         // Assert — null-name group not removed, OldGroup removed, NewGroup added
@@ -1581,7 +1582,7 @@ public sealed class KeycloakServiceTests
             .ReturnsAsync([]);
 
         // Act
-        var act = () => _sut.UpdateUserAsync(userId, "John", "Doe", true, ["MissingGroup"],
+        var act = () => _sut.UpdateUserAsync(userId, "John", "Doe", null, true, ["MissingGroup"],
             cancellationToken: CancellationToken.None);
 
         // Assert
