@@ -22,8 +22,8 @@ public sealed class GetMemberAffiliations : ICarterModule
     private async Task<ApiGetResponse<GetMemberAffiliationsResult>> HandleGetMemberAffiliationsAsync(
         ISender sender,
         [FromRoute] Guid memberId,
-        [AsParameters] PaginationRequest paging,
-        [FromQuery] string? affiliationName)
+        [FromQuery] string? affiliationName,
+        [AsParameters] PaginationRequest paging)
     {
         var result = await sender.Send(new GetMemberAffiliationsQuery(memberId, paging, affiliationName));
         return new ApiGetResponse<GetMemberAffiliationsResult>(result);

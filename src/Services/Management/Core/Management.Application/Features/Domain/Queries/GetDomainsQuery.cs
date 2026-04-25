@@ -19,7 +19,7 @@ public sealed class GetDomainsQueryHandler(IDocumentSession session, IMapper map
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             var name = query.Name.Trim().ToLower();
-            domainQuery = domainQuery.Where(x => x.Name.ToLower().Contains(query.Name));
+            domainQuery = domainQuery.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await domainQuery.CountAsync(cancellationToken);
