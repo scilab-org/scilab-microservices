@@ -31,6 +31,10 @@ public static class DependencyInjection
                 .SoftDeleted();
             opts.Schema.For<SectionEntity>()
                 .SoftDeleted();
+            opts.Schema.For<GapTypeEntity>()
+                .SoftDeleted();
+            opts.Schema.For<AuthorRoleEntity>()
+                .SoftDeleted();
             opts.Schema.For<PaperBankEntity>()
                 .SoftDeleted()
                 .Index(pb => pb.Keywords);

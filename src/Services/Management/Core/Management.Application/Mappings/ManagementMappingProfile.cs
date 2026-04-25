@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Management.Application.Dtos.Affiliations;
 using Management.Application.Dtos.Datasets;
 using Management.Application.Dtos.Members;
 using Management.Application.Dtos.Projects;
+using Management.Application.Dtos.UserAffiliations;
 using Management.Application.Models.Results;
 using Management.Domain.Entities;
 
@@ -21,6 +23,8 @@ public class ManagementMappingProfile : Profile
         CreateDatasetMappings();
         CreateMemberMappings();
         CreateDomainMappings();
+        CreateAffiliationMappings();
+        CreateUserAffiliationMappings();
     }
 
     #endregion
@@ -55,6 +59,28 @@ public class ManagementMappingProfile : Profile
     {
         // Domain Models -> Dtos
         CreateMap<DomainEntity, DomainDto>();
+    }
+
+    private void CreateAffiliationMappings()
+    {
+        CreateMap<AffiliationEntity, AffiliationDto>();
+    }
+
+    private void CreateUserAffiliationMappings()
+    {
+        CreateMap<UserAffiliationEntity, UserAffiliationDto>()
+            .ForMember(dest => dest.Affiliation, opt => opt.MapFrom(src => new AffiliationDto
+            {
+                Id = src.AffiliationId,
+                Name = null,
+                ShortName = null,
+                RorId = null,
+                RorUrl = null,
+                CreatedOnUtc = default,
+                CreatedBy = null,
+                LastModifiedOnUtc = null,
+                LastModifiedBy = null
+            }));
     }
     #endregion
 }

@@ -32,6 +32,9 @@ public static class DependencyInjection
             
             opts.Schema.For<ProjectEntity>().SoftDeleted();
             opts.Schema.For<MemberEntity>().SoftDeleted();
+            opts.Schema.For<DomainEntity>().SoftDeleted();
+            opts.Schema.For<AffiliationEntity>().SoftDeleted();
+            opts.Schema.For<UserAffiliationEntity>().SoftDeleted();
         }).UseLightweightSessions();
 
         services.Scan(s => s

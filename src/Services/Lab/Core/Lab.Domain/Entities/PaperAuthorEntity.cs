@@ -12,6 +12,7 @@ public class PaperAuthorEntity: Entity<Guid>
     public Guid AuthorRoleId { get; set; }
     public Guid MemberId { get; set; }
     
+    
     #endregion
 
     #region Factories
