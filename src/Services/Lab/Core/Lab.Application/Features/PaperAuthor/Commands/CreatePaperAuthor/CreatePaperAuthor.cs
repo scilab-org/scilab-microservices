@@ -18,6 +18,7 @@ public class CreatePaperAuthorCommandValidator : AbstractValidator<CreatePaperAu
         RuleFor(x => x.Dto.PaperId).NotEmpty();
         RuleFor(x => x.Dto.AuthorRoleId).NotEmpty();
         RuleFor(x => x.Dto.MemberId).NotEmpty();
+        RuleFor(x => x.Dto.AffiliationId).NotEmpty();
     }
 }
 
@@ -39,7 +40,9 @@ public class CreatePaperAuthorCommandHandler(
             request.Dto.Email.Trim(),
             request.Dto.PaperId,
             request.Dto.AuthorRoleId,
-            request.Dto.MemberId);
+            request.Dto.MemberId,
+            request.Dto.ProjectId,
+            request.Dto.AffiliationName);
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

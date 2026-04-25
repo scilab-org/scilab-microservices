@@ -20,35 +20,32 @@ public sealed class GetMemberAffiliationsQueryHandler(IDocumentSession session, 
             ?? throw new ClientValidationException(MessageCode.MemberNotFound, query.MemberId.ToString());
 
         var affiliationsQuery = session.Query<UserAffiliationEntity>()
-            .Where(x => x.UserId == member.UserId);
+            .Where(x => x.UserId == member.UserId)
+            .OrderByDescending(x => x.CreatedOnUtc);
 
-        if (!string.IsNullOrWhiteSpace(query.AffiliationName))
-        {
-            var affiliationName = query.AffiliationName.Trim().ToLower();
-            affiliationsQuery = affiliationsQuery.Where(x => x.AffiliationId != Guid.Empty);
-        }
+        var affiliations = await affiliationsQuery.ToListAsync(cancellationToken);
 
-        var affiliations = await affiliationsQuery
-            .OrderByDescending(x => x.CreatedOnUtc)
-            .Skip((query.Paging.PageNumber - 1) * query.Paging.PageSize)
-            .Take(query.Paging.PageSize)
-            .ToListAsync(cancellationToken);
-
-        var result = new List<UserAffiliationDto>(affiliations.Count);
+        var affiliationDtos = new List<UserAffiliationDto>(affiliations.Count);
         foreach (var item in affiliations)
         {
             var affiliation = await session.LoadAsync<AffiliationEntity>(item.AffiliationId, cancellationToken);
             if (!string.IsNullOrWhiteSpace(query.AffiliationName) &&
-                (affiliation is null || affiliation.Name is null || !affiliation.Name.Contains(query.AffiliationName.Trim())))
+                (affiliation is null || affiliation.Name is null || !affiliation.Name.Contains(query.AffiliationName.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
             }
 
             var dto = mapper.Map<UserAffiliationDto>(item);
             dto.Affiliation = affiliation is null ? null : mapper.Map<AffiliationDto>(affiliation);
-            result.Add(dto);
+            affiliationDtos.Add(dto);
         }
 
-        return new GetMemberAffiliationsResult(result, result.Count, query.Paging);
+        var totalCount = affiliationDtos.Count;
+        var items = affiliationDtos
+            .Skip((query.Paging.PageNumber - 1) * query.Paging.PageSize)
+            .Take(query.Paging.PageSize)
+            .ToList();
+
+        return new GetMemberAffiliationsResult(items, totalCount, query.Paging);
     }
 }

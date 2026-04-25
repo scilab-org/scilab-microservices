@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Management.Application.Features.UserAffiliation.Queries;
 
-public sealed record GetUserAffiliationsQuery() : IRequest<List<UserAffiliationDto>>;
+public sealed record GetUserAffiliationsQuery(Guid UserId) : IRequest<List<UserAffiliationDto>>;
 
 public sealed class GetUserAffiliationsQueryHandler(IDocumentSession session, IMapper mapper)
     : IRequestHandler<GetUserAffiliationsQuery, List<UserAffiliationDto>>
@@ -15,6 +15,7 @@ public sealed class GetUserAffiliationsQueryHandler(IDocumentSession session, IM
     public async Task<List<UserAffiliationDto>> Handle(GetUserAffiliationsQuery query, CancellationToken cancellationToken)
     {
         var result = await session.Query<UserAffiliationEntity>()
+            .Where(x => x.UserId == query.UserId)
             .OrderByDescending(x => x.CreatedOnUtc)
             .ToListAsync(cancellationToken);
 

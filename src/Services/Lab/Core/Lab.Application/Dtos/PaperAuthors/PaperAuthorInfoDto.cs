@@ -12,4 +12,6 @@ public class PaperAuthorInfoDto : DtoId<Guid>
     public string? AuthorRoleName { get; set; }
     public string? AuthorRoleDescription { get; set; }
     public Guid MemberId { get; set; }
+    public Guid AffiliationId { get; set; }
+    public string AffiliationName { get; set; } = null!;
 }

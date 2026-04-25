@@ -30,12 +30,14 @@ public class UpdatePaperAuthorCommandHandler(IDocumentSession session,
                     ?? throw new NotFoundException(MessageCode.NotFound, request.Id.ToString());
 
         entity.Update(
-            request.Dto.Name?.Trim(),
-            request.Dto.OcrId?.Trim(),
-            request.Dto.Email?.Trim(),
-            request.Dto.PaperId,
-            request.Dto.AuthorRoleId,
-            request.Dto.MemberId);
+            name: request.Dto.Name?.Trim(),
+            ocrId: request.Dto.OcrId?.Trim(),
+            email: request.Dto.Email?.Trim(),
+            paperId: request.Dto.PaperId,
+            authorRoleId: request.Dto.AuthorRoleId,
+            memberId: request.Dto.MemberId,
+            affiliationId: request.Dto.AffiliationId,
+            affiliationName: request.Dto.AffiliationName?.Trim());
 
         session.Store(entity);
         await session.SaveChangesAsync(cancellationToken);

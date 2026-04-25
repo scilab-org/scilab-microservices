@@ -11,7 +11,8 @@ public class PaperAuthorEntity: Entity<Guid>
     public Guid PaperId { get; set; }
     public Guid AuthorRoleId { get; set; }
     public Guid MemberId { get; set; }
-    
+    public Guid AffiliationId { get; set; }
+    public string AffiliationName { get; set; } = null!;
     
     #endregion
 
@@ -23,7 +24,9 @@ public class PaperAuthorEntity: Entity<Guid>
         string email, 
         Guid paperId, 
         Guid authorRoleId, 
-        Guid memberId)
+        Guid memberId,
+        Guid affiliationId,
+        string affiliationName)
     {
         return new PaperAuthorEntity()
         {
@@ -33,7 +36,11 @@ public class PaperAuthorEntity: Entity<Guid>
             Email = email,
             PaperId = paperId,
             AuthorRoleId = authorRoleId,
-            MemberId = memberId
+            MemberId = memberId,
+            AffiliationId = affiliationId,
+            AffiliationName = affiliationName,
+            CreatedOnUtc = DateTimeOffset.Now,
+            LastModifiedOnUtc = DateTimeOffset.Now
         };
     }
     
@@ -42,7 +49,9 @@ public class PaperAuthorEntity: Entity<Guid>
         string? email = null,
         Guid? paperId = null,
         Guid? authorRoleId = null, 
-        Guid? memberId = null)
+        Guid? memberId = null,
+        Guid? affiliationId = null,
+        string? affiliationName = null)
     {
         Name = name ?? Name;
         OcrId = ocrId ?? OcrId;
@@ -50,6 +59,9 @@ public class PaperAuthorEntity: Entity<Guid>
         PaperId = paperId ?? PaperId;
         AuthorRoleId = authorRoleId ?? AuthorRoleId;
         MemberId = memberId ?? MemberId;
+        AffiliationId = affiliationId ?? AffiliationId;
+        AffiliationName = affiliationName ?? AffiliationName;
+        LastModifiedOnUtc = DateTimeOffset.Now;
     }
     #endregion
 }

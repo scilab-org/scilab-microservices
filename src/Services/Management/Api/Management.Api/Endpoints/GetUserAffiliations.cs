@@ -1,3 +1,5 @@
+using BuildingBlocks.Exceptions;
+using Common.Constants;
 using Management.Api.Constants;
 using Management.Application.Dtos.UserAffiliations;
 using Management.Application.Features.UserAffiliation.Queries;
@@ -16,9 +18,14 @@ public sealed class GetUserAffiliations : ICarterModule
             .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 
-    private async Task<ApiGetResponse<List<UserAffiliationDto>>> HandleGetUserAffiliationsAsync(ISender sender)
+    private async Task<ApiGetResponse<List<UserAffiliationDto>>> HandleGetUserAffiliationsAsync(
+        ISender sender,
+        [FromQuery] string userId)
     {
-        var result = await sender.Send(new GetUserAffiliationsQuery());
+        var id = Guid.TryParse(userId, out var guid) ? guid : Guid.Empty;
+        if (id == Guid.Empty)
+            throw new ClientValidationException(MessageCode.UserIdIsRequired, userId);
+        var result = await sender.Send(new GetUserAffiliationsQuery(id));
         return new ApiGetResponse<List<UserAffiliationDto>>(result);
     }
 }
