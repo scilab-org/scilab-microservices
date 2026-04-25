@@ -95,7 +95,7 @@ public sealed class ApiRoutes
         public const string GetProjectMembers    = $"{Base}/{{projectId}}/members";
         public const string UpdateProjectMemberRole = $"{BaseProjectManager}/{{projectId}}/members/{{memberId}}/role";
         public const string GetMemberById = $"{Base}/members/{{memberId}}";
-        
+        public const string GetMemberAffiliations = $"{Base}/members/{{memberId}}/affiliations";
         #endregion
     }
 
@@ -126,6 +126,37 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAdmin}/{{id}}";
         public const string GetDomains = $"{Base}";
         public const string GetDomainById = $"{Base}/{{id}}";
+
+        #endregion
+    }
+
+    public static class Affiliation
+    {
+        #region Constants
+        public const string Tags = "Affiliations";
+
+        private const string BaseAdmin = "/admin/affiliations";
+        private const string Base = "/affiliations";
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetAffiliations = $"{Base}";
+        public const string GetAffiliationById = $"{Base}/{{id}}";
+
+        #endregion
+    }
+
+    public static class UserAffiliation
+    {
+        #region Constants
+        public const string Tags = "User Affiliations";
+
+        private const string Base = "/admin/user-affiliations";
+        public const string Create = $"{Base}";
+        public const string Update = $"{Base}/{{id}}";
+        public const string Delete = $"{Base}/{{id}}";
+        public const string GetUserAffiliations = $"{Base}";
+        public const string GetUserAffiliationById = $"{Base}/{{id}}";
 
         #endregion
     }

@@ -338,4 +338,12 @@ public sealed class MessageCode
     public const string GapTypeIsNotExists = "GAP_TYPE_IS_NOT_EXISTS";
 
     #endregion
+
+    #region Affiliation Management
+
+    public const string AffiliationNameIsRequired = "AFFILIATION_NAME_IS_REQUIRED";
+    public const string AffiliationIdIsRequired = "AFFILIATION_ID_IS_REQUIRED";
+    public const string AffiliationIsNotExists = "AFFILIATION_IS_NOT_EXISTS";
+    public const string UserAffiliationIsNotExists = "USER_AFFILIATION_IS_NOT_EXISTS";
+    #endregion
 }

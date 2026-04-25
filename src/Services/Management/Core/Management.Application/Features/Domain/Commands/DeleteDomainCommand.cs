@@ -29,17 +29,6 @@ public sealed class DeleteDomainCommandHandler(IDocumentSession session)
         var entity = await session.LoadAsync<DomainEntity>(command.DomainId, cancellationToken)
             ?? throw new ClientValidationException(MessageCode.DomainIsNotExists, command.DomainId.ToString());
 
-        var projects = await session.Query<ProjectEntity>()
-            .Where(x => x.DomainIds.Contains(command.DomainId))
-            .ToListAsync(cancellationToken);
-
-        foreach (var project in projects)
-        {
-            project.DomainIds.Remove(command.DomainId);
-            project.LastModifiedOnUtc = DateTimeOffset.UtcNow;
-            session.Store(project);
-        }
-
         session.Delete(entity);
         await session.SaveChangesAsync(cancellationToken);
 
