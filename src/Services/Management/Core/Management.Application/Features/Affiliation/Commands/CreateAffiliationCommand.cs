@@ -7,6 +7,7 @@ namespace Management.Application.Features.Affiliation.Commands;
 
 public sealed record CreateAffiliationCommand(CreateAffiliationDto Dto) : ICommand<Guid>;
 
+[ExcludeFromCodeCoverage]
 public sealed class CreateAffiliationCommandValidator : AbstractValidator<CreateAffiliationCommand>
 {
     public CreateAffiliationCommandValidator()

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//private/tmp/**)",
+      "Bash(cat)",
+      "Bash(dotnet-script --version)",
+      "Bash(dotnet tool:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(docker info:*)",
+      "Bash(pg_isready -h localhost -p 5432)",
+      "Bash(psql -h localhost -U postgres -c \"SELECT 1\")",
+      "Bash(brew services:*)",
+      "Bash(nc -z localhost 5432)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git -C /Users/trungnguyen/Workspaces/projects/scilab/scilab-microservices diff --name-only)",
+      "Bash(git -C /Users/trungnguyen/Workspaces/projects/scilab/scilab-microservices status --short)",
+      "Bash(reportgenerator '-reports:coverage-results/**/coverage.cobertura.xml' -targetdir:coverage-results/html -reporttypes:Html -assemblyfilters:+Management.Application '-classfilters:+Management.Application.Features.*')",
+      "Bash(reportgenerator '-reports:coverage-results/**/coverage.cobertura.xml' -targetdir:coverage-results/html -reporttypes:TextSummary -assemblyfilters:+Management.Application '-classfilters:+Management.Application.Features.*')",
+      "Bash(grep -v \"^$\")",
+      "Bash(python3:*)"
+    ]
+  }
+}

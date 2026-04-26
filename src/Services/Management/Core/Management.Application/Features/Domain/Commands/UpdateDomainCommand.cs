@@ -7,6 +7,7 @@ namespace Management.Application.Features.Domain.Commands;
 
 public sealed record UpdateDomainCommand(Guid DomainId, UpdateDomainDto Dto) : ICommand<Guid>;
 
+[ExcludeFromCodeCoverage]
 public sealed class UpdateDomainCommandValidator : AbstractValidator<UpdateDomainCommand>
 {
     #region Ctors

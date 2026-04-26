@@ -25,7 +25,7 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
                     {
                         if (dto.StartDate == null || dto.EndDate == null) return true;
 
-                        return dto.StartDate < dto.EndDate;
+                        return dto.StartDate.Value < dto.EndDate.Value;
                     })
                     .WithMessage(MessageCode.StartDateMustBeBeforeEndDate);
             });
@@ -43,10 +43,13 @@ public class CreateProjectCommandHandler(IDocumentSession session) : ICommandHan
     {
         var dto = command.Dto;
 
-        var checkCode = await session.Query<ProjectEntity>()
-            .AnyAsync(p => p.Code == dto.Code, cancellationToken);
-        if (checkCode)
-            throw new ClientValidationException(MessageCode.ProjectCodeAlreadyExists, dto.Code!);
+        if (!string.IsNullOrWhiteSpace(dto.Code))
+        {
+            var checkCode = await session.Query<ProjectEntity>()
+                .AnyAsync(p => p.Code == dto.Code, cancellationToken);
+            if (checkCode)
+                throw new ClientValidationException(MessageCode.ProjectCodeAlreadyExists, dto.Code);
+        }
 
         await session.BeginTransactionAsync(cancellationToken);
 

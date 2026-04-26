@@ -7,6 +7,7 @@ namespace Management.Application.Features.Domain.Commands;
 
 public sealed record CreateDomainCommand(CreateDomainDto Dto) : ICommand<Guid>;
 
+[ExcludeFromCodeCoverage]
 public sealed class CreateDomainCommandValidator : AbstractValidator<CreateDomainCommand>
 {
     #region Ctors

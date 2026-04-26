@@ -96,4 +96,33 @@ public sealed class UpdateProjectCommandValidatorTests : BaseTest
         // Assert
         result.IsValid.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task Validate_ShouldPass_WhenOnlyStartDateProvided()
+    {
+        // Arrange
+        var dto = ProjectTestData.UpdateProjectDto(startDate: DateTimeOffset.UtcNow, endDate: null);
+        var command = new UpdateProjectCommand(Guid.NewGuid(), dto);
+
+        // Act
+        var result = await _validator.ValidateAsync(command, CancellationToken);
+
+        // Assert
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Validate_ShouldPass_WhenStartDateIsBeforeEndDate()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var dto = ProjectTestData.UpdateProjectDto(startDate: now, endDate: now.AddDays(10));
+        var command = new UpdateProjectCommand(Guid.NewGuid(), dto);
+
+        // Act
+        var result = await _validator.ValidateAsync(command, CancellationToken);
+
+        // Assert
+        result.IsValid.Should().BeTrue();
+    }
 }

@@ -6,6 +6,7 @@ namespace Management.Application.Features.UserAffiliation.Commands;
 
 public sealed record DeleteUserAffiliationCommand(Guid Id) : ICommand<Unit>;
 
+[ExcludeFromCodeCoverage]
 public sealed class DeleteUserAffiliationCommandValidator : AbstractValidator<DeleteUserAffiliationCommand>
 {
     public DeleteUserAffiliationCommandValidator()

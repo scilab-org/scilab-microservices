@@ -1,0 +1,129 @@
+Summary
+  Generated on: 26/4/2026 - 15:50:21
+  Coverage date: 26/4/2026 - 15:50:06
+  Parser: Cobertura
+  Assemblies: 1
+  Classes: 107
+  Files: 54
+  Line coverage: 100%
+  Covered lines: 730
+  Uncovered lines: 0
+  Coverable lines: 730
+  Total lines: 3307
+  Branch coverage: 97.7% (88 of 90)
+  Covered branches: 88
+  Total branches: 90
+  Method coverage: 100% (145 of 145)
+  Full method coverage: 100% (145 of 145)
+  Covered methods: 145
+  Fully covered methods: 145
+  Total methods: 145
+
+Management.Application                                                                                          100%
+  Management.Application.Features.Affiliation.Commands.CreateAffiliationCommand                                 100%
+  Management.Application.Features.Affiliation.Commands.CreateAffiliationCommandHandler                          100%
+  Management.Application.Features.Affiliation.Commands.DeleteAffiliationCommand                                 100%
+  Management.Application.Features.Affiliation.Commands.DeleteAffiliationCommandHandler                          100%
+  Management.Application.Features.Affiliation.Commands.UpdateAffiliationCommand                                 100%
+  Management.Application.Features.Affiliation.Commands.UpdateAffiliationCommandHandler                          100%
+  Management.Application.Features.Affiliation.Queries.GetAffiliationByIdQuery                                   100%
+  Management.Application.Features.Affiliation.Queries.GetAffiliationByIdQueryHandler                            100%
+  Management.Application.Features.Affiliation.Queries.GetAffiliationsQuery                                      100%
+  Management.Application.Features.Affiliation.Queries.GetAffiliationsQueryHandler                               100%
+  Management.Application.Features.Dataset.Commands.CreateDatasetCommand                                         100%
+  Management.Application.Features.Dataset.Commands.CreateDatasetCommandHandler                                  100%
+  Management.Application.Features.Dataset.Commands.CreateDatasetCommandValidator                                100%
+  Management.Application.Features.Dataset.Commands.DeleteDatasetCommand                                         100%
+  Management.Application.Features.Dataset.Commands.DeleteDatasetValidator                                       100%
+  Management.Application.Features.Dataset.Commands.UpdateDatasetCommand                                         100%
+  Management.Application.Features.Dataset.Commands.UpdateDatasetCommandHandler                                  100%
+  Management.Application.Features.Dataset.Commands.UpdateDatasetCommandValidator                                100%
+  Management.Application.Features.Dataset.Queries.GetDatasetsQuery                                              100%
+  Management.Application.Features.Domain.Commands.CreateDomainCommand                                           100%
+  Management.Application.Features.Domain.Commands.CreateDomainCommandHandler                                    100%
+  Management.Application.Features.Domain.Commands.DeleteDomainCommand                                           100%
+  Management.Application.Features.Domain.Commands.DeleteDomainCommandHandler                                    100%
+  Management.Application.Features.Domain.Commands.UpdateDomainCommand                                           100%
+  Management.Application.Features.Domain.Commands.UpdateDomainCommandHandler                                    100%
+  Management.Application.Features.Domain.Queries.GetDomainByIdQuery                                             100%
+  Management.Application.Features.Domain.Queries.GetDomainByIdQueryHandler                                      100%
+  Management.Application.Features.Domain.Queries.GetDomainsQuery                                                100%
+  Management.Application.Features.Domain.Queries.GetDomainsQueryHandler                                         100%
+  Management.Application.Features.Member.Commands.AddProjectManagersCommand                                     100%
+  Management.Application.Features.Member.Commands.AddProjectManagersValidator                                   100%
+  Management.Application.Features.Member.Commands.AddProjectMembersCommand                                      100%
+  Management.Application.Features.Member.Commands.AddProjectMembersValidator                                    100%
+  Management.Application.Features.Member.Commands.AddSubProjectMembersCommand                                   100%
+  Management.Application.Features.Member.Commands.AddSubProjectMembersValidator                                 100%
+  Management.Application.Features.Member.Commands.DeleteProjectManagersCommand                                  100%
+  Management.Application.Features.Member.Commands.DeleteProjectManagersValidator                                100%
+  Management.Application.Features.Member.Commands.DeleteProjectMembersCommand                                   100%
+  Management.Application.Features.Member.Commands.DeleteProjectMembersValidator                                 100%
+  Management.Application.Features.Member.Commands.DeleteSubProjectMembersCommand                                100%
+  Management.Application.Features.Member.Commands.DeleteSubProjectMembersValidator                              100%
+  Management.Application.Features.Member.Commands.UpdateProjectMemberRoleCommand                                100%
+  Management.Application.Features.Member.Commands.UpdateProjectMemberRoleValidator                              100%
+  Management.Application.Features.Member.Queries.GetMemberByIdQuery                                             100%
+  Management.Application.Features.Member.Queries.GetMemberByIdQueryHandler                                      100%
+  Management.Application.Features.Member.Queries.GetMemberByPaperIdQuery                                        100%
+  Management.Application.Features.Member.Queries.GetMemberByPaperIdQueryValidator                               100%
+  Management.Application.Features.Member.Queries.GetProjectMembersValidator                                     100%
+  Management.Application.Features.Member.Queries.GetSubProjectMembersByPaperIdQuery                             100%
+  Management.Application.Features.Member.Queries.GetSubProjectMembersByPaperIdQueryValidator                    100%
+  Management.Application.Features.Member.Queries.GetSubProjectMembersValidator                                  100%
+  Management.Application.Features.Project.Commands.CreateProjectCommand                                         100%
+  Management.Application.Features.Project.Commands.CreateProjectCommandValidator                                100%
+  Management.Application.Features.Project.Commands.CreateProjectConferenceJournalCommand                        100%
+  Management.Application.Features.Project.Commands.CreateProjectConferenceJournalCommandHandler                 100%
+  Management.Application.Features.Project.Commands.CreateProjectConferenceJournalValidator                      100%
+  Management.Application.Features.Project.Commands.CreateProjectPaperCommand                                    100%
+  Management.Application.Features.Project.Commands.CreateProjectPaperCommandHandler                             100%
+  Management.Application.Features.Project.Commands.CreateProjectPaperValidator                                  100%
+  Management.Application.Features.Project.Commands.CreateSubProjectCommand                                      100%
+  Management.Application.Features.Project.Commands.CreateSubProjectCommandHandler                               100%
+  Management.Application.Features.Project.Commands.CreateSubProjectValidator                                    100%
+  Management.Application.Features.Project.Commands.DeleteProjectCommand                                         100%
+  Management.Application.Features.Project.Commands.DeleteProjectCommandValidator                                100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalByJournalIdCommand             100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalByJournalIdCommandValidator    100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalsCommand                       100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalsCommandHandler                100%
+  Management.Application.Features.Project.Commands.DeleteProjectConferenceJournalsValidator                     100%
+  Management.Application.Features.Project.Commands.DeleteProjectPaperByBankIdCommand                            100%
+  Management.Application.Features.Project.Commands.DeleteProjectPaperByBankIdCommandValidator                   100%
+  Management.Application.Features.Project.Commands.DeleteProjectPapersCommand                                   100%
+  Management.Application.Features.Project.Commands.DeleteProjectPapersCommandHandler                            100%
+  Management.Application.Features.Project.Commands.DeleteProjectPapersValidator                                 100%
+  Management.Application.Features.Project.Commands.DeleteSubProjectCommand                                      100%
+  Management.Application.Features.Project.Commands.UpdateProjectCommand                                         100%
+  Management.Application.Features.Project.Commands.UpdateProjectCommandValidator                                100%
+  Management.Application.Features.Project.Queries.GetAssignedPapersValidator                                    100%
+  Management.Application.Features.Project.Queries.GetAvailablePapersQuery                                       100%
+  Management.Application.Features.Project.Queries.GetAvailablePapersQueryHandler                                100%
+  Management.Application.Features.Project.Queries.GetAvailablePapersValidator                                   100%
+  Management.Application.Features.Project.Queries.GetGetAvailableProjectUsersValidator                          100%
+  Management.Application.Features.Project.Queries.GetMyProjectRoleQuery                                         100%
+  Management.Application.Features.Project.Queries.GetMyProjectRoleQueryValidator                                100%
+  Management.Application.Features.Project.Queries.GetMyProjectsValidator                                        100%
+  Management.Application.Features.Project.Queries.GetProjectByIdQuery                                           100%
+  Management.Application.Features.Project.Queries.GetProjectPapersQuery                                         100%
+  Management.Application.Features.Project.Queries.GetProjectPapersQueryHandler                                  100%
+  Management.Application.Features.Project.Queries.GetProjectPapersValidator                                     100%
+  Management.Application.Features.Project.Queries.GetProjectsByUserIdQuery                                      100%
+  Management.Application.Features.Project.Queries.GetProjectsByUserIdValidator                                  100%
+  Management.Application.Features.Project.Queries.GetProjectSubmissionStatusSummaryQuery                        100%
+  Management.Application.Features.Project.Queries.GetSubProjectsValidator                                       100%
+  Management.Application.Features.System.InitialDataCommand                                                     100%
+  Management.Application.Features.System.InitialDataCommandHandler                                              100%
+  Management.Application.Features.UserAffiliation.Commands.CreateUserAffiliationCommand                         100%
+  Management.Application.Features.UserAffiliation.Commands.CreateUserAffiliationCommandHandler                  100%
+  Management.Application.Features.UserAffiliation.Commands.DeleteUserAffiliationCommand                         100%
+  Management.Application.Features.UserAffiliation.Commands.DeleteUserAffiliationCommandHandler                  100%
+  Management.Application.Features.UserAffiliation.Commands.UpdateUserAffiliationCommand                         100%
+  Management.Application.Features.UserAffiliation.Commands.UpdateUserAffiliationCommandHandler                  100%
+  Management.Application.Features.UserAffiliation.Queries.GetMemberAffiliationsQuery                            100%
+  Management.Application.Features.UserAffiliation.Queries.GetMemberAffiliationsQueryHandler                     100%
+  Management.Application.Features.UserAffiliation.Queries.GetUserAffiliationByIdQuery                           100%
+  Management.Application.Features.UserAffiliation.Queries.GetUserAffiliationByIdQueryHandler                    100%
+  Management.Application.Features.UserAffiliation.Queries.GetUserAffiliationsQuery                              100%
+  Management.Application.Features.UserAffiliation.Queries.GetUserAffiliationsQueryHandler                       100%

@@ -1,5 +1,7 @@
 using Common.Models;
+using Lab.Application.Dtos.AuthorRoles;
 using Lab.Application.Dtos.Comments;
+using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.PaperContributors;
@@ -7,7 +9,12 @@ using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Projects;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Dtos.Template;
+using Lab.Application.Features.AuthorRole.Commands.CreateAuthorRole;
+using Lab.Application.Features.AuthorRole.Commands.DeleteAuthorRole;
+using Lab.Application.Features.AuthorRole.Queries.GetAuthorRoleById;
 using Lab.Application.Features.Comment.Commands.CreateComment;
+using Lab.Application.Features.GapType.Commands.CreateGapType;
+using Lab.Application.Features.GapType.Commands.DeleteGapType;
 using Lab.Application.Features.Journal.Commands.CreateJournal;
 using Lab.Application.Features.Journal.Commands.UpdateJournal;
 using Lab.Application.Features.Paper.Commands.CreatePaper;
@@ -630,6 +637,109 @@ public sealed class UpdateProjectRulesCommandValidatorTests
     {
         var dto = new UpdateProjectRulesDto { PaperIds = new List<Guid> { Guid.NewGuid() } };
         var command = new UpdateProjectRulesCommand(dto);
+        _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
+    }
+}
+
+#endregion
+
+#region AuthorRole Validators
+
+public sealed class CreateAuthorRoleCommandValidatorTests
+{
+    private readonly CreateAuthorRoleCommandValidator _validator = new();
+
+    [Fact]
+    public void ShouldHaveError_WhenNameIsEmpty()
+    {
+        var command = new CreateAuthorRoleCommand(new CreateAuthorRoleDto { Name = "" });
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.Name);
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenNameIsProvided()
+    {
+        var command = new CreateAuthorRoleCommand(new CreateAuthorRoleDto { Name = "Reviewer" });
+        _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
+    }
+}
+
+public sealed class DeleteAuthorRoleCommandValidatorTests
+{
+    private readonly DeleteAuthorRoleCommandValidator _validator = new();
+
+    [Fact]
+    public void ShouldHaveError_WhenIdIsEmpty()
+    {
+        var command = new DeleteAuthorRoleCommand(Guid.Empty);
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Id);
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenIdIsValid()
+    {
+        var command = new DeleteAuthorRoleCommand(Guid.NewGuid());
+        _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
+    }
+}
+
+public sealed class GetAuthorRoleByIdQueryValidatorTests
+{
+    private readonly GetAuthorRoleByIdQueryValidator _validator = new();
+
+    [Fact]
+    public void ShouldHaveError_WhenIdIsEmpty()
+    {
+        var query = new GetAuthorRoleByIdQuery(Guid.Empty);
+        _validator.TestValidate(query).ShouldHaveValidationErrorFor(x => x.Id);
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenIdIsValid()
+    {
+        var query = new GetAuthorRoleByIdQuery(Guid.NewGuid());
+        _validator.TestValidate(query).ShouldNotHaveAnyValidationErrors();
+    }
+}
+
+#endregion
+
+#region GapType Validators
+
+public sealed class CreateGapTypeCommandValidatorTests
+{
+    private readonly CreateGapTypeCommandValidator _validator = new();
+
+    [Fact]
+    public void ShouldHaveError_WhenNameIsEmpty()
+    {
+        var command = new CreateGapTypeCommand(new CreateGapTypeDto { Name = "" });
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.Name);
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenNameIsProvided()
+    {
+        var command = new CreateGapTypeCommand(new CreateGapTypeDto { Name = "Empirical Gap" });
+        _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
+    }
+}
+
+public sealed class DeleteGapTypeCommandValidatorTests
+{
+    private readonly DeleteGapTypeCommandValidator _validator = new();
+
+    [Fact]
+    public void ShouldHaveError_WhenIdIsEmpty()
+    {
+        var command = new DeleteGapTypeCommand(Guid.Empty);
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Id);
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenIdIsValid()
+    {
+        var command = new DeleteGapTypeCommand(Guid.NewGuid());
         _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
     }
 }

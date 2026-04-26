@@ -7,6 +7,7 @@ namespace Management.Application.Features.UserAffiliation.Commands;
 
 public sealed record UpdateUserAffiliationCommand(Guid Id, UpdateUserAffiliationDto Dto) : ICommand<Guid>;
 
+[ExcludeFromCodeCoverage]
 public sealed class UpdateUserAffiliationCommandValidator : AbstractValidator<UpdateUserAffiliationCommand>
 {
     public UpdateUserAffiliationCommandValidator()

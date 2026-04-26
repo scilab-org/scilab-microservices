@@ -6,6 +6,7 @@ namespace Management.Application.Features.Domain.Commands;
 
 public sealed record DeleteDomainCommand(Guid DomainId) : ICommand<Unit>;
 
+[ExcludeFromCodeCoverage]
 public sealed class DeleteDomainCommandValidator : AbstractValidator<DeleteDomainCommand>
 {
     #region Ctors

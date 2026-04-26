@@ -30,7 +30,7 @@ public class UpdateProjectCommandValidator : AbstractValidator<UpdateProjectComm
                     {
                         if (dto.StartDate == null || dto.EndDate == null) return true;
 
-                        return dto.StartDate < dto.EndDate;
+                        return dto.StartDate.Value < dto.EndDate.Value;
                     })
                     .WithMessage(MessageCode.StartDateMustBeBeforeEndDate);
             });
