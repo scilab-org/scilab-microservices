@@ -18,7 +18,6 @@ public class CreatePaperAuthorCommandValidator : AbstractValidator<CreatePaperAu
         RuleFor(x => x.Dto.PaperId).NotEmpty();
         RuleFor(x => x.Dto.AuthorRoleId).NotEmpty();
         RuleFor(x => x.Dto.MemberId).NotEmpty();
-        RuleFor(x => x.Dto.AffiliationId).NotEmpty();
     }
 }
 
@@ -29,9 +28,9 @@ public class CreatePaperAuthorCommandHandler(
     public async Task<Guid> Handle(CreatePaperAuthorCommand request, CancellationToken cancellationToken)
     {
         
-        var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
-        if (role.IsNullOrEmpty() || !AuthorizeConstants.PaperAuthor.EqualsIgnoreCase(role))
-            throw new UnauthorizedException(MessageCode.AccessDenied);
+        // var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
+        // if (role.IsNullOrEmpty() || !AuthorizeConstants.PaperAuthor.EqualsIgnoreCase(role))
+        //     throw new UnauthorizedException(MessageCode.AccessDenied);
         
         var entity = PaperAuthorEntity.Create(
             Guid.NewGuid(),
@@ -41,7 +40,7 @@ public class CreatePaperAuthorCommandHandler(
             request.Dto.PaperId,
             request.Dto.AuthorRoleId,
             request.Dto.MemberId,
-            request.Dto.ProjectId,
+            request.Dto.AffiliationId,
             request.Dto.AffiliationName);
 
         session.Store(entity);

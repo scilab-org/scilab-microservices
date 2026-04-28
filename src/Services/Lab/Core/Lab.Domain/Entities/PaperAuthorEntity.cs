@@ -11,8 +11,8 @@ public class PaperAuthorEntity: Entity<Guid>
     public Guid PaperId { get; set; }
     public Guid AuthorRoleId { get; set; }
     public Guid MemberId { get; set; }
-    public Guid AffiliationId { get; set; }
-    public string AffiliationName { get; set; } = null!;
+    public Guid? AffiliationId { get; set; }
+    public string? AffiliationName { get; set; } = null!;
     
     #endregion
 
@@ -25,8 +25,8 @@ public class PaperAuthorEntity: Entity<Guid>
         Guid paperId, 
         Guid authorRoleId, 
         Guid memberId,
-        Guid affiliationId,
-        string affiliationName)
+        Guid? affiliationId = null,
+        string? affiliationName = null)
     {
         return new PaperAuthorEntity()
         {

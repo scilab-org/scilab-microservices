@@ -228,6 +228,78 @@ public sealed class ManagementApiService(IManagementServiceApi managementService
 
         return body?.Value;
     }
+
+    public async Task<ManagementUserAffiliationInfo?> GetUserAffiliationByIdAsync(
+        Guid userAffiliationId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (userAffiliationId == Guid.Empty)
+                return null;
+
+            var response = await managementServiceApi.GetUserAffiliationByIdAsync(userAffiliationId);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<UserAffiliationApiDto>>(
+                cancellationToken: cancellationToken);
+
+            var data = body?.Result;
+            if (data == null)
+                return null;
+
+            return new ManagementUserAffiliationInfo(
+                Id: data.Id,
+                UserId: data.UserId,
+                Department: data.Department,
+                Position: data.Position,
+                AffiliationStartYear: data.AffiliationStartYear,
+                AffiliationEndYear: data.AffiliationEndYear
+            );
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public async Task<ManagementUserAffiliationInfo?> GetUserAffiliationByUserIdAndAffiliationIdAsync(
+        Guid userId,
+        Guid affiliationId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (userId == Guid.Empty || affiliationId == Guid.Empty)
+                return null;
+
+            var response = await managementServiceApi.GetInternalUserAffiliationByUserIdAndAffiliationIdAsync(userId, affiliationId);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var body = await response.Content.ReadFromJsonAsync<ApiGetResponse<UserAffiliationApiDto>>(
+                cancellationToken: cancellationToken);
+
+            var data = body?.Result;
+            if (data == null)
+                return null;
+
+            return new ManagementUserAffiliationInfo(
+                Id: data.Id,
+                UserId: data.UserId,
+                Department: data.Department,
+                Position: data.Position,
+                AffiliationStartYear: data.AffiliationStartYear,
+                AffiliationEndYear: data.AffiliationEndYear
+            );
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     public async Task<ManagementMemberInfo?> GetMemberByIdAsync(
         Guid memberId,
         CancellationToken cancellationToken = default)
@@ -357,4 +429,14 @@ file sealed class MemberApiDto
     public Guid UserId { get; init; }
     public Guid ProjectId { get; init; }
     public string? ProjectRole { get; init; }
+}
+
+file sealed class UserAffiliationApiDto
+{
+    public Guid Id { get; init; }
+    public Guid UserId { get; init; }
+    public string? Department { get; init; }
+    public string? Position { get; init; }
+    public int? AffiliationStartYear { get; init; }
+    public int? AffiliationEndYear { get; init; }
 }

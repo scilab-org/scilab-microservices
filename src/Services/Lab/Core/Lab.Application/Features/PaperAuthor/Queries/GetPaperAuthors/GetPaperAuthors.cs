@@ -2,6 +2,7 @@ using AutoMapper;
 using Lab.Application.Dtos.PaperAuthors;
 using Lab.Application.Models.Filters;
 using Lab.Application.Models.Results;
+using Lab.Application.Services;
 using Lab.Domain.Entities;
 using Marten;
 using Marten.Pagination;
@@ -10,7 +11,10 @@ namespace Lab.Application.Features.PaperAuthor.Queries.GetPaperAuthors;
 
 public record GetPaperAuthorsQuery(GetPaperAuthorsFilter Filter, PaginationRequest Paging) : IQuery<GetPaperAuthorsResult>;
 
-public class GetPaperAuthorsQueryHandler(IDocumentSession session, IMapper mapper)
+public class GetPaperAuthorsQueryHandler(
+    IDocumentSession session,
+    IMapper mapper,
+    IManagementApiService managementApiService)
     : IQueryHandler<GetPaperAuthorsQuery, GetPaperAuthorsResult>
 {
     public async Task<GetPaperAuthorsResult> Handle(GetPaperAuthorsQuery request, CancellationToken cancellationToken)
@@ -45,6 +49,7 @@ public class GetPaperAuthorsQueryHandler(IDocumentSession session, IMapper mappe
 
         var items = mapper.Map<List<PaperAuthorDto>>(results.ToList());
         await ApplyAuthorRoleDetailsAsync(items, cancellationToken);
+        await ApplyAffiliationDetailsAsync(items, cancellationToken);
 
         return new GetPaperAuthorsResult(items, totalCount, request.Paging);
     }
@@ -67,6 +72,51 @@ public class GetPaperAuthorsQueryHandler(IDocumentSession session, IMapper mappe
             {
                 item.AuthorRoleName = role.Name;
                 item.AuthorRoleDescription = role.Description;
+            }
+        }
+    }
+
+    private async Task ApplyAffiliationDetailsAsync(List<PaperAuthorDto> items, CancellationToken cancellationToken)
+    {
+        var affiliationPairs = items
+            .Where(x => x.MemberId != Guid.Empty && x.AffiliationId != Guid.Empty)
+            .Select(x => new { x.MemberId, x.AffiliationId })
+            .DistinctBy(x => (x.MemberId, x.AffiliationId))
+            .ToList();
+
+        if (affiliationPairs.Count == 0)
+            return;
+
+        var memberTasks = affiliationPairs
+            .Select(async pair =>
+            {
+                var member = await managementApiService.GetMemberByIdAsync(pair.MemberId, cancellationToken);
+                if (member is null)
+                    return ((Guid MemberId, Guid AffiliationId, ManagementUserAffiliationInfo? Info)?)null;
+
+                var affiliation = await managementApiService.GetUserAffiliationByUserIdAndAffiliationIdAsync(
+                    member.UserId,
+                    pair.AffiliationId,
+                    cancellationToken);
+
+                return (pair.MemberId, pair.AffiliationId, Info: affiliation);
+            })
+            .ToList();
+
+        var affiliations = await Task.WhenAll(memberTasks);
+        var lookup = affiliations
+            .Where(x => x.HasValue && x.Value.Info is not null)
+            .Select(x => x!.Value)
+            .ToDictionary(x => (x.MemberId, x.AffiliationId), x => x.Info!);
+
+        foreach (var item in items)
+        {
+            if (lookup.TryGetValue((item.MemberId, item.AffiliationId), out var affiliation))
+            {
+                item.Department = affiliation.Department;
+                item.Position = affiliation.Position;
+                item.AffiliationStartYear = affiliation.AffiliationStartYear;
+                item.AffiliationEndYear = affiliation.AffiliationEndYear;
             }
         }
     }
