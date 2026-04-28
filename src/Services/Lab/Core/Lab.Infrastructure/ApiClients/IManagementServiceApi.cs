@@ -94,6 +94,21 @@ public interface IManagementServiceApi
     [Post("/projects/journal/{journalId}")]
     Task<HttpResponseMessage> RemoveConferenceJournalFromProjectAsync(
         [AliasAs("journalId")] Guid journalId);
+
+    /// <summary>
+    /// GET /user-affiliations/{id} — fetches user affiliation by id.
+    /// </summary>
+    [Get("/user-affiliations/{id}")]
+    Task<HttpResponseMessage> GetUserAffiliationByIdAsync(
+        [AliasAs("id")] Guid id);
+
+    /// <summary>
+    /// GET /internal/user-affiliations/users/{userId}/affiliations/{affiliationId} — internal fetch by user and affiliation ids.
+    /// </summary>
+    [Get("/user-affiliations/users/{userId}/affiliations/{affiliationId}")]
+    Task<HttpResponseMessage> GetInternalUserAffiliationByUserIdAndAffiliationIdAsync(
+        [AliasAs("userId")] Guid userId,
+        [AliasAs("affiliationId")] Guid affiliationId);
     
 }
 

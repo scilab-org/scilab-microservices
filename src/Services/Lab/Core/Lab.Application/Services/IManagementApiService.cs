@@ -110,6 +110,21 @@ public interface IManagementApiService
     Task<List<Guid>?> RemoveConferenceJournalFromProjectAsync(
         Guid journalId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Calls the Management service to fetch a user affiliation by Id.
+    /// </summary>
+    Task<ManagementUserAffiliationInfo?> GetUserAffiliationByIdAsync(
+        Guid userAffiliationId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Calls the Management service to fetch a user affiliation by userId + affiliationId.
+    /// </summary>
+    Task<ManagementUserAffiliationInfo?> GetUserAffiliationByUserIdAndAffiliationIdAsync(
+        Guid userId,
+        Guid affiliationId,
+        CancellationToken cancellationToken = default);
     
 }
 
@@ -139,3 +154,11 @@ public sealed record ManagementProjectInfo(
     string? Context,
     string? Domain,
     string? Keypoint);
+
+public sealed record ManagementUserAffiliationInfo(
+    Guid Id,
+    Guid UserId,
+    string? Department,
+    string? Position,
+    int? AffiliationStartYear,
+    int? AffiliationEndYear);

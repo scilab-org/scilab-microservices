@@ -151,12 +151,14 @@ public sealed class ApiRoutes
         #region Constants
         public const string Tags = "User Affiliations";
 
-        private const string Base = "/admin/user-affiliations";
-        public const string Create = $"{Base}";
-        public const string Update = $"{Base}/{{id}}";
-        public const string Delete = $"{Base}/{{id}}";
-        public const string GetUserAffiliations = $"{Base}";
+        private const string BaseAdmin = "/admin/user-affiliations";
+        private const string Base = "/user-affiliations";
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetUserAffiliations = $"{BaseAdmin}";
         public const string GetUserAffiliationById = $"{Base}/{{id}}";
+        public const string GetUserAffiliationByUserIdAndAffiliationId = $"{Base}/users/{{userId}}/affiliations/{{affiliationId}}";
 
         #endregion
     }
