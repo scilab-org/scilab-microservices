@@ -33,6 +33,7 @@ public sealed class ApiRoutes
         public const string Delete = $"{BaseAdmin}/{{id}}";
         public const string GetPaperBanks = $"{Base}";
         public const string GetPaperBankById = $"{Base}/{{id}}";
+        public const string RetryIngestion = $"{BaseAdmin}/{{id}}/retry-ingestion";
 
         #endregion
     }
