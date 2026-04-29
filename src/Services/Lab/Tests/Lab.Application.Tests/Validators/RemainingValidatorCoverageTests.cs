@@ -25,7 +25,6 @@ using Lab.Application.Features.PaperContributor.Queries.GetPaperContributors;
 using Lab.Application.Features.PaperTag.Commands.AddTagToPaper;
 using Lab.Application.Features.Section.Commands.MarkMainSection;
 using Lab.Application.Features.Section.Commands.MarkSectionToCompleted;
-using Lab.Application.Features.Section.Commands.MarkSectionToReview;
 using Lab.Application.Features.Section.Commands.UpdateReference;
 using Lab.Application.Features.Section.Commands.UploadSectionFile;
 using Lab.Application.Features.Section.Queries.GetInUseReferenceBySectionId;
@@ -654,43 +653,6 @@ public sealed class MarkSectionToCompletedCommandValidatorTests
     public void ShouldNotHaveError_WhenValid()
     {
         var command = new MarkSectionToCompletedCommand(Guid.NewGuid(), new MarkSectionToCompletedDto { MemberId = Guid.NewGuid(), ProjectId = Guid.NewGuid() }, "user");
-
-        _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
-    }
-}
-
-public sealed class MarkSectionToReviewCommandValidatorTests
-{
-    private readonly MarkSectionToReviewCommandValidator _validator = new();
-
-    [Fact]
-    public void ShouldHaveError_WhenIdIsEmpty()
-    {
-        var command = new MarkSectionToReviewCommand(Guid.Empty, new MarkSectionToReviewDto { MemberId = Guid.NewGuid(), ProjectId = Guid.NewGuid() }, "user");
-
-        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Id);
-    }
-
-    [Fact]
-    public void ShouldHaveError_WhenMemberIdIsEmpty()
-    {
-        var command = new MarkSectionToReviewCommand(Guid.NewGuid(), new MarkSectionToReviewDto { MemberId = Guid.Empty, ProjectId = Guid.NewGuid() }, "user");
-
-        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.MemberId);
-    }
-
-    [Fact]
-    public void ShouldHaveError_WhenProjectIdIsEmpty()
-    {
-        var command = new MarkSectionToReviewCommand(Guid.NewGuid(), new MarkSectionToReviewDto { MemberId = Guid.NewGuid(), ProjectId = Guid.Empty }, "user");
-
-        _validator.TestValidate(command).ShouldHaveValidationErrorFor(x => x.Dto.ProjectId);
-    }
-
-    [Fact]
-    public void ShouldNotHaveError_WhenValid()
-    {
-        var command = new MarkSectionToReviewCommand(Guid.NewGuid(), new MarkSectionToReviewDto { MemberId = Guid.NewGuid(), ProjectId = Guid.NewGuid() }, "user");
 
         _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
     }

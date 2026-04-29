@@ -239,6 +239,8 @@ public sealed class MessageCode
 
     public const string SectionStatusMustBeInReview = "SECTION_STATUS_MUST_BE_IN_REVIEW";
 
+    public const string SectionStatusMustBeCompleted = "SECTION_STATUS_MUST_BE_COMPLETED";
+
     #endregion
 
     #region Comment Management

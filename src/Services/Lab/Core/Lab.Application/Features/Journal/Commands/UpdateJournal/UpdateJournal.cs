@@ -40,9 +40,6 @@ public class UpdateJournalCommandValidator : AbstractValidator<UpdateJournalComm
                     .NotNull().WithMessage(MessageCode.TemplateIdIsRequired)
                     .Must(ids => ids is { Count: > 0 }).WithMessage(MessageCode.TemplateIdIsRequired);
 
-                RuleFor(x => x.Dto.Type)
-                    .NotNull().WithMessage(MessageCode.JournalTypeIsRequired);
-
                 RuleFor(x => x.Dto.TexUploadFile)
                     .Must(file => file == null || file.FileName.EndsWith(".tex", StringComparison.OrdinalIgnoreCase))
                     .WithMessage(MessageCode.JournalTexFileInvalidExtension);
@@ -80,7 +77,6 @@ public class UpdateJournalCommandHandler(
             url: dto.Url,
             style: dto.Style,
             issn: dto.ISSN,
-            type: dto.Type,
             templateIds: templates.Select(x => x.Id).ToList(),
             lastModifiedBy: request.UserName);
 

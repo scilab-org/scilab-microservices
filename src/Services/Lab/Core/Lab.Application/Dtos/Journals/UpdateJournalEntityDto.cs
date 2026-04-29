@@ -12,7 +12,6 @@ public class UpdateJournalEntityDto
     public string? Url { get; set; }
     public string? Style { get; set; }
     public string? ISSN { get; set; }
-    public ConferenceJournalType Type { get; set; }
     public List<Guid> TemplateIds { get; set; }
     public UploadFileBytes? TexUploadFile { get; set; }
     public UploadFileBytes? PdfUploadFile { get; set; }

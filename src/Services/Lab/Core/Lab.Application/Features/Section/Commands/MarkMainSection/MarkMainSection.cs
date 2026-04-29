@@ -47,12 +47,15 @@ public class MarkMainSectionCommandHandler(IDocumentSession session, IManagement
         if (section.IsMainSection == true)
             throw new ClientValidationException(MessageCode.SectionIsAlreadyMainSection, request.Id);
 
+        if (section.Status != SectionStatus.Completed)
+            throw new ClientValidationException(MessageCode.SectionStatusMustBeCompleted, request.Id);
+
         var count = await session.Query<SectionEntity>()
             .Where(x => x.PaperId == section.PaperId &&
                         x.IsOldMainSection == true &&
                         x.Title!.EqualsIgnoreCase(section.Title!))
             .CountAsync(cancellationToken);
-        
+
         // Clone main section to new record
         var newMainSection = SectionEntity.Create(
             id: Guid.NewGuid(),

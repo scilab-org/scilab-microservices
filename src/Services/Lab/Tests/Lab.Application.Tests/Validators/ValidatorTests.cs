@@ -1,11 +1,9 @@
-using Common.Models;
 using Lab.Application.Dtos.AuthorRoles;
 using Lab.Application.Dtos.Comments;
 using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.Journals;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Dtos.PaperContributors;
-using Lab.Application.Dtos.Papers;
 using Lab.Application.Dtos.Projects;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Dtos.Template;
@@ -330,7 +328,7 @@ public sealed class UpdateJournalCommandValidatorTests
     [Fact]
     public void ShouldNotHaveError_WhenValid()
     {
-        var dto = new UpdateJournalEntityDto { Name = "ICSE", Ranking = "A*", Url = "https://icse.org", ISSN = "1234-5678", Type = ConferenceJournalType.Journal, TemplateIds = [Guid.NewGuid()] };
+        var dto = new UpdateJournalEntityDto { Name = "ICSE", Ranking = "A*", Url = "https://icse.org", ISSN = "1234-5678", TemplateIds = [Guid.NewGuid()] };
         var command = new UpdateJournalCommand(dto, Guid.NewGuid(), "user");
         _validator.TestValidate(command).ShouldNotHaveAnyValidationErrors();
     }

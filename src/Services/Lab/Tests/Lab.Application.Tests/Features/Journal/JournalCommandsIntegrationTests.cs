@@ -108,7 +108,6 @@ public class JournalCommandsIntegrationTests : MartenTestBase
         var dto = new UpdateJournalEntityDto
         {
             Name = "Updated", Ranking = "Q1", Url = "new-url", ISSN = "new-issn",
-            Type = ConferenceJournalType.Conference,
             TemplateIds = new List<Guid> { template.Id }
         };
 
@@ -127,7 +126,6 @@ public class JournalCommandsIntegrationTests : MartenTestBase
         var dto = new UpdateJournalEntityDto
         {
             Name = "X", Ranking = "Q1", Url = "url", ISSN = "issn",
-            Type = ConferenceJournalType.Journal,
             TemplateIds = new List<Guid> { Guid.NewGuid() }
         };
 
