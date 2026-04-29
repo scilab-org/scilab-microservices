@@ -41,6 +41,31 @@ public class GetPaperSamplesQueryHandler(IDocumentSession session, IMapper mappe
         var papers = result.ToList();
         var items = mapper.Map<List<PaperBankDto>>(papers);
 
+        var journalIds = papers
+            .Where(p => p.ConferenceJournalId.HasValue)
+            .Select(p => p.ConferenceJournalId!.Value)
+            .Distinct()
+            .ToList();
+
+        var journals = journalIds.Count > 0
+            ? await session.Query<ConferenceJournalEntity>()
+                .Where(x => journalIds.Contains(x.Id))
+                .ToListAsync(cancellationToken)
+            : [];
+
+        items.ForEach(item =>
+        {
+            if (item.ConferenceJournalId.HasValue)
+            {
+                var journal = journals.FirstOrDefault(x => x.Id == item.ConferenceJournalId.Value);
+                if (journal != null)
+                {
+                    item.ConferenceJournalName = journal.Name;
+                    item.ConferenceJournalType = journal.Type;
+                }
+            }
+        });
+
         var reponse = new GetPaperBanksResult(items, totalCount, paging);
 
         return reponse;

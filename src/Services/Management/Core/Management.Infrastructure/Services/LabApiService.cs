@@ -18,7 +18,7 @@ file enum PaperStatus
 }
 
 // Internal shapes matching Lab service JSON response
-// Internal deserialization shapes — LabPaperItem (bank/list) and LabPaperFull (single paper with Template + ParsedText)
+// Internal deserialization shapes — LabPaperItem (bank/list) and LabPaperFull (single paper entity)
 [ExcludeFromCodeCoverage]
 file sealed class LabPaperItem
 {
@@ -26,21 +26,26 @@ file sealed class LabPaperItem
     public string? Title { get; set; }
     public string? Authors { get; set; }
     public string? Publisher { get; set; }
+    public string? Ranking { get; set; }
     public string? Abstract { get; set; }
     public string? Doi { get; set; }
+    public string? Url { get; set; }
     public string? FilePath { get; set; }
-    public int? Status { get; set; }
+    public string? BibFilePath { get; set; }
+    public string? ParsedText { get; set; }
     public bool? IsIngested { get; set; }
     public bool? IsAutoTagged { get; set; }
     public DateTimeOffset? PublicationDate { get; set; }
-    public string? PaperType { get; set; }
-    public string? JournalName { get; set; }
     public string? Pages { get; set; }
     public string? Number { get; set; }
     public string? Volume { get; set; }
-    public string? ConferenceName { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public int? ConferenceJournalType { get; set; }
     public string? ReferenceContent { get; set; }
     public List<string> Keywords { get; set; } = new();
+    public int? IngestStatus { get; set; }
+    public string? CreatedBy { get; set; }
 }
 
 // GET /papers/sample  =>  { "result": { "items": [...], "paging": {...} } }
@@ -77,32 +82,29 @@ file sealed class LabGetPaperBanksResponse
 }
 
 // GET /papers/{id}  =>  { "result": { "paper": { ...PaperDto... } } }
-// PaperDto adds Template + ParsedText over PaperBankInfoDto
+// PaperDto — Lab paper entity fields (title, template, context, status, etc.)
 [ExcludeFromCodeCoverage]
 file sealed class LabPaperFull
 {
     public Guid Id { get; set; }
     public string? Title { get; set; }
-    public string? Authors { get; set; }
-    public string? Publisher { get; set; }
     public string? Template { get; set; }
-    public string? Abstract { get; set; }
-    public string? Doi { get; set; }
     public string? FilePath { get; set; }
+    public string? Context { get; set; }
+    public string? Abstract { get; set; }
+    public string? ResearchGap { get; set; }
+    public string? MainContribution { get; set; }
+    public string? ResearchAim { get; set; }
+    public string? Rule { get; set; }
+    public Guid? ConferenceJournalId { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public int? ConferenceJournalType { get; set; }
+    public DateTimeOffset? ConferenceJournalStartAt { get; set; }
+    public DateTimeOffset? ConferenceJournalEndAt { get; set; }
+    public Guid? SubProjectId { get; set; }
     public int? Status { get; set; }
     public int? SubmissionStatus { get; set; }
-    public string? ParsedText { get; set; }
-    public bool? IsIngested { get; set; }
-    public bool? IsAutoTagged { get; set; }
-    public DateTimeOffset? PublicationDate { get; set; }
-    public string? PaperType { get; set; }
-    public string? JournalName { get; set; }
-    public string? Pages { get; set; }
-    public string? Number { get; set; }
-    public string? Volume { get; set; }
-    public string? ConferenceName { get; set; }
-    public string? ReferenceContent { get; set; }
-    public List<string> Keywords { get; set; } = new();
+    public List<string> TagNames { get; set; } = new();
     public string? CreatedBy { get; set; }
 }
 
@@ -824,47 +826,52 @@ file static class LabPaperItemMapper
 {
     internal static PaperBankInfoDto MapToDto(this LabPaperItem p) => new()
     {
-        Id              = p.Id,
-        Title           = p.Title,
-        Authors         = p.Authors,
-        Publisher       = p.Publisher,
-        Abstract        = p.Abstract,
-        Doi             = p.Doi,
-        FilePath        = p.FilePath,
-        Status          = p.Status ?? 0,
-        PublicationDate = p.PublicationDate,
-        PaperType       = p.PaperType,
-        JournalName     = p.JournalName,
-        Pages           = p.Pages,
-        Number          = p.Number,
-        Volume          = p.Volume,
-        ConferenceName  = p.ConferenceName,
-        ReferenceContent = p.ReferenceContent,
-        Keywords        = p.Keywords
+        Id                   = p.Id,
+        Title                = p.Title,
+        Authors              = p.Authors,
+        Publisher            = p.Publisher,
+        Ranking              = p.Ranking,
+        Abstract             = p.Abstract,
+        Doi                  = p.Doi,
+        Url                  = p.Url,
+        FilePath             = p.FilePath,
+        BibFilePath          = p.BibFilePath,
+        ParsedText           = p.ParsedText,
+        IsIngested           = p.IsIngested,
+        IsAutoTagged         = p.IsAutoTagged,
+        PublicationDate      = p.PublicationDate,
+        Pages                = p.Pages,
+        Number               = p.Number,
+        Volume               = p.Volume,
+        ConferenceJournalId  = p.ConferenceJournalId,
+        ConferenceJournalName = p.ConferenceJournalName,
+        ConferenceJournalType = p.ConferenceJournalType,
+        ReferenceContent     = p.ReferenceContent,
+        Keywords             = p.Keywords,
+        IngestStatus         = p.IngestStatus,
+        CreatedBy            = p.CreatedBy
     };
 
     internal static PaperInfoDto MapToPaperDto(this LabPaperFull p) => new()
     {
-        Id              = p.Id,
-        Title           = p.Title,
-        Authors         = p.Authors,
-        Publisher       = p.Publisher,
-        Template        = p.Template,
-        Abstract        = p.Abstract,
-        Doi             = p.Doi,
-        FilePath        = p.FilePath,
-        Status          = p.Status ?? 0,
-        SubmissionStatus = p.SubmissionStatus,
-        ParsedText      = p.ParsedText,
-        PublicationDate = p.PublicationDate,
-        PaperType       = p.PaperType,
-        JournalName     = p.JournalName,
-        Pages           = p.Pages,
-        Number          = p.Number,
-        Volume          = p.Volume,
-        ConferenceName  = p.ConferenceName,
-        ReferenceContent = p.ReferenceContent,
-        Keywords        = p.Keywords,
-        CreatedBy       = p.CreatedBy
+        Id                      = p.Id,
+        Title                   = p.Title,
+        Template                = p.Template,
+        FilePath                = p.FilePath,
+        Context                 = p.Context,
+        Abstract                = p.Abstract,
+        ResearchGap             = p.ResearchGap,
+        MainContribution        = p.MainContribution,
+        ResearchAim             = p.ResearchAim,
+        Rule                    = p.Rule,
+        ConferenceJournalId     = p.ConferenceJournalId,
+        ConferenceJournalName   = p.ConferenceJournalName,
+        ConferenceJournalType   = p.ConferenceJournalType,
+        ConferenceJournalStartAt = p.ConferenceJournalStartAt,
+        ConferenceJournalEndAt  = p.ConferenceJournalEndAt,
+        SubProjectId            = p.SubProjectId,
+        Status                  = p.Status,
+        SubmissionStatus        = p.SubmissionStatus,
+        CreatedBy               = p.CreatedBy
     };
 }

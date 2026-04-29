@@ -131,24 +131,52 @@ public sealed class GetAssignedPapersQueryHandler(
             pageSize: request.Paging.PageSize,
             cancellationToken: cancellationToken);
 
-        var assignedItems = items.Select(item => 
+        var assignedItems = items.Select(item =>
         {
             var projectId = paperToProjectMap.TryGetValue(item.Id, out var pid) ? pid : Guid.Empty;
             var subProjectId = paperToSubProjectMap.TryGetValue(item.Id, out var spid) ? spid : (Guid?)null;
             return new AssignedPaperDto
             {
-                ProjectId = projectId,
-                ProjectCode = projectId != Guid.Empty && projectIdToCodeMap.TryGetValue(projectId, out var code) ? code : null,
-                Id = item.Id,
-                SubProjectId = subProjectId,
-                Title = item.Title,
-                Authors = item.Authors,
-                Abstract = item.Abstract,
-                FilePath = item.FilePath,
-                Status = item.Status,
-                SubmissionStatus = item.SubmissionStatus,
-                CreatedBy = item.CreatedBy,
-                Template = item.Template
+                // AssignedPaper-specific
+                ProjectId            = projectId,
+                ProjectCode          = projectId != Guid.Empty && projectIdToCodeMap.TryGetValue(projectId, out var code) ? code : null,
+                // PaperBankInfoDto fields
+                Id                   = item.Id,
+                SubProjectId         = subProjectId,
+                Title                = item.Title,
+                Authors              = item.Authors,
+                Publisher            = item.Publisher,
+                Ranking              = item.Ranking,
+                Abstract             = item.Abstract,
+                Doi                  = item.Doi,
+                Url                  = item.Url,
+                FilePath             = item.FilePath,
+                BibFilePath          = item.BibFilePath,
+                ParsedText           = item.ParsedText,
+                IsIngested           = item.IsIngested,
+                IsAutoTagged         = item.IsAutoTagged,
+                PublicationDate      = item.PublicationDate,
+                Pages                = item.Pages,
+                Number               = item.Number,
+                Volume               = item.Volume,
+                ConferenceJournalId  = item.ConferenceJournalId,
+                ConferenceJournalName = item.ConferenceJournalName,
+                ConferenceJournalType = item.ConferenceJournalType,
+                ReferenceContent     = item.ReferenceContent,
+                Keywords             = item.Keywords,
+                IngestStatus         = item.IngestStatus,
+                CreatedBy            = item.CreatedBy,
+                // PaperInfoDto fields
+                Template             = item.Template,
+                Context              = item.Context,
+                ResearchGap          = item.ResearchGap,
+                MainContribution     = item.MainContribution,
+                ResearchAim          = item.ResearchAim,
+                Rule                 = item.Rule,
+                Status               = item.Status,
+                SubmissionStatus     = item.SubmissionStatus,
+                ConferenceJournalStartAt = item.ConferenceJournalStartAt,
+                ConferenceJournalEndAt   = item.ConferenceJournalEndAt,
             };
         }).ToList();
 

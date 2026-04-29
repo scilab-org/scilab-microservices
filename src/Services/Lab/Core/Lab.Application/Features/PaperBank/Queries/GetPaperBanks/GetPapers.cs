@@ -164,6 +164,7 @@ public class GetPaperBanksQueryHandler(IDocumentSession session, IMapper mapper)
                 if (journal != null)
                 {
                     item.ConferenceJournalName = journal.Name;
+                    item.ConferenceJournalType = journal.Type;
                 }
             }
 
