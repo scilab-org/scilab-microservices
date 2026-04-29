@@ -1,9 +1,7 @@
 using Common.Constants;
-using Common.Models;
 using Lab.Application.Dtos.Sections;
 using Lab.Application.Features.Section.Commands.MarkMainSection;
 using Lab.Application.Features.Section.Commands.MarkSectionToCompleted;
-using Lab.Application.Features.Section.Commands.MarkSectionToReview;
 using Lab.Application.Features.Section.Commands.UpdateGuideline;
 using Lab.Application.Features.Section.Commands.UpdateReference;
 using Lab.Application.Features.Section.Commands.UploadSectionFile;
@@ -11,7 +9,6 @@ using Lab.Application.Features.Section.Commands.UpsertSection;
 using Lab.Application.Features.Section.Queries.GetSectionByMarkSectionId;
 using Lab.Application.Features.Section.Queries.GetSectionHistory;
 using Lab.Application.Tests.Common;
-using Lab.Domain.Constants;
 using GetSectionByMarkSectionIdHandler = Lab.Application.Features.Section.Queries.GetSectionByMarkSectionId.GetSectionByMarkSectionIdQueryHandler;
 using GetSectionHistoryHandler = Lab.Application.Features.Section.Queries.GetSectionHistory.GetSectionByMarkSectionIdQueryHandler;
 
@@ -191,98 +188,6 @@ public class SectionCommandsIntegrationTests : MartenTestBase
         updated!.Content.Should().Be("updated content");
     }
 
-    // ─── MarkSectionToReview ──────────────────────────────────────────────────
-
-    [Fact]
-    public async Task MarkSectionToReview_WhenRoleIsEmpty_ShouldThrowUnauthorizedException()
-    {
-        var projectId = Guid.NewGuid();
-        _mockMgmt.Setup(x => x.GetMyProjectRoleAsync(projectId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((string?)null);
-
-        var handler = new MarkSectionToReviewCommandHandler(Session, _mockMgmt.Object);
-        var dto = new MarkSectionToReviewDto { MemberId = Guid.NewGuid(), ProjectId = projectId };
-
-        var act = () => handler.Handle(new MarkSectionToReviewCommand(Guid.NewGuid(), dto, "user"), CancellationToken.None);
-        await act.Should().ThrowAsync<UnauthorizedException>();
-    }
-
-    [Fact]
-    public async Task MarkSectionToReview_WithNonExistentSection_ShouldThrowClientValidationException()
-    {
-        var projectId = Guid.NewGuid();
-        _mockMgmt.Setup(x => x.GetMyProjectRoleAsync(projectId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(AuthorizeConstants.SectionEdit);
-
-        var handler = new MarkSectionToReviewCommandHandler(Session, _mockMgmt.Object);
-        var dto = new MarkSectionToReviewDto { MemberId = Guid.NewGuid(), ProjectId = projectId };
-
-        var act = () => handler.Handle(new MarkSectionToReviewCommand(Guid.NewGuid(), dto, "user"), CancellationToken.None);
-        await act.Should().ThrowAsync<ClientValidationException>();
-    }
-
-    [Fact]
-    public async Task MarkSectionToReview_WhenContributorMissingOrReadOnly_ShouldThrowUnauthorizedException()
-    {
-        var projectId = Guid.NewGuid();
-        var paperId = Guid.NewGuid();
-        var memberId = Guid.NewGuid();
-        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.InProgress);
-        await Session.SaveChangesAsync();
-
-        _mockMgmt.Setup(x => x.GetMyProjectRoleAsync(projectId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(AuthorizeConstants.SectionEdit);
-
-        var handler = new MarkSectionToReviewCommandHandler(Session, _mockMgmt.Object);
-        var dto = new MarkSectionToReviewDto { MemberId = memberId, ProjectId = projectId };
-
-        var act = () => handler.Handle(new MarkSectionToReviewCommand(section.Id, dto, "user"), CancellationToken.None);
-        await act.Should().ThrowAsync<UnauthorizedException>();
-    }
-
-    [Fact]
-    public async Task MarkSectionToReview_WhenStatusIsNotInProgress_ShouldThrowClientValidationException()
-    {
-        var projectId = Guid.NewGuid();
-        var paperId = Guid.NewGuid();
-        var memberId = Guid.NewGuid();
-        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.NotStarted);
-        SeedContributor(paperId, memberId, section.Id, Guid.NewGuid());
-        await Session.SaveChangesAsync();
-
-        _mockMgmt.Setup(x => x.GetMyProjectRoleAsync(projectId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(AuthorizeConstants.SectionEdit);
-
-        var handler = new MarkSectionToReviewCommandHandler(Session, _mockMgmt.Object);
-        var dto = new MarkSectionToReviewDto { MemberId = memberId, ProjectId = projectId };
-
-        var act = () => handler.Handle(new MarkSectionToReviewCommand(section.Id, dto, "user"), CancellationToken.None);
-        await act.Should().ThrowAsync<ClientValidationException>();
-    }
-
-    [Fact]
-    public async Task MarkSectionToReview_WithValidData_ShouldSetStatusToInReview()
-    {
-        var projectId = Guid.NewGuid();
-        var paperId = Guid.NewGuid();
-        var memberId = Guid.NewGuid();
-        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.InProgress);
-        SeedContributor(paperId, memberId, section.Id, Guid.NewGuid());
-        await Session.SaveChangesAsync();
-
-        _mockMgmt.Setup(x => x.GetMyProjectRoleAsync(projectId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(AuthorizeConstants.SectionEdit);
-
-        var handler = new MarkSectionToReviewCommandHandler(Session, _mockMgmt.Object);
-        var dto = new MarkSectionToReviewDto { MemberId = memberId, ProjectId = projectId };
-
-        var result = await handler.Handle(new MarkSectionToReviewCommand(section.Id, dto, "author"), CancellationToken.None);
-
-        result.Should().Be(section.Id);
-        var updated = await Session.LoadAsync<SectionEntity>(section.Id);
-        updated!.Status.Should().Be(SectionStatus.InReview);
-    }
-
     // ─── MarkSectionToCompleted ───────────────────────────────────────────────
 
     [Fact]
@@ -305,7 +210,7 @@ public class SectionCommandsIntegrationTests : MartenTestBase
         var projectId = Guid.NewGuid();
         var paperId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.InReview);
+        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.InProgress);
         await Session.SaveChangesAsync();
 
         _mockMgmt.Setup(x => x.GetMyProjectRoleAsync(projectId, It.IsAny<CancellationToken>()))
@@ -319,7 +224,7 @@ public class SectionCommandsIntegrationTests : MartenTestBase
     }
 
     [Fact]
-    public async Task MarkSectionToCompleted_WhenStatusIsNotInReview_ShouldThrowClientValidationException()
+    public async Task MarkSectionToCompleted_WhenStatusIsNotInProgress_ShouldThrowClientValidationException()
     {
         var projectId = Guid.NewGuid();
         var paperId = Guid.NewGuid();
@@ -344,7 +249,7 @@ public class SectionCommandsIntegrationTests : MartenTestBase
         var projectId = Guid.NewGuid();
         var paperId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.InReview);
+        var section = SeedChildSection(Guid.NewGuid(), paperId, status: SectionStatus.InProgress);
         SeedContributor(paperId, memberId, section.Id, Guid.NewGuid());
         await Session.SaveChangesAsync();
 

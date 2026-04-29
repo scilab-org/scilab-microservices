@@ -4,6 +4,7 @@ using Lab.Application.Models.Results;
 using Lab.Application.Services;
 using Lab.Domain.Constants;
 using Lab.Domain.Entities;
+using Lab.Domain.Enums;
 using Marten;
 
 namespace Lab.Application.Features.Paper.Commands.CombineSectionsToPaper;
@@ -80,13 +81,22 @@ public class CombineSectionsToPaperCommandHandler(
         var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId!, cancellationToken);
 
         // Format the paper content to match the conference/journal template style using AI
-        var savedContent = content;
+        string savedContent;
         if (!string.IsNullOrWhiteSpace(journal?.TexFile))
         {
             var httpClient = httpClientFactory.CreateClient();
             var templateContent = await httpClient.GetStringAsync(journal.TexFile, cancellationToken);
             savedContent = await aiApiService.FormatPaperToStyleAsync(content, templateContent, cancellationToken);
         }
+        else
+        {
+            savedContent = BuildIEEEtranTemplateContent(paper.Title, author: string.Empty, combineSectionPackages,
+                referenceSectionContent,
+                bodyContent,
+                journal?.Type);
+        }
+
+
         var files = mainSections
             .Where(x => x.Files != null)
             .SelectMany(x => x.Files!)
@@ -153,6 +163,48 @@ public class CombineSectionsToPaperCommandHandler(
         var blocks = new List<string>
         {
             "\\documentclass{article}",
+            combineSectionPackages,
+            titleBlock,
+            authorBlock,
+            "\\begin{document}",
+            "\\maketitle",
+            bodyContent,
+            referenceSectionContent,
+            "\\printbibliography",
+            "\\end{document}"
+        };
+
+        return string.Join(
+            $"{Environment.NewLine}{Environment.NewLine}",
+            blocks.Where(x => !string.IsNullOrWhiteSpace(x)));
+    }
+
+    private static string BuildIEEEtranTemplateContent(
+        string title,
+        string author,
+        string combineSectionPackages,
+        string referenceSectionContent,
+        string bodyContent,
+        ConferenceJournalType? journalType)
+    {
+        var documentClass = journalType switch
+        {
+            ConferenceJournalType.Journal    => "\\documentclass[journal]{IEEEtran}",
+            ConferenceJournalType.Conference => "\\documentclass[conference]{IEEEtran}",
+            _                                => "\\documentclass[journal]{IEEEtran}"
+        };
+
+        var titleBlock = $"\\title{{{title}}}";
+        var authorBlock = $"\\author{{{author}}}";
+
+        var blocks = new List<string>
+        {
+            documentClass,
+            "\\usepackage{amsmath, amssymb}",
+            "\\usepackage{graphicx}",
+            "\\usepackage{booktabs}",
+            "\\usepackage{hyperref}",
+            "\\usepackage[style=ieee, backend=biber]{biblatex}",
             combineSectionPackages,
             titleBlock,
             authorBlock,
