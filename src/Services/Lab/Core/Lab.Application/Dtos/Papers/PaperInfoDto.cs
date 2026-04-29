@@ -18,6 +18,7 @@ public  class PaperInfoDto : DtoId<Guid>
     public List<GapTypeInfoDto> GapTypes { get; set; } = new();
     public Guid? ConferenceJournalId { get; set; }
     public string? ConferenceJournalName { get; set; }
+    public ConferenceJournalType? ConferenceJournalType { get; set; }
     public DateTimeOffset? ConferenceJournalStartAt { get; set; }
     public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public Guid? SubProjectId { get; set; }

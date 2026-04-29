@@ -27,6 +27,7 @@ public class PaperBankInfoDto : DtoId<Guid>
     public string? Volume { get; set; }
     public Guid? ConferenceJournalId { get; set; }
     public string? ConferenceJournalName { get; set; }
+    public ConferenceJournalType? ConferenceJournalType { get; set; }
     public string? ReferenceContent { get; set; }
     public List<string> Keywords { get; set; } = new();
     public IngestStatus? IngestStatus { get; set; }

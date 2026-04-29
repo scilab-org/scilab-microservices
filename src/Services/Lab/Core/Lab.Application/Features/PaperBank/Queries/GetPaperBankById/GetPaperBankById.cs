@@ -38,6 +38,7 @@ public class GetPaperBankByIdQueryHandler(IDocumentSession session, IMapper mapp
             if (journal != null)
             {
                 response.ConferenceJournalName = journal.Name;
+                response.ConferenceJournalType = journal.Type;
             }
         }
 

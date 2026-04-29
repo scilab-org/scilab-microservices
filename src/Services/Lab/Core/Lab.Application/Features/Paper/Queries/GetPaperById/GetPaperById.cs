@@ -34,6 +34,14 @@ public class GetPaperByIdQueryHandler(IDocumentSession session,
             throw new NotFoundException(MessageCode.PaperIsNotExists, request.Id.ToString());
 
         var response = mapper.Map<PaperDto>(paper);
+
+        if (paper.ConferenceJournalId.HasValue)
+        {
+            var journal = await session.LoadAsync<ConferenceJournalEntity>(paper.ConferenceJournalId.Value, cancellationToken);
+            if (journal != null)
+                response.ConferenceJournalType = journal.Type;
+        }
+
         var gapTypeIds = paper.GapTypeIds ?? new List<Guid>();
 
         var gapTypes = gapTypeIds.Count == 0
