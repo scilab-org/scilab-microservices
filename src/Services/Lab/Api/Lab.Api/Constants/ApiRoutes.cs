@@ -166,6 +166,7 @@ public sealed class ApiRoutes
         public const string PreviewReference = $"{Base}/reference/preview";
         public const string MarkSectionToReview = $"{Base}/{{id}}/mark-section-to-review";
         public const string MarkSectionToCompleted = $"{Base}/{{id}}/mark-section-to-completed";
+        public const string GetNumberOfCompleteSection = $"{Base}/{{id}}/number-of-complete-section";
 
         #endregion
 
