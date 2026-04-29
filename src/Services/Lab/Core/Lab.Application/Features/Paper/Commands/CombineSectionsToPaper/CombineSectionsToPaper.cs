@@ -147,6 +147,7 @@ public class CombineSectionsToPaperCommandHandler(
                 .SelectMany(x => x.Packages!)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => x.Trim())
+                .Where(x => !x.StartsWith("\\documentclass", StringComparison.OrdinalIgnoreCase))
                 .Distinct());
     }
 
@@ -164,12 +165,12 @@ public class CombineSectionsToPaperCommandHandler(
         {
             "\\documentclass{article}",
             combineSectionPackages,
+            referenceSectionContent,
             titleBlock,
             authorBlock,
             "\\begin{document}",
             "\\maketitle",
             bodyContent,
-            referenceSectionContent,
             "\\printbibliography",
             "\\end{document}"
         };
@@ -197,6 +198,15 @@ public class CombineSectionsToPaperCommandHandler(
         var titleBlock = $"\\title{{{title}}}";
         var authorBlock = $"\\author{{{author}}}";
 
+        var defaultPackages = new[] { "amsmath", "amssymb", "graphicx", "booktabs", "hyperref", "biblatex" };
+
+        var extraPackages = combineSectionPackages
+            .Split(Environment.NewLine)
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Where(x => !defaultPackages.Any(p => x.Contains(p, StringComparison.OrdinalIgnoreCase)))
+            .Distinct();
+
         var blocks = new List<string>
         {
             documentClass,
@@ -205,13 +215,13 @@ public class CombineSectionsToPaperCommandHandler(
             "\\usepackage{booktabs}",
             "\\usepackage{hyperref}",
             "\\usepackage[style=ieee, backend=biber]{biblatex}",
-            combineSectionPackages,
+            string.Join(Environment.NewLine, extraPackages),
+            referenceSectionContent,
             titleBlock,
             authorBlock,
             "\\begin{document}",
             "\\maketitle",
             bodyContent,
-            referenceSectionContent,
             "\\printbibliography",
             "\\end{document}"
         };
