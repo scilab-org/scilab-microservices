@@ -28,6 +28,7 @@ public sealed class PaperBankEntity : Entity<Guid>
     public string? ReferenceContent { get; set; }
     public List<string> Keywords { get; set; } = new();
     public IngestStatus? IngestStatus { get; set; }
+    public string? ReferenceKey { get; set; }
 
     #endregion
 
@@ -52,7 +53,8 @@ public sealed class PaperBankEntity : Entity<Guid>
         Guid? conferenceJournalId = null,
         string? referenceContent = null,
         List<string>? keywords = null,
-        IngestStatus? ingestStatus = null)
+        IngestStatus? ingestStatus = null,
+        string? referenceKey = null)
     {
         return new PaperBankEntity()
         {
@@ -76,6 +78,7 @@ public sealed class PaperBankEntity : Entity<Guid>
             ReferenceContent = referenceContent,
             Keywords = keywords ?? new(),
             IngestStatus = ingestStatus ?? Enums.IngestStatus.Pending,
+            ReferenceKey = referenceKey,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedOnUtc = DateTimeOffset.UtcNow,
         };
@@ -102,7 +105,8 @@ public sealed class PaperBankEntity : Entity<Guid>
         Guid? conferenceJournalId = null,
         string? referenceContent = null,
         IngestStatus? ingestStatus = null,
-        List<string>? keywords = null)
+        List<string>? keywords = null,
+        string? referenceKey = null)
     {
         Title = title ?? Title;
         Authors = authors ?? Authors;
@@ -122,6 +126,7 @@ public sealed class PaperBankEntity : Entity<Guid>
         ReferenceContent = referenceContent ?? ReferenceContent;
         IngestStatus = ingestStatus ?? IngestStatus;
         Keywords = keywords ?? Keywords;
+        ReferenceKey = referenceKey ?? ReferenceKey;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }
 
