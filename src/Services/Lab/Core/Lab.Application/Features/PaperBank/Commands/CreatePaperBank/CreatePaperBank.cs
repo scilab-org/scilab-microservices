@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using EventSourcing.Events.Lab;
 using Lab.Application.Dtos.PaperBanks;
 using Lab.Application.Repositories;
@@ -85,7 +84,8 @@ public class CreatePaperBankCommandHandler(
             conferenceJournalId: dto.ConferenceJournalId,
             referenceContent: dto.ReferenceContent,
             keywords: keywords,
-            ingestStatus: IngestStatus.Pending);
+            ingestStatus: IngestStatus.Pending,
+            referenceKey: dto.ReferenceKey);
 
         var (pdfFile, bibFile) = await UploadFilesAsync(dto, cancellationToken);
         entity.UpdateFilePath(pdfFile, bibFile);
@@ -97,16 +97,15 @@ public class CreatePaperBankCommandHandler(
             PaperId = entity.Id,
             PaperName = entity.Title,
             ParsedText = entity.ParsedText ?? string.Empty,
-            ReferenceKey = GenerateReferenceKey(entity),
+            ReferenceKey = entity.ReferenceKey ?? string.Empty,
             Authors = entity.Authors ?? string.Empty,
             Publisher = entity.Publisher ?? string.Empty,
             JournalName = journal.Name ?? string.Empty,
             Volume = entity.Volume ?? string.Empty,
             Pages = entity.Pages ?? string.Empty,
             Doi = entity.Doi ?? string.Empty,
-            PublicationMonthYear = FormatMonthYear(entity.PublicationDate) ?? string.Empty,
+            PublicationMonthYear = FormatMonthYear(entity.PublicationDate) ?? string.Empty,        
         };
-
         var outbox = OutboxMessageEntity.Create(
             id: Guid.NewGuid(),
             eventType: message.EventType!,
@@ -152,37 +151,11 @@ public class CreatePaperBankCommandHandler(
         return result.FirstOrDefault()?.PublicURL;
     }
 
-    private static string GenerateReferenceKey(PaperBankEntity entity)
-    {
-        var year = entity.PublicationDate?.Year.ToString() ?? string.Empty;
-
-        var authors = entity.Authors ?? string.Empty;
-        var normalizedAuthors = Regex.Replace(authors, @"\s+and\s+", ", ", RegexOptions.IgnoreCase);
-
-        var firstAuthorToken = normalizedAuthors
-            .Split(',')
-            .Select(p => p.Trim())
-            .FirstOrDefault(p => !string.IsNullOrEmpty(p));
-
-        var raw = firstAuthorToken
-                  ?? (string.IsNullOrWhiteSpace(entity.Title) ? "Paper" : entity.Title);
-
-        var authorToken = Regex.Replace(raw, @"[^A-Za-z0-9]+", string.Empty);
-
-        if (authorToken.Length > 0 && char.IsDigit(authorToken[0]))
-            authorToken = "Paper" + authorToken;
-
-        if (string.IsNullOrEmpty(authorToken))
-            authorToken = "Paper";
-
-        return $"{authorToken}{year.Trim()}";
-    }
-
     private static string? FormatMonthYear(DateTimeOffset? date)
-        => date.HasValue
-            ? date.Value.ToString("MMMM yyyy", CultureInfo.InvariantCulture)
-            : null;
-
+    => date.HasValue
+        ? date.Value.ToString("MMMM yyyy", CultureInfo.InvariantCulture)
+        : null;
+    
     private List<string> NormalizeKeywords(List<string>? keywords)
     {
         if (keywords == null) return new List<string>();

@@ -21,6 +21,7 @@ public class UpdatePaperBankRequest
     public string? Volume { get; set; }
     public Guid ConferenceJournalId { get; set; }
     public string? ReferenceContent { get; set; }
+    public string? ReferenceKey { get; set; }
     public List<string>? Keywords { get; set; }
 
     #endregion

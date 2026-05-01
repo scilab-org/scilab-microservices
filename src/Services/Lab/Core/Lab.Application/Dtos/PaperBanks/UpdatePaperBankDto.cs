@@ -21,6 +21,7 @@ public class UpdatePaperBankDto
     public string? Volume { get; init; }
     public Guid ConferenceJournalId { get; init; }
     public string? ReferenceContent { get; init; }
+    public string? ReferenceKey { get; init; }
     public List<string>? Keywords { get; init; }
 
     #endregion

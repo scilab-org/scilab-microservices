@@ -95,7 +95,8 @@ public class UpdatePaperCommandBankHandler(IDocumentSession session, IMinIoCloud
             volume: dto.Volume,
             conferenceJournalId: journal.Id,
             referenceContent: dto.ReferenceContent,
-            keywords: keywords);
+            keywords: keywords,
+            referenceKey: dto.ReferenceKey);
 
         var bibFile = await UploadFilesAsync(dto, cancellationToken);
         entity.UpdateFilePath(bibUrl: bibFile);
