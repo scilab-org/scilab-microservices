@@ -67,6 +67,7 @@ public sealed class ApiRoutes
         public const string GetStatusHistory = $"{Base}/{{id}}/status-history";
         public const string GetSubmissionStatusSummary = $"{Base}/submission-status-summary";
         public const string CreateVersionFile = $"{Base}/{{paperId}}/versions/{{versionId}}/files";
+        public const string UploadPaperFile = $"{Base}/{{paperId}}/files";
         public const string GetVersionFiles = $"{Base}/{{paperId}}/versions/{{versionId}}/files";
         public const string GetVersionFileById = $"{Base}/version-files/{{id}}";
 

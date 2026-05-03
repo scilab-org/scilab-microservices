@@ -76,8 +76,10 @@ public class TransitionPaperStatusCommandHandler(
                           ?? throw new NotFoundException(MessageCode.PdfFileNotFound, dto.PdfFileId.ToString()!);
 
             // Verify the PDF belongs to a version of this paper
-            var paperVersion = await session.LoadAsync<PaperVersionEntity>(pdfFile.PaperVersionId, cancellationToken);
-            if (paperVersion is null || paperVersion.PaperId != request.PaperId)
+            var paperVersion = pdfFile.PaperVersionId.HasValue
+                ? await session.LoadAsync<PaperVersionEntity>(pdfFile.PaperVersionId.Value, cancellationToken)
+                : null;
+            if (pdfFile.PaperVersionId.HasValue && (paperVersion is null || paperVersion.PaperId != request.PaperId))
                 throw new ClientValidationException(
                     MessageCode.PdfFileNotBelongToPaper,
                     dto.PdfFileId.ToString()!);

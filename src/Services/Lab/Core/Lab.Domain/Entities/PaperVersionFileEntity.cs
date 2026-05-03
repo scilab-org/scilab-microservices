@@ -6,7 +6,7 @@ public sealed class PaperVersionFileEntity : Entity<Guid>
 {
     #region Fields, Properties and Indexers
 
-    public Guid PaperVersionId { get; set; }
+    public Guid? PaperVersionId { get; set; }
     public string FileName { get; set; } = null!;
     public string FileUrl { get; set; } = null!;
     public string? Note { get; set; }
@@ -16,7 +16,7 @@ public sealed class PaperVersionFileEntity : Entity<Guid>
     #region Factories
 
     public static PaperVersionFileEntity Create(
-        Guid paperVersionId,
+        Guid? paperVersionId,
         string fileName,
         string fileUrl,
         string? note = null,
