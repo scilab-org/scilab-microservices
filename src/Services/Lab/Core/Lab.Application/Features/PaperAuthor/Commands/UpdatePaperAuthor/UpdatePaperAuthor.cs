@@ -23,7 +23,7 @@ public class UpdatePaperAuthorCommandHandler(IDocumentSession session,
     public async Task<Unit> Handle(UpdatePaperAuthorCommand request, CancellationToken cancellationToken)
     {
         var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
-        if (role.IsNullOrEmpty() || !AuthorizeConstants.PaperAuthor.EqualsIgnoreCase(role))
+        if (role.IsNullOrEmpty() || !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role))
             throw new UnauthorizedException(MessageCode.AccessDenied);
         
         var entity = await session.LoadAsync<PaperAuthorEntity>(request.Id, cancellationToken)
