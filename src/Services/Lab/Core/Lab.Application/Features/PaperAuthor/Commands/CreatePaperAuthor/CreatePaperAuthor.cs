@@ -28,9 +28,9 @@ public class CreatePaperAuthorCommandHandler(
     public async Task<Guid> Handle(CreatePaperAuthorCommand request, CancellationToken cancellationToken)
     {
         
-        // var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
-        // if (role.IsNullOrEmpty() || !AuthorizeConstants.PaperAuthor.EqualsIgnoreCase(role))
-        //     throw new UnauthorizedException(MessageCode.AccessDenied);
+        var role = await managementApiService.GetMyProjectRoleAsync(request.Dto.ProjectId, cancellationToken);
+        if (role.IsNullOrEmpty() || !AuthorizeConstants.ProjectManager.EqualsIgnoreCase(role))
+            throw new UnauthorizedException(MessageCode.AccessDenied);
         
         var entity = PaperAuthorEntity.Create(
             Guid.NewGuid(),
