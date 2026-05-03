@@ -54,13 +54,13 @@ public class PaperAuthorEntity: Entity<Guid>
         string? affiliationName = null)
     {
         Name = name ?? Name;
-        OcrId = ocrId ?? OcrId;
+        OcrId = ocrId;
         Email = email ?? Email;
         PaperId = paperId ?? PaperId;
         AuthorRoleId = authorRoleId ?? AuthorRoleId;
         MemberId = memberId ?? MemberId;
-        AffiliationId = affiliationId ?? AffiliationId;
-        AffiliationName = affiliationName ?? AffiliationName;
+        AffiliationId = affiliationId;
+        AffiliationName = affiliationName;
         LastModifiedOnUtc = DateTimeOffset.Now;
     }
     #endregion
