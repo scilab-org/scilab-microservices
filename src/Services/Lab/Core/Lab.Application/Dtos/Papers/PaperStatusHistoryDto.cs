@@ -15,6 +15,7 @@ public class PaperStatusHistoryDto : ICreationAuditDto
     public Guid? PdfFileId { get; set; }
     public string? PdfFileName { get; set; }
     public string? PdfFileUrl { get; set; }
+    public string? SubmittedUrl { get; set; }
     public DateTimeOffset CreatedOnUtc { get; set; }
     public string? CreatedBy { get; set; }
 }

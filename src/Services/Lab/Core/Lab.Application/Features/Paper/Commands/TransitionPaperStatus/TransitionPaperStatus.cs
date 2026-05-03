@@ -94,7 +94,8 @@ public class TransitionPaperStatusCommandHandler(
             actorUserName: request.UserName,
             note: dto.Note,
             revisionType: dto.RevisionType,
-            pdfFileId: PaperStatusMachine.RequiresPdf(dto.TargetStatus) ? dto.PdfFileId : null);
+            pdfFileId: PaperStatusMachine.RequiresPdf(dto.TargetStatus) ? dto.PdfFileId : null,
+            submittedUrl: PaperStatusMachine.RequiresPdf(dto.TargetStatus) ? dto.SubmittedUrl : null);
 
         await session.BeginTransactionAsync(cancellationToken);
         session.Store(historyEntry);
