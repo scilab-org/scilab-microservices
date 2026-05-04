@@ -161,6 +161,7 @@ public sealed class ApiRoutes
         public const string GetSectionHistory = $"{Base}/{{id}}/history";
         public const string Upload = $"{Base}/{{id}}/upload-file";
         public const string GetSectionFileById = $"{Base}/{{id}}/files";
+        public const string DeleteSectionFileById = $"{Base}/{{id}}/files/{{fileName}}";
         public const string MarkMainSection = $"{Base}/{{id}}/mark-main-section";
         public const string Reference = $"{Base}/{{id}}/reference";
         public const string InUseReference = $"{Base}/{{id}}/reference/in-use";

@@ -225,6 +225,10 @@ public sealed class MessageCode
 
     public const string SectionFileIsRequired = "SECTION_FILE_IS_REQUIRED";
 
+    public const string SectionFileNameIsRequired = "SECTION_FILE_NAME_IS_REQUIRED";
+
+    public const string SectionFileNotFound = "SECTION_FILE_NOT_FOUND";
+
     public const string SectionIsNotExists = "SECTION_IS_NOT_EXISTS";
 
     public const string SectionIsAlreadyMainSection = "SECTION_IS_ALREADY_MAIN_SECTION";
