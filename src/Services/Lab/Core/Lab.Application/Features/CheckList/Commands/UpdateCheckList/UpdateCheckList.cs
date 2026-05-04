@@ -1,6 +1,7 @@
 using JasperFx.Core;
 using Lab.Application.Dtos.CheckLists;
 using Lab.Domain.Entities;
+using Lab.Domain.Models;
 using Marten;
 using MediatR;
 
@@ -24,16 +25,19 @@ public class UpdateCheckListCommandValidator : AbstractValidator<UpdateCheckList
                     .NotEmpty().WithMessage(MessageCode.CheckListSectionIsRequired)
                     .NotNull().WithMessage(MessageCode.CheckListSectionIsRequired);
 
-                RuleFor(x => x.Dto.RuleName)
-                    .NotEmpty().WithMessage(MessageCode.CheckListRuleNameIsRequired)
-                    .NotNull().WithMessage(MessageCode.CheckListRuleNameIsRequired);
+                RuleForEach(x => x.Dto.Items).ChildRules(item =>
+                {
+                    item.RuleFor(i => i.Name)
+                        .NotEmpty().WithMessage(MessageCode.CheckListRuleNameIsRequired)
+                        .NotNull().WithMessage(MessageCode.CheckListRuleNameIsRequired);
 
-                RuleFor(x => x.Dto.Item)
-                    .NotEmpty().WithMessage(MessageCode.CheckListItemIsRequired)
-                    .NotNull().WithMessage(MessageCode.CheckListItemIsRequired);
+                    item.RuleFor(i => i.Rule)
+                        .NotEmpty().WithMessage(MessageCode.CheckListItemIsRequired)
+                        .NotNull().WithMessage(MessageCode.CheckListItemIsRequired);
 
-                RuleFor(x => x.Dto.Weight)
-                    .GreaterThan(0).WithMessage(MessageCode.CheckListWeightIsRequired);
+                    item.RuleFor(i => i.Weight)
+                        .GreaterThan(0).WithMessage(MessageCode.CheckListWeightIsRequired);
+                });
             });
     }
 }
@@ -48,11 +52,24 @@ public class UpdateCheckListCommandHandler(IDocumentSession session)
         var entity = await session.LoadAsync<CheckListEntity>(request.Id, cancellationToken)
                      ?? throw new ClientValidationException(MessageCode.CheckListIsNotExists, request.Id);
 
+        var dupplicateSection = await session.Query<CheckListEntity>()
+            .Where(x => x.Id != request.Id && x.Section.ToLower() == request.Dto.Section.ToLower().Trim())
+            .AnyAsync(cancellationToken);
+
+        if (dupplicateSection)
+        {
+            throw new ValidationException(MessageCode.CheckListSectionAlreadyExists);
+        }
+
         entity.Update(
             section: request.Dto.Section.Trim(),
-            ruleName: request.Dto.RuleName.Trim(),
-            item: request.Dto.Item.Trim(),
-            weight: request.Dto.Weight,
+            items: request.Dto.Items.Select(x => new Item
+            {
+                Id = x.Id == Guid.Empty ? Guid.NewGuid() : x.Id,
+                Name = x.Name.Trim(),
+                Rule = x.Rule.Trim(),
+                Weight = x.Weight
+            }).ToList(),
             modifiedBy: request.UserName);
 
         session.Update(entity);

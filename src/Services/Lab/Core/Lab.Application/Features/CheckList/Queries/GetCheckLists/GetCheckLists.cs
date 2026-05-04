@@ -28,21 +28,15 @@ public class GetCheckListsQueryHandler(
             query = query.Where(x => x.Section.ToLower().Contains(section));
         }
 
-        if (!filter.RuleName.IsNullOrWhiteSpace())
+        if (!filter.Name.IsNullOrWhiteSpace())
         {
-            var ruleName = filter.RuleName.ToLower().Trim();
-            query = query.Where(x => x.RuleName.ToLower().Contains(ruleName));
-        }
-
-        if (!filter.Item.IsNullOrWhiteSpace())
-        {
-            var item = filter.Item.Trim();
-            query = query.Where(x => x.Item.Contains(item));
+            var ruleName = filter.Name.ToLower().Trim();
+            query = query.Where(x => x.Items.Any(i => i.Name.ToLower().Contains(ruleName)));
         }
 
         if (filter.Weight.HasValue)
         {
-            query = query.Where(x => x.Weight == filter.Weight.Value);
+            query = query.Where(x => x.Items.Any(i => i.Weight == filter.Weight.Value));
         }
 
         if (filter.IsDeleted.HasValue && filter.IsDeleted.Value)

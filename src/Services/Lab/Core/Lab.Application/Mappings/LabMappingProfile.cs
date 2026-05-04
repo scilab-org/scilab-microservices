@@ -162,6 +162,7 @@ public sealed class LabMappingProfile : Profile
 
     private void CreateCheckListMappings()
     {
+        CreateMap<Item, CheckListItemDto>();
         CreateMap<CheckListEntity, CheckListDto>();
     }
 
