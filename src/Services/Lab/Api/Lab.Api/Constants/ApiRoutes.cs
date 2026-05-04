@@ -196,6 +196,27 @@ public sealed class ApiRoutes
         #endregion
     }
 
+    public static class CheckList
+    {
+        #region Constants
+
+        public const string Tags = "CheckLists";
+        private const string Base = "/check-lists";
+        private const string BaseAdmin = "/admin/check-lists";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetCheckLists = $"{Base}";
+        public const string GetCheckListById = $"{Base}/{{id}}";
+
+        #endregion
+    }
+
     public static class Comment
     {
         #region Constants
@@ -249,7 +270,7 @@ public sealed class ApiRoutes
         public const string Create = $"{BaseAdmin}";
         public const string Update = $"{BaseAdmin}/{{id}}";
         public const string Delete = $"{BaseAdmin}/{{id}}";
-        public const string GetAuthorRoles= $"{Base}";
+        public const string GetAuthorRoles = $"{Base}";
         public const string GetAuthorRoleById = $"{Base}/{{id}}";
         #endregion
     }

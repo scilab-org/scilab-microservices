@@ -150,9 +150,9 @@ public sealed class MessageCode
 
     public const string PaperResearchAimIsRequired = "PAPER_RESEARCH_AIM_IS_REQUIRED";
 
-    public const string JournalStartAtIsRequired  = "JOURNAL_START_AT_IS_REQUIRED";
+    public const string JournalStartAtIsRequired = "JOURNAL_START_AT_IS_REQUIRED";
 
-    public const string JournalEndAtIsRequired  = "JOURNAL_END_AT_IS_REQUIRED";
+    public const string JournalEndAtIsRequired = "JOURNAL_END_AT_IS_REQUIRED";
 
     public const string PaperVersionIdIsRequired = "PAPER_VERSION_ID_IS_REQUIRED";
 
@@ -229,7 +229,7 @@ public sealed class MessageCode
 
     public const string SectionIsAlreadyMainSection = "SECTION_IS_ALREADY_MAIN_SECTION";
 
-    public const string SectionAlreadyHasVersion =  "SECTION_ALREADY_HAS_VERSION";
+    public const string SectionAlreadyHasVersion = "SECTION_ALREADY_HAS_VERSION";
 
     public const string SectionContentIsRequired = "SECTION_CONTENT_IS_REQUIRED";
 
@@ -275,6 +275,22 @@ public sealed class MessageCode
     public const string JournalIssnIsRequired = "JOURNAL_ISSN_IS_REQUIRED";
 
     public const string JournalTypeIsRequired = "JOURNAL_TYPE_IS_REQUIRED";
+
+    #endregion
+
+    #region CheckList Management
+
+    public const string CheckListIdIsRequired = "CHECKLIST_ID_IS_REQUIRED";
+
+    public const string CheckListIsNotExists = "CHECKLIST_IS_NOT_EXISTS";
+
+    public const string CheckListSectionIsRequired = "CHECKLIST_SECTION_IS_REQUIRED";
+
+    public const string CheckListRuleNameIsRequired = "CHECKLIST_RULE_NAME_IS_REQUIRED";
+
+    public const string CheckListItemIsRequired = "CHECKLIST_ITEM_IS_REQUIRED";
+
+    public const string CheckListWeightIsRequired = "CHECKLIST_WEIGHT_IS_REQUIRED";
 
     #endregion
 

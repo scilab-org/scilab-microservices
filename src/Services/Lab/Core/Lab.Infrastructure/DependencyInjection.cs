@@ -51,6 +51,8 @@ public static class DependencyInjection
                 .SoftDeleted();
             opts.Schema.For<PaperStatusHistoryEntity>()
                 .Index(h => h.PaperId);
+            opts.Schema.For<CheckListEntity>()
+                .SoftDeleted();
         }).UseLightweightSessions();
 
         services.Scan(s => s
