@@ -296,6 +296,8 @@ public sealed class MessageCode
 
     public const string CheckListWeightIsRequired = "CHECKLIST_WEIGHT_IS_REQUIRED";
 
+    public const string CheckListSectionAlreadyExists = "CHECKLIST_SECTION_ALREADY_EXISTS";
+
     #endregion
 
     #region Task Management

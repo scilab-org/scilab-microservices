@@ -1,26 +1,23 @@
 ﻿using Lab.Domain.Abstractions;
+using Lab.Domain.Models;
 
 namespace Lab.Domain.Entities;
 
 public class CheckListEntity : Entity<Guid>
 {
     public string Section { get; set; } = null!;
-    public string RuleName { get; set; } = null!;
-    public string Item { get; set; } = null!;
-    public int Weight { get; set; }
+    public List<Item> Items { get; set; } = [];
 
     #region Factories
 
-    public static CheckListEntity Create(Guid id, string section, string ruleName, string item, int weight,
+    public static CheckListEntity Create(Guid id, string section, List<Item> items,
         string? createBy = null)
     {
         return new CheckListEntity()
         {
             Id = id,
             Section = section,
-            RuleName = ruleName,
-            Item = item,
-            Weight = weight,
+            Items = items,
             CreatedBy = createBy,
             CreatedOnUtc = DateTimeOffset.UtcNow,
             LastModifiedBy = createBy,
@@ -32,13 +29,11 @@ public class CheckListEntity : Entity<Guid>
 
     #region Methods
 
-    public void Update(string? section = null, string? ruleName = null, string? item = null, int? weight = null,
+    public void Update(string? section = null, List<Item>? items = null,
         string? modifiedBy = null)
     {
         Section = section ?? Section;
-        RuleName = ruleName ?? RuleName;
-        Item = item ?? Item;
-        Weight = weight ?? Weight;
+        Items = items ?? Items;
         LastModifiedBy = modifiedBy;
         LastModifiedOnUtc = DateTimeOffset.UtcNow;
     }

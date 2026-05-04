@@ -39,9 +39,13 @@ public sealed class UpdateCheckList : ICarterModule
         var dto = new UpdateCheckListDto
         {
             Section = request.Section,
-            RuleName = request.RuleName,
-            Item = request.Item,
-            Weight = request.Weight
+            Items = request.Items.Select(x => new CheckListItemDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Rule = x.Rule,
+                Weight = x.Weight
+            }).ToList()
         };
 
         var command = new UpdateCheckListCommand(dto, id, currentUser.UserName);

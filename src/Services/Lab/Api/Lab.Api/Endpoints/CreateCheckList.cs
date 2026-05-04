@@ -37,9 +37,13 @@ public sealed class CreateCheckList : ICarterModule
         var dto = new CreateCheckListDto
         {
             Section = req.Section,
-            RuleName = req.RuleName,
-            Item = req.Item,
-            Weight = req.Weight
+            Items = req.Items.Select(x => new CheckListItemDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Rule = x.Rule,
+                Weight = x.Weight
+            }).ToList()
         };
 
         var command = new CreateCheckListCommand(dto, currentUser.UserName);
