@@ -161,6 +161,7 @@ public sealed class ApiRoutes
         public const string GetSectionHistory = $"{Base}/{{id}}/history";
         public const string Upload = $"{Base}/{{id}}/upload-file";
         public const string GetSectionFileById = $"{Base}/{{id}}/files";
+        public const string DeleteSectionFileById = $"{Base}/{{id}}/files/{{fileName}}";
         public const string MarkMainSection = $"{Base}/{{id}}/mark-main-section";
         public const string Reference = $"{Base}/{{id}}/reference";
         public const string InUseReference = $"{Base}/{{id}}/reference/in-use";
@@ -192,6 +193,27 @@ public sealed class ApiRoutes
         public const string GetJournalById = $"{Base}/{{id}}";
         public const string GetJournalsInProject = $"{Base}/projects/{{projectId}}";
         public const string GetJournalInProjectById = $"{Base}/{{id}}/projects/{{projectId}}";
+
+        #endregion
+    }
+
+    public static class CheckList
+    {
+        #region Constants
+
+        public const string Tags = "CheckLists";
+        private const string Base = "/check-lists";
+        private const string BaseAdmin = "/admin/check-lists";
+
+        #endregion
+
+        #region Endpoints
+
+        public const string Create = $"{BaseAdmin}";
+        public const string Update = $"{BaseAdmin}/{{id}}";
+        public const string Delete = $"{BaseAdmin}/{{id}}";
+        public const string GetCheckLists = $"{Base}";
+        public const string GetCheckListById = $"{Base}/{{id}}";
 
         #endregion
     }
@@ -249,7 +271,7 @@ public sealed class ApiRoutes
         public const string Create = $"{BaseAdmin}";
         public const string Update = $"{BaseAdmin}/{{id}}";
         public const string Delete = $"{BaseAdmin}/{{id}}";
-        public const string GetAuthorRoles= $"{Base}";
+        public const string GetAuthorRoles = $"{Base}";
         public const string GetAuthorRoleById = $"{Base}/{{id}}";
         #endregion
     }

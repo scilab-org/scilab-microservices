@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Lab.Application.Dtos.AuthorRoles;
+using Lab.Application.Dtos.CheckLists;
 using Lab.Application.Dtos.Comments;
 using Lab.Application.Dtos.GapTypes;
 using Lab.Application.Dtos.Journals;
@@ -36,6 +37,7 @@ public sealed class LabMappingProfile : Profile
         CreateSectionMappings();
         CreateCommentMappings();
         CreateJournalMappings();
+        CreateCheckListMappings();
         CreateTaskMappings();
     }
 
@@ -152,6 +154,15 @@ public sealed class LabMappingProfile : Profile
     private void CreateTaskMappings()
     {
         CreateMap<TaskEntity, TaskDto>();
+    }
+
+    #endregion
+
+    #region CheckList Mappings
+
+    private void CreateCheckListMappings()
+    {
+        CreateMap<CheckListEntity, CheckListDto>();
     }
 
     #endregion

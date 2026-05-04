@@ -59,7 +59,7 @@ public class MarkSectionToCompletedCommandHandler(IDocumentSession session, IMan
             throw new UnauthorizedException(MessageCode.AccessDenied);
 
         if (section.Status != SectionStatus.InProgress)
-            throw new ClientValidationException(MessageCode.SectionStatusMustBeInReview);
+            throw new ClientValidationException(MessageCode.SectionStatusMustBeInProgress);
 
         section.Update(status: SectionStatus.Completed, lastModifiedBy: request.UserName);
         session.Update(section);

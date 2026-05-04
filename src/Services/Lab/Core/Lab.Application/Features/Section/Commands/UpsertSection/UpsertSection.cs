@@ -77,7 +77,7 @@ public class UpsertSectionCommandHandler(
 
             if (section.Version.EqualsIgnoreCase("Version Initial"))
                 section.Update(status: SectionStatus.InProgress);
-            
+
             var version = BuildNextDraftVersion(section.Version);
             var newSection = SectionEntity.Create(
                 id: Guid.NewGuid(),
@@ -93,6 +93,7 @@ public class UpsertSectionCommandHandler(
                 description: section.Description,
                 mainIdea: section.MainIdea,
                 rule: section.Rule,
+                files: section.Files,
                 //Mark new section as new version of main section
                 previousVersionSectionId: section.Id,
                 createdBy: request.UserName,
@@ -115,7 +116,7 @@ public class UpsertSectionCommandHandler(
                 sectionId: newSection.Id,
                 markSectionId: section.Id
             );
-            
+
             session.Update(section);
             session.Store(newSection);
             session.Update(contributor);
