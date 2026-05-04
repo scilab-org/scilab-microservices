@@ -55,7 +55,6 @@ public class UpdateCheckListCommandHandler(IDocumentSession session)
         var dupplicateSection = await session.Query<CheckListEntity>()
             .Where(x => x.Id != request.Id && x.Section.ToLower() == request.Dto.Section.ToLower().Trim())
             .AnyAsync(cancellationToken);
-
         if (dupplicateSection)
         {
             throw new ValidationException(MessageCode.CheckListSectionAlreadyExists);
