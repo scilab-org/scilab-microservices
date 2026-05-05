@@ -211,6 +211,25 @@ public sealed class UserApiService(IUserServiceApi userServiceApi) : IUserApiSer
             throw new InfrastructureException(MessageCode.FailedToAssignGroup);
     }
 
+    public async Task<long> GetUserCountAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await userServiceApi.GetUsersAsync(pageNumber: 1, pageSize: 1000);
+            if (!response.IsSuccessStatusCode)
+                return 0;
+
+            var body = await response.Content.ReadFromJsonAsync<UserServiceGetResponse>(
+                cancellationToken: cancellationToken);
+
+            return body?.Result?.Items?.Count ?? 0;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
     #endregion
 }
 

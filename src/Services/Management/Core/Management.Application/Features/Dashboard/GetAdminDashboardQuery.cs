@@ -23,6 +23,7 @@ public sealed class AdminDashboardKpis
     public PaperBankKpis PaperBank { get; set; } = new();
     public JournalKpis Journals { get; set; } = new();
     public TemplateKpis Templates { get; set; } = new();
+    public UserKpis Users { get; set; } = new();
 }
 
 [ExcludeFromCodeCoverage]
@@ -59,6 +60,12 @@ public sealed class TemplateKpis
 }
 
 [ExcludeFromCodeCoverage]
+public sealed class UserKpis
+{
+    public long Total { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
 public sealed class RecentProjectItem
 {
     public Guid Id { get; set; }
@@ -84,6 +91,7 @@ public record GetAdminDashboardQuery : IQuery<AdminDashboardResult>;
 public sealed class GetAdminDashboardQueryHandler(
     IDocumentSession session,
     ILabApiService labApiService,
+    IUserApiService userApiService,
     IRedisService redisService)
     : IQueryHandler<GetAdminDashboardQuery, AdminDashboardResult>
 {
@@ -94,12 +102,13 @@ public sealed class GetAdminDashboardQueryHandler(
         GetAdminDashboardQuery request,
         CancellationToken cancellationToken)
     {
-        // Always fetch Lab data — needed for recentPapers (not cached) and as input to KPI cache factory
+        // Fetch Lab + user data upfront — needed for recentPapers and as input to KPI cache factory
         var labData = await labApiService.GetAdminDashboardKpisAsync(cancellationToken);
+        var userCount = await userApiService.GetUserCountAsync(cancellationToken);
 
         var kpis = await redisService.GetOrSetCacheAsync<AdminDashboardKpis>(
             CacheKey,
-            ct => BuildKpisAsync(labData, ct),
+            ct => BuildKpisAsync(labData, userCount, ct),
             CacheTtl,
             cancellationToken);
 
@@ -124,7 +133,7 @@ public sealed class GetAdminDashboardQueryHandler(
         };
     }
 
-    private async Task<AdminDashboardKpis> BuildKpisAsync(LabAdminDashboardKpisDto labData, CancellationToken ct)
+    private async Task<AdminDashboardKpis> BuildKpisAsync(LabAdminDashboardKpisDto labData, long userCount, CancellationToken ct)
     {
         var allProjects = await session.Query<ProjectEntity>()
             .Where(x => x.ParentProjectId == null)
@@ -163,6 +172,10 @@ public sealed class GetAdminDashboardQueryHandler(
             Templates = new TemplateKpis
             {
                 Total = labData.TemplateTotal
+            },
+            Users = new UserKpis
+            {
+                Total = userCount
             }
         };
     }

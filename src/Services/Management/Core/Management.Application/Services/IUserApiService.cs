@@ -40,5 +40,7 @@ public interface IUserApiService
         Guid userId,
         string roleName,
         CancellationToken cancellationToken = default);
+    /// <summary>Returns the total number of enabled users from the User service.</summary>
+    Task<long> GetUserCountAsync(CancellationToken cancellationToken = default);
     #endregion
 }
