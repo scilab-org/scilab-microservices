@@ -110,6 +110,12 @@ public interface ILabServiceApi
     [Post("/papers/submission-status-summary")]
     Task<HttpResponseMessage> GetSubmissionStatusSummaryAsync([Body] LabSubmissionStatusSummaryRequest body);
 
+    /// <summary>
+    /// GET /admin/dashboard/kpis — returns Lab-side admin dashboard KPIs.
+    /// </summary>
+    [Get("/admin/dashboard/kpis")]
+    Task<HttpResponseMessage> GetAdminDashboardKpisAsync();
+
     #endregion
 
     #region Paper Contributors

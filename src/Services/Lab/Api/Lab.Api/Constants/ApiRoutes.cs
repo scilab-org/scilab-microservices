@@ -2,6 +2,12 @@ namespace Lab.Api.Constants;
 
 public sealed class ApiRoutes
 {
+    public static class Dashboard
+    {
+        public const string Tags = "Dashboard";
+        public const string GetAdminKpis = "/admin/dashboard/kpis";
+    }
+
     public static class System
     {
         #region Constants

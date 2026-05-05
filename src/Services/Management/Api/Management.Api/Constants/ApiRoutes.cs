@@ -2,6 +2,12 @@ namespace Management.Api.Constants;
 
 public sealed class ApiRoutes
 {
+    public static class Dashboard
+    {
+        public const string Tags = "Dashboard";
+        public const string GetAdminDashboard = "/admin/dashboard";
+    }
+
     public static class System
     {
         #region Constants

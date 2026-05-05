@@ -1,3 +1,4 @@
+using Management.Application.Dtos.Dashboard;
 using Management.Application.Dtos.Papers;
 
 namespace Management.Application.Services;
@@ -157,6 +158,10 @@ public interface ILabApiService
         string? context,
         string? domain,
         string? keypoint,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Returns Lab-side admin dashboard KPIs (paper bank, journals, templates, submission status counts, recent papers).</summary>
+    Task<LabAdminDashboardKpisDto> GetAdminDashboardKpisAsync(
         CancellationToken cancellationToken = default);
 
     #endregion

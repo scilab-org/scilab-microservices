@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
+using Management.Application.Dtos.Dashboard;
 using Management.Application.Dtos.Papers;
 using Management.Application.Services;
 using Management.Infrastructure.ApiClients;
@@ -804,6 +805,48 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<LabAdminDashboardKpisDto> GetAdminDashboardKpisAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetAdminDashboardKpisAsync();
+            if (!response.IsSuccessStatusCode)
+                return new LabAdminDashboardKpisDto();
+
+            var body = await response.Content.ReadFromJsonAsync<LabAdminDashboardKpisResponse>(
+                cancellationToken: cancellationToken);
+
+            if (body is null)
+                return new LabAdminDashboardKpisDto();
+
+            return new LabAdminDashboardKpisDto
+            {
+                PaperBankTotal = body.PaperBankTotal,
+                JournalTotal = body.JournalTotal,
+                ConferenceTotal = body.ConferenceTotal,
+                TemplateTotal = body.TemplateTotal,
+                SubmissionStatusCounts = body.SubmissionStatusCounts
+                    .Select(x => new LabSubmissionStatusCountDto { Status = x.Status, Count = x.Count })
+                    .ToList(),
+                RecentPapers = body.RecentPapers
+                    .Select(x => new LabRecentPaperDto
+                    {
+                        Id = x.Id,
+                        Title = x.Title,
+                        Status = x.Status,
+                        ConferenceJournalName = x.ConferenceJournalName,
+                        CreatedAt = x.CreatedAt
+                    })
+                    .ToList()
+            };
+        }
+        catch
+        {
+            return new LabAdminDashboardKpisDto();
+        }
+    }
+
     #endregion
 }
 
@@ -874,4 +917,33 @@ file static class LabPaperItemMapper
         SubmissionStatus        = p.SubmissionStatus,
         CreatedBy               = p.CreatedBy
     };
+}
+
+// GET /admin/dashboard/kpis response shape
+[ExcludeFromCodeCoverage]
+file sealed class LabAdminDashboardKpisResponse
+{
+    public long PaperBankTotal { get; set; }
+    public long JournalTotal { get; set; }
+    public long ConferenceTotal { get; set; }
+    public long TemplateTotal { get; set; }
+    public List<LabAdminSubmissionStatusCountRaw> SubmissionStatusCounts { get; set; } = [];
+    public List<LabAdminRecentPaperRaw> RecentPapers { get; set; } = [];
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabAdminSubmissionStatusCountRaw
+{
+    public int Status { get; set; }
+    public int Count { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabAdminRecentPaperRaw
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = null!;
+    public int? Status { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
