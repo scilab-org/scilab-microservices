@@ -164,5 +164,11 @@ public interface ILabApiService
     Task<LabAdminDashboardKpisDto> GetAdminDashboardKpisAsync(
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns Lab-side user dashboard KPIs (task counts, paper counts, recent tasks, recent papers).</summary>
+    Task<LabUserDashboardKpisDto> GetUserDashboardKpisAsync(
+        string username,
+        IEnumerable<Guid> memberIds,
+        CancellationToken cancellationToken = default);
+
     #endregion
 }

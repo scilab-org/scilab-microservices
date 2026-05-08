@@ -6,6 +6,7 @@ public sealed class ApiRoutes
     {
         public const string Tags = "Dashboard";
         public const string GetAdminDashboard = "/admin/dashboard";
+        public const string GetUserDashboard = "/user/dashboard";
     }
 
     public static class System

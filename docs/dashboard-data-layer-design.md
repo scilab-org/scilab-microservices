@@ -58,12 +58,11 @@ Management service has `ILabApiService` (calls Lab API). Lab service has `IManag
 
 | KPI                                     | Source                                                         | Computed?                       | Cache TTL        |
 | --------------------------------------- | -------------------------------------------------------------- | ------------------------------- | ---------------- |
-| My active projects                      | Management · `MemberEntity` + `ProjectEntity`                  | Join + filter `Status = Active` | 2 min (per user) |
-| My tasks by `TaskDefineStatus`          | Lab · `TaskEntity` (by `AssignedToUserName`)                   | Group-by count                  | 1 min (per user) |
-| My papers by current `SubmissionStatus` | Lab · `PaperContributorEntity` → `PaperStatusHistoryEntity`    | Resolved via membership         | 2 min (per user) |
-| Papers with upcoming deadlines          | Lab · `PaperEntity` (`ConferenceJournalEndAt` in next 60 days) | Filtered, sorted                | 2 min (per user) |
-| My 5 most recent tasks                  | Lab · `TaskEntity`                                             | Raw, `LastModifiedOnUtc DESC`   | No cache         |
-| My 5 most recent papers                 | Lab via `PaperContributorEntity`                               | Raw, `CreatedOnUtc DESC`        | No cache         |
+| My active projects                      | Management · `MemberEntity` + `ProjectEntity`               | Join + filter `Status = Active` | 2 min (per user) |
+| My tasks by `TaskDefineStatus`          | Lab · `TaskEntity` (by `AssignedToUserName`)                 | Group-by count                  | 1 min (per user) |
+| My papers by current `SubmissionStatus` | Lab · `PaperContributorEntity` → `PaperStatusHistoryEntity` | Resolved via membership         | 2 min (per user) |
+| My 5 most recent tasks                  | Lab · `TaskEntity`                                           | Raw, `LastModifiedOnUtc DESC`   | No cache         |
+| My 5 most recent papers                 | Lab via `PaperContributorEntity`                             | Raw, `CreatedOnUtc DESC`        | No cache         |
 
 ---
 
@@ -77,10 +76,6 @@ Authorization: Bearer <token>
 ```
 
 A single endpoint in **Management.Api**. The handler reads the caller's group from the JWT, branches into admin or user path, and returns a discriminated response.
-
-**Optional query param:**
-
-- `deadlineWithinDays` (default: `60`) — window for the upcoming deadlines list (user only)
 
 **Implementation path:**
 
@@ -196,16 +191,6 @@ Management.Api → GET /dashboard
       }
     }
   },
-  "upcomingDeadlines": [
-    {
-      "paperId": "7b4e3f12-1a2b-4c5d-8e9f-0a1b2c3d4e5f",
-      "paperTitle": "Transformer Efficiency Survey",
-      "conferenceJournalName": "NeurIPS 2025",
-      "conferenceJournalType": 2,
-      "deadlineAt": "2025-05-31T23:59:59Z",
-      "daysRemaining": 26
-    }
-  ],
   "myRecentTasks": [
     {
       "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -236,8 +221,6 @@ Management.Api → GET /dashboard
 
 - `myPapers` is the union of `PaperContributorEntity` (contributor) and `PaperAuthorEntity` (author), deduplicated by `PaperId`
 - `submissionStatus` per paper = latest `PaperStatusHistoryEntity` record; papers with no history = `Draft=1`
-- `upcomingDeadlines` uses `PaperEntity.ConferenceJournalEndAt` (denormalized), filtered within `deadlineWithinDays`, sorted ASC, max 10 items
-- `daysRemaining` is computed at query time (`(deadlineAt - UtcNow).Days`), not stored
 - `myRecentTasks` — 5 items, `LastModifiedOnUtc DESC`
 - `myRecentPapers` — 5 items, `LastModifiedOnUtc DESC`
 
@@ -254,9 +237,8 @@ Management.Api → GET /dashboard
 | Recent papers (all)           | ✅    | ❌                       |
 | My project counts             | ❌    | ✅                       |
 | My task breakdown             | ❌    | ✅                       |
-| My papers + submission status | ❌    | ✅                       |
-| Upcoming deadlines            | ❌    | ✅ (scoped to my papers) |
-| My recent tasks               | ❌    | ✅                       |
+| My papers + submission status | ❌    | ✅ |
+| My recent tasks               | ❌    | ✅ |
 
 Admin never sees `parsedText`, `abstract`, `researchGap`, or other large text fields in dashboard responses — only identifiers, status values, and titles. Users never see other users' data.
 
@@ -270,10 +252,9 @@ Admin never sees `parsedText`, `abstract`, `researchGap`, or other large text fi
 
 | Key                                 | TTL    | Content                   |
 | ----------------------------------- | ------ | ------------------------- |
-| `dashboard:admin:kpis`              | 5 min  | Full admin KPI block      |
-| `dashboard:admin:journals`          | 10 min | Journal + template counts |
-| `dashboard:user:{userId}:kpis`      | 2 min  | User task + paper counts  |
-| `dashboard:user:{userId}:deadlines` | 2 min  | Upcoming deadlines list   |
+| `dashboard:admin:kpis`         | 5 min  | Full admin KPI block      |
+| `dashboard:admin:journals`     | 10 min | Journal + template counts |
+| `dashboard:user:{userId}:kpis` | 2 min  | User task + paper counts  |
 
 `recentProjects`, `recentPapers`, `myRecentTasks`, and `myRecentPapers` are **not cached** — they signal current activity.
 
@@ -299,10 +280,9 @@ Lab side — GET /admin/dashboard/kpis (single call from Management):
 ```
 1. Load MemberEntity[] for userId                       → resolve projectIds + memberIds
 2. [parallel] Count active projects (MemberEntity data + one DB status filter)
-3. [parallel] Load TaskEntity[] where AssignedToUserName = username → count by TaskDefineStatus
+3. [parallel] Load TaskEntity[] where AssignedToUserName = username → count by TaskDefineStatus + top-5 recent
 4. [parallel] Load PaperContributorEntity[] + PaperAuthorEntity[] where MemberId IN memberIds → collect paperIds
-5. Load latest PaperStatusHistoryEntity per paperIds    → existing summary logic
-6. Load PaperEntity[] for deadline window               → filter ConferenceJournalEndAt
+5. Load latest PaperStatusHistoryEntity per paperIds    → existing summary logic + top-5 recent papers
 ```
 
 Steps 2, 3, 4 can fire in parallel after username and memberIds are resolved.
@@ -326,10 +306,7 @@ Implicitly `SubmissionStatus.Draft`. The existing `GetSubmissionStatusSummaryQue
 **3. Cross-service latency for Admin KPIs**  
 Admin KPI block requires 3–4 HTTP calls to Lab. Without Redis cache, each load incurs those round-trips. Cache the aggregate result at the Management layer.
 
-**4. Stale `ConferenceJournalEndAt` on `PaperEntity`**  
-The deadline is denormalized from `ConferenceJournalEntity` onto `PaperEntity`. If the journal's deadline changes after the paper was linked, the paper's field becomes stale. Mitigate with the `PaperDeadlineSyncJob` described below.
-
-**5. `PaperStatus` vs `SubmissionStatus` confusion**  
+**4. `PaperStatus` vs `SubmissionStatus` confusion**  
 These are two distinct axes:
 
 - `PaperStatus` = internal workflow (Draft → Processing → Submitted → Released → Sampled)
@@ -337,10 +314,10 @@ These are two distinct axes:
 
 Admin KPIs expose both. User dashboard exposes only `SubmissionStatus` in KPIs (more actionable), with `PaperStatus` surfaced in `myRecentPapers`.
 
-**6. Admin is also a project member**  
+**5. Admin is also a project member**  
 Always returns admin-shaped response. Intentional — admin uses project-scoped endpoints for member-level drill-down.
 
-**7. Submission status summary over all papers (admin)**  
+**6. Submission status summary over all papers (admin)**  
 Loading all paper IDs into memory to pass to the existing summary endpoint is unsafe at scale. A dedicated `GET /papers/submission-status-counts` Lab endpoint (no ID list required, full-table group-by) is required before enabling the admin `submissionStatus` KPI block.
 
 ---
@@ -353,8 +330,4 @@ Loading all paper IDs into memory to pass to the existing summary endpoint is un
 - **Action:** precompute the full admin KPI block and write to `dashboard:admin:kpis` in Redis
 - **Benefit:** eliminates cold-cache latency on first admin load after TTL expiry
 
-### `PaperDeadlineSyncJob`
 
-- **Schedule:** daily
-- **Action:** for each `ConferenceJournalEntity`, find all linked `PaperEntity` records where `ConferenceJournalEndAt` differs from the journal's current deadline and update them
-- **Benefit:** keeps `upcomingDeadlines` accurate without real-time joins to `ConferenceJournalEntity`

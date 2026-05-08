@@ -847,6 +847,66 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
         }
     }
 
+    public async Task<LabUserDashboardKpisDto> GetUserDashboardKpisAsync(
+        string username,
+        IEnumerable<Guid> memberIds,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await labServiceApi.GetUserDashboardKpisAsync(username, memberIds.ToArray());
+            if (!response.IsSuccessStatusCode)
+                return new LabUserDashboardKpisDto();
+
+            var body = await response.Content.ReadFromJsonAsync<LabUserDashboardKpisResponse>(
+                cancellationToken: cancellationToken);
+
+            if (body is null)
+                return new LabUserDashboardKpisDto();
+
+            return new LabUserDashboardKpisDto
+            {
+                TotalTasks = body.TotalTasks,
+                TaskStatusCounts = body.TaskStatusCounts
+                    .Select(x => new LabTaskStatusCountDto { Status = x.Status, Count = x.Count })
+                    .ToList(),
+                TotalPapers = body.TotalPapers,
+                PaperSubmissionStatusCounts = body.PaperSubmissionStatusCounts
+                    .Select(x => new LabSubmissionStatusCountDto { Status = x.Status, Count = x.Count })
+                    .ToList(),
+                RecentTasks = body.RecentTasks
+                    .Select(x => new LabRecentTaskDto
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        TaskType = x.TaskType,
+                        Status = x.Status,
+                        PaperId = x.PaperId,
+                        PaperTitle = x.PaperTitle,
+                        NextReviewDate = x.NextReviewDate,
+                        LastModifiedAt = x.LastModifiedAt
+                    })
+                    .ToList(),
+                RecentPapers = body.RecentPapers
+                    .Select(x => new LabUserRecentPaperDto
+                    {
+                        Id = x.Id,
+                        Title = x.Title,
+                        PaperStatus = x.PaperStatus,
+                        SubmissionStatus = x.SubmissionStatus,
+                        ConferenceJournalName = x.ConferenceJournalName,
+                        ConferenceJournalEndAt = x.ConferenceJournalEndAt,
+                        LastModifiedAt = x.LastModifiedAt
+                    })
+                    .ToList()
+            };
+        }
+        catch
+        {
+            return new LabUserDashboardKpisDto();
+        }
+    }
+
     #endregion
 }
 
@@ -946,4 +1006,48 @@ file sealed class LabAdminRecentPaperRaw
     public int? Status { get; set; }
     public string? ConferenceJournalName { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+}
+
+// GET /user/dashboard/kpis response shape
+[ExcludeFromCodeCoverage]
+file sealed class LabUserDashboardKpisResponse
+{
+    public long TotalTasks { get; set; }
+    public List<LabUserTaskStatusCountRaw> TaskStatusCounts { get; set; } = [];
+    public long TotalPapers { get; set; }
+    public List<LabAdminSubmissionStatusCountRaw> PaperSubmissionStatusCounts { get; set; } = [];
+    public List<LabUserRecentTaskRaw> RecentTasks { get; set; } = [];
+    public List<LabUserRecentPaperRaw> RecentPapers { get; set; } = [];
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabUserTaskStatusCountRaw
+{
+    public int Status { get; set; }
+    public int Count { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabUserRecentTaskRaw
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+    public int TaskType { get; set; }
+    public int Status { get; set; }
+    public Guid? PaperId { get; set; }
+    public string? PaperTitle { get; set; }
+    public DateTimeOffset? NextReviewDate { get; set; }
+    public DateTimeOffset? LastModifiedAt { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
+file sealed class LabUserRecentPaperRaw
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = null!;
+    public int? PaperStatus { get; set; }
+    public int SubmissionStatus { get; set; }
+    public string? ConferenceJournalName { get; set; }
+    public DateTimeOffset? ConferenceJournalEndAt { get; set; }
+    public DateTimeOffset? LastModifiedAt { get; set; }
 }

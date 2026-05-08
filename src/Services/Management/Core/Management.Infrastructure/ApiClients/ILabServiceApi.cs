@@ -116,6 +116,14 @@ public interface ILabServiceApi
     [Get("/admin/dashboard/kpis")]
     Task<HttpResponseMessage> GetAdminDashboardKpisAsync();
 
+    /// <summary>
+    /// GET /user/dashboard/kpis — returns Lab-side user dashboard KPIs.
+    /// </summary>
+    [Get("/user/dashboard/kpis")]
+    Task<HttpResponseMessage> GetUserDashboardKpisAsync(
+        [AliasAs("username")] string username,
+        [AliasAs("memberIds"), Query(CollectionFormat.Multi)] Guid[] memberIds);
+
     #endregion
 
     #region Paper Contributors
