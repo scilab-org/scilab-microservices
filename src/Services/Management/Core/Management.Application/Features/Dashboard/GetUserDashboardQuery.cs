@@ -53,11 +53,9 @@ public record GetUserDashboardQuery(Guid UserId, string Username) : IQuery<UserD
 
 public sealed class GetUserDashboardQueryHandler(
     IDocumentSession session,
-    ILabApiService labApiService,
-    IRedisService redisService)
+    ILabApiService labApiService)
     : IQueryHandler<GetUserDashboardQuery, UserDashboardResult>
 {
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(2);
 
     public async Task<UserDashboardResult> Handle(
         GetUserDashboardQuery request,
@@ -85,8 +83,7 @@ public sealed class GetUserDashboardQueryHandler(
             activeProjects = userProjects.Count(x => x.Status == ProjectStatus.Active);
         }
 
-        // 3. Fetch Lab KPIs (tasks + papers); cache the KPI block per user
-        var cacheKey = $"dashboard:user:{request.UserId}:kpis";
+        // 3. Fetch Lab KPIs (tasks + papers)
         var labData = await labApiService.GetUserDashboardKpisAsync(request.Username, memberIds, cancellationToken);
 
         // Resolve ProjectId for each recent paper using the member-to-project mapping
@@ -97,15 +94,11 @@ public sealed class GetUserDashboardQueryHandler(
                 paper.ProjectId = projectId;
         }
 
-        var kpis = await redisService.GetOrSetCacheAsync<UserDashboardKpis>(
-            cacheKey,
-            _ => Task.FromResult(BuildKpis(totalProjects, activeProjects, userProjects, labData)),
-            CacheTtl,
-            cancellationToken);
+        var kpis = BuildKpis(totalProjects, activeProjects, userProjects, labData);
 
         return new UserDashboardResult
         {
-            Kpis = kpis ?? BuildKpis(totalProjects, activeProjects, userProjects, labData),
+            Kpis = kpis,
             MyRecentTasks = labData.RecentTasks,
             MyRecentPapers = labData.RecentPapers
         };
