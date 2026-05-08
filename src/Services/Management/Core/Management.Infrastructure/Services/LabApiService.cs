@@ -896,7 +896,8 @@ public sealed class LabApiService(ILabServiceApi labServiceApi) : ILabApiService
                         SubmissionStatus = x.SubmissionStatus,
                         ConferenceJournalName = x.ConferenceJournalName,
                         ConferenceJournalEndAt = x.ConferenceJournalEndAt,
-                        LastModifiedAt = x.LastModifiedAt
+                        LastModifiedAt = x.LastModifiedAt,
+                        MemberId = x.MemberId
                     })
                     .ToList()
             };
@@ -1050,4 +1051,5 @@ file sealed class LabUserRecentPaperRaw
     public string? ConferenceJournalName { get; set; }
     public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public DateTimeOffset? LastModifiedAt { get; set; }
+    public Guid? MemberId { get; set; }
 }

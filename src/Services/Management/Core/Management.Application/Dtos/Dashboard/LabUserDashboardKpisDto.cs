@@ -43,4 +43,6 @@ public sealed class LabUserRecentPaperDto
     public string? ConferenceJournalName { get; set; }
     public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public DateTimeOffset? LastModifiedAt { get; set; }
+    public Guid? MemberId { get; set; }
+    public Guid? ProjectId { get; set; }
 }

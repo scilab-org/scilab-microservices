@@ -13,6 +13,7 @@ public sealed class UserMyProjectsKpis
 {
     public long Total { get; set; }
     public long Active { get; set; }
+    public Dictionary<string, long> ByStatus { get; set; } = [];
 }
 
 [ExcludeFromCodeCoverage]
@@ -70,41 +71,47 @@ public sealed class GetUserDashboardQueryHandler(
         var memberIds = members.Select(m => m.Id).ToArray();
         var projectIds = members.Select(m => m.ProjectId).Distinct().ToList();
 
-        // 2. Count active top-level projects the user belongs to
-        long totalProjects = projectIds.Count;
+        // 2. Load top-level projects the user belongs to (with status breakdown)
+        IReadOnlyList<ProjectEntity> userProjects = [];
+        long totalProjects = 0;
         long activeProjects = 0;
         if (projectIds.Count > 0)
         {
-            activeProjects = await session.Query<ProjectEntity>()
-                .Where(x => projectIds.Contains(x.Id)
-                             && x.ParentProjectId == null
-                             && x.Status == ProjectStatus.Active)
-                .CountAsync(cancellationToken);
-
-            totalProjects = await session.Query<ProjectEntity>()
+            userProjects = await session.Query<ProjectEntity>()
                 .Where(x => projectIds.Contains(x.Id) && x.ParentProjectId == null)
-                .CountAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
+
+            totalProjects = userProjects.Count;
+            activeProjects = userProjects.Count(x => x.Status == ProjectStatus.Active);
         }
 
         // 3. Fetch Lab KPIs (tasks + papers); cache the KPI block per user
         var cacheKey = $"dashboard:user:{request.UserId}:kpis";
         var labData = await labApiService.GetUserDashboardKpisAsync(request.Username, memberIds, cancellationToken);
 
+        // Resolve ProjectId for each recent paper using the member-to-project mapping
+        var memberToProjectMap = members.ToDictionary(m => m.Id, m => m.ProjectId);
+        foreach (var paper in labData.RecentPapers)
+        {
+            if (paper.MemberId.HasValue && memberToProjectMap.TryGetValue(paper.MemberId.Value, out var projectId))
+                paper.ProjectId = projectId;
+        }
+
         var kpis = await redisService.GetOrSetCacheAsync<UserDashboardKpis>(
             cacheKey,
-            _ => Task.FromResult(BuildKpis(totalProjects, activeProjects, labData)),
+            _ => Task.FromResult(BuildKpis(totalProjects, activeProjects, userProjects, labData)),
             CacheTtl,
             cancellationToken);
 
         return new UserDashboardResult
         {
-            Kpis = kpis ?? BuildKpis(totalProjects, activeProjects, labData),
+            Kpis = kpis ?? BuildKpis(totalProjects, activeProjects, userProjects, labData),
             MyRecentTasks = labData.RecentTasks,
             MyRecentPapers = labData.RecentPapers
         };
     }
 
-    private static UserDashboardKpis BuildKpis(long totalProjects, long activeProjects, LabUserDashboardKpisDto labData)
+    private static UserDashboardKpis BuildKpis(long totalProjects, long activeProjects, IReadOnlyList<ProjectEntity> userProjects, LabUserDashboardKpisDto labData)
     {
         var taskByStatus = labData.TaskStatusCounts
             .ToDictionary(x => MapTaskStatus(x.Status), x => x.Count);
@@ -112,12 +119,17 @@ public sealed class GetUserDashboardQueryHandler(
         var paperBySubmission = labData.PaperSubmissionStatusCounts
             .ToDictionary(x => MapSubmissionStatus(x.Status), x => x.Count);
 
+        var projectByStatus = userProjects
+            .GroupBy(x => x.Status)
+            .ToDictionary(g => g.Key.ToString().ToLowerInvariant(), g => (long)g.Count());
+
         return new UserDashboardKpis
         {
             MyProjects = new UserMyProjectsKpis
             {
                 Total = totalProjects,
-                Active = activeProjects
+                Active = activeProjects,
+                ByStatus = projectByStatus
             },
             MyTasks = new UserMyTasksKpis
             {

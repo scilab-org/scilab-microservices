@@ -31,6 +31,7 @@ public sealed class UserRecentPaperSummary
     public string? ConferenceJournalName { get; set; }
     public DateTimeOffset? ConferenceJournalEndAt { get; set; }
     public DateTimeOffset? LastModifiedAt { get; set; }
+    public Guid? MemberId { get; set; }
 }
 
 public sealed class UserDashboardKpisResult
@@ -73,6 +74,7 @@ public sealed class GetUserDashboardKpisQueryHandler(IDocumentSession session)
         var memberIds = request.MemberIds;
         var paperIds = new HashSet<Guid>();
         var taskIdToPaperId = new Dictionary<Guid, Guid>();
+        var paperToMemberMap = new Dictionary<Guid, Guid>();
 
         if (memberIds.Length > 0)
         {
@@ -83,6 +85,7 @@ public sealed class GetUserDashboardKpisQueryHandler(IDocumentSession session)
             foreach (var c in contributors)
             {
                 paperIds.Add(c.PaperId);
+                paperToMemberMap.TryAdd(c.PaperId, c.MemberId);
                 foreach (var tid in c.TaskIds)
                     taskIdToPaperId.TryAdd(tid, c.PaperId);
             }
@@ -92,7 +95,10 @@ public sealed class GetUserDashboardKpisQueryHandler(IDocumentSession session)
                 .ToListAsync(cancellationToken);
 
             foreach (var a in authorships)
+            {
                 paperIds.Add(a.PaperId);
+                paperToMemberMap.TryAdd(a.PaperId, a.MemberId);
+            }
         }
 
         // 3. Resolve paper titles for the top-5 recent tasks
@@ -192,7 +198,8 @@ public sealed class GetUserDashboardKpisQueryHandler(IDocumentSession session)
             SubmissionStatus = latestStatusByPaper.TryGetValue(p.Id, out var ss) ? ss : (int)SubmissionStatus.Draft,
             ConferenceJournalName = p.ConferenceJournalName,
             ConferenceJournalEndAt = p.ConferenceJournalEndAt,
-            LastModifiedAt = p.LastModifiedOnUtc
+            LastModifiedAt = p.LastModifiedOnUtc,
+            MemberId = paperToMemberMap.TryGetValue(p.Id, out var mid) ? mid : (Guid?)null
         }).ToList();
 
         return new UserDashboardKpisResult
