@@ -56,13 +56,13 @@ Management service has `ILabApiService` (calls Lab API). Lab service has `IManag
 
 ### User KPIs
 
-| KPI                                     | Source                                                         | Computed?                       | Cache TTL        |
-| --------------------------------------- | -------------------------------------------------------------- | ------------------------------- | ---------------- |
+| KPI                                     | Source                                                      | Computed?                       | Cache TTL        |
+| --------------------------------------- | ----------------------------------------------------------- | ------------------------------- | ---------------- |
 | My active projects                      | Management · `MemberEntity` + `ProjectEntity`               | Join + filter `Status = Active` | 2 min (per user) |
-| My tasks by `TaskDefineStatus`          | Lab · `TaskEntity` (by `AssignedToUserName`)                 | Group-by count                  | 1 min (per user) |
+| My tasks by `TaskDefineStatus`          | Lab · `TaskEntity` (by `AssignedToUserName`)                | Group-by count                  | 1 min (per user) |
 | My papers by current `SubmissionStatus` | Lab · `PaperContributorEntity` → `PaperStatusHistoryEntity` | Resolved via membership         | 2 min (per user) |
-| My 5 most recent tasks                  | Lab · `TaskEntity`                                           | Raw, `LastModifiedOnUtc DESC`   | No cache         |
-| My 5 most recent papers                 | Lab via `PaperContributorEntity`                             | Raw, `CreatedOnUtc DESC`        | No cache         |
+| My 5 most recent tasks                  | Lab · `TaskEntity`                                          | Raw, `LastModifiedOnUtc DESC`   | No cache         |
+| My 5 most recent papers                 | Lab via `PaperContributorEntity`                            | Raw, `CreatedOnUtc DESC`        | No cache         |
 
 ---
 
@@ -228,17 +228,17 @@ Management.Api → GET /dashboard
 
 ## D. Role-Based Differences
 
-| Field                         | Admin | User                     |
-| ----------------------------- | ----- | ------------------------ |
-| System-wide project counts    | ✅    | ❌                       |
-| PaperBank total               | ✅    | ❌                       |
-| Journal / template totals     | ✅    | ❌                       |
-| Recent projects (all)         | ✅    | ❌                       |
-| Recent papers (all)           | ✅    | ❌                       |
-| My project counts             | ❌    | ✅                       |
-| My task breakdown             | ❌    | ✅                       |
-| My papers + submission status | ❌    | ✅ |
-| My recent tasks               | ❌    | ✅ |
+| Field                         | Admin | User |
+| ----------------------------- | ----- | ---- |
+| System-wide project counts    | ✅    | ❌   |
+| PaperBank total               | ✅    | ❌   |
+| Journal / template totals     | ✅    | ❌   |
+| Recent projects (all)         | ✅    | ❌   |
+| Recent papers (all)           | ✅    | ❌   |
+| My project counts             | ❌    | ✅   |
+| My task breakdown             | ❌    | ✅   |
+| My papers + submission status | ❌    | ✅   |
+| My recent tasks               | ❌    | ✅   |
 
 Admin never sees `parsedText`, `abstract`, `researchGap`, or other large text fields in dashboard responses — only identifiers, status values, and titles. Users never see other users' data.
 
@@ -250,8 +250,8 @@ Admin never sees `parsedText`, `abstract`, `researchGap`, or other large text fi
 
 ### Redis Cache Keys
 
-| Key                                 | TTL    | Content                   |
-| ----------------------------------- | ------ | ------------------------- |
+| Key                            | TTL    | Content                   |
+| ------------------------------ | ------ | ------------------------- |
 | `dashboard:admin:kpis`         | 5 min  | Full admin KPI block      |
 | `dashboard:admin:journals`     | 10 min | Journal + template counts |
 | `dashboard:user:{userId}:kpis` | 2 min  | User task + paper counts  |
@@ -329,5 +329,3 @@ Loading all paper IDs into memory to pass to the existing summary endpoint is un
 - **Schedule:** every 5 minutes
 - **Action:** precompute the full admin KPI block and write to `dashboard:admin:kpis` in Redis
 - **Benefit:** eliminates cold-cache latency on first admin load after TTL expiry
-
-
