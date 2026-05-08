@@ -91,26 +91,17 @@ public record GetAdminDashboardQuery : IQuery<AdminDashboardResult>;
 public sealed class GetAdminDashboardQueryHandler(
     IDocumentSession session,
     ILabApiService labApiService,
-    IUserApiService userApiService,
-    IRedisService redisService)
+    IUserApiService userApiService)
     : IQueryHandler<GetAdminDashboardQuery, AdminDashboardResult>
 {
-    private const string CacheKey = "dashboard:admin:kpis";
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
-
     public async Task<AdminDashboardResult> Handle(
         GetAdminDashboardQuery request,
         CancellationToken cancellationToken)
     {
-        // Fetch Lab + user data upfront — needed for recentPapers and as input to KPI cache factory
         var labData = await labApiService.GetAdminDashboardKpisAsync(cancellationToken);
         var userCount = await userApiService.GetUserCountAsync(cancellationToken);
 
-        var kpis = await redisService.GetOrSetCacheAsync<AdminDashboardKpis>(
-            CacheKey,
-            ct => BuildKpisAsync(labData, userCount, ct),
-            CacheTtl,
-            cancellationToken);
+        var kpis = await BuildKpisAsync(labData, userCount, cancellationToken);
 
         var recentProjects = await session.Query<ProjectEntity>()
             .Where(x => x.ParentProjectId == null)
@@ -120,7 +111,7 @@ public sealed class GetAdminDashboardQueryHandler(
 
         return new AdminDashboardResult
         {
-            Kpis = kpis ?? new AdminDashboardKpis(),
+            Kpis = kpis,
             RecentProjects = recentProjects.Select(p => new RecentProjectItem
             {
                 Id = p.Id,
